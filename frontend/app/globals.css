@@ -1,26 +1,244 @@
 @import "tailwindcss";
 
+/* -----------------------------
+   Google Theme Colors
+------------------------------ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --google-blue: #4285F4;
+  --google-red: #EA4335;
+  --google-yellow: #FBBC04;
+  --google-green: #34A853;
+  --gray-50: #F8F9FA;
+  --gray-100: #F1F3F4;
+  --gray-200: #E8EAED;
+  --gray-300: #DADCE0;
+  --gray-500: #9AA0A6;
+  --gray-700: #5F6368;
+  --gray-900: #202124;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* -----------------------------
+   CSS Reset & Base Styles
+------------------------------ */
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  padding: 0;
+  margin: 0;
+  scroll-behavior: smooth;
+  background-color: #ffffff;
+  color: var(--gray-900);
+  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* -----------------------------
+   Typography - Google Style
+------------------------------ */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  color: var(--gray-900);
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: var(--gray-900);
+}
+
+h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+p {
+  font-size: 1rem;
+  color: var(--gray-700);
+  line-height: 1.75;
+}
+
+/* -----------------------------
+   Google-Style Buttons
+------------------------------ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background-color: var(--google-blue);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #1a73e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--google-blue);
+  background-color: white;
+  border: 1px solid var(--gray-300);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: var(--gray-50);
+  border-color: var(--google-blue);
+}
+
+/* -----------------------------
+   Google-Style Form Inputs
+------------------------------ */
+.input {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 16px;
+  color: var(--gray-900);
+  background-color: var(--gray-50);
+  border: 1px solid var(--gray-300);
+  border-radius: 9999px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  background-color: white;
+  border-color: var(--google-blue);
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.textarea {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 16px;
+  min-height: 160px;
+  color: var(--gray-900);
+  background-color: var(--gray-50);
+  border: 1px solid var(--gray-300);
+  border-radius: 24px;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: none;
+  background-color: white;
+  border-color: var(--google-blue);
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+/* -----------------------------
+   Google-Style Cards
+------------------------------ */
+.card {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+/* -----------------------------
+   Layout
+------------------------------ */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* -----------------------------
+   Prose Content
+------------------------------ */
+.prose {
+  max-width: 720px;
+}
+
+.prose p {
+  margin-bottom: 1.5em;
+}
+
+.prose h2 {
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
+
+.prose h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.prose li {
+  margin-bottom: 0.5em;
+  color: var(--gray-700);
+}
+
+/* -----------------------------
+   Utility
+------------------------------ */
+::selection {
+  background-color: var(--google-blue);
+  color: white;
+}
+
+/* Google Color Accents */
+.text-google-blue {
+  color: var(--google-blue);
+}
+
+.text-google-red {
+  color: var(--google-red);
+}
+
+.text-google-yellow {
+  color: var(--google-yellow);
+}
+
+.text-google-green {
+  color: var(--google-green);
+}
+
+.bg-google-blue {
+  background-color: var(--google-blue);
+}
+
+.bg-google-red {
+  background-color: var(--google-red);
+}
+
+.bg-google-yellow {
+  background-color: var(--google-yellow);
+}
+
+.bg-google-green {
+  background-color: var(--google-green);
 }
