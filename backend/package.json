@@ -1,0 +1,38 @@
+{
+  "name": "gdg-newsletter-backend",
+  "version": "1.0.0",
+  "description": "Backend API for GDG On Campus Newsletter Platform - Node.js + Express + MongoDB",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node db_tests/test.js",
+    "dev": "nodemon server.js",
+    "seed": "node db/seeds/seedData.js"
+  },
+  "keywords": [
+    "gdg",
+    "newsletter",
+    "express",
+    "mongodb",
+    "mongoose"
+  ],
+  "author": "GDG On Campus - Galgotias University",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
