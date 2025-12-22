@@ -2,15 +2,59 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Implement login logic
-        console.log('Login attempt:', { email, password });
+        setError('');
+        setIsLoading(true);
+
+        try {
+            // Using localhost:5000 as defined in backend/.env
+            const res = await fetch('http://localhost:5000/auth/signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || 'Invalid email or password');
+            }
+
+            // Save token and user info to localStorage
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify({
+                name: data.name,
+                email: data.email,
+                role: data.role
+            }));
+
+            console.log('Login successful:', data.message);
+
+            // Redirect based on role
+            if (data.role === 'admin') {
+                router.push('/admin');
+            } else {
+                router.push('/');
+            }
+
+        } catch (err: any) {
+            console.error('Login error:', err);
+            setError(err.message || 'Something went wrong. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -31,6 +75,13 @@ export default function LoginPage() {
                         <p className="text-[var(--gray-500)]">to get early access to GDGoCGU newsletter</p>
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                        <div className="mb-6 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                            {error}
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-[var(--gray-700)] mb-2">
@@ -41,9 +92,10 @@ export default function LoginPage() {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="input"
+                                className="input w-full"
                                 placeholder="you@example.com"
                                 required
+                                disabled={isLoading}
                             />
                         </div>
 
@@ -56,9 +108,10 @@ export default function LoginPage() {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="input"
+                                className="input w-full"
                                 placeholder="Enter your password"
                                 required
+                                disabled={isLoading}
                             />
                         </div>
 
@@ -72,8 +125,12 @@ export default function LoginPage() {
                             </a>
                         </div>
 
-                        <button type="submit" className="btn-primary w-full mt-6">
-                            Sign in
+                        <button 
+                            type="submit" 
+                            className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Signing in...' : 'Sign in'}
                         </button>
                     </form>
 
