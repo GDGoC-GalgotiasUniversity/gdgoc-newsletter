@@ -6,6 +6,14 @@ export async function POST(request: NextRequest) {
     { status: 200 }
   );
 
+  // Clear both tokens
+  response.cookies.set('authToken', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0,
+  });
+
   response.cookies.set('adminToken', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',

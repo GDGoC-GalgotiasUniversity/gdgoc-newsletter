@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const { title, content, excerpt, author } = body;
+    const { title, content, excerpt, author, featured } = body;
 
     if (!title || !content || !excerpt || !author) {
       return NextResponse.json(
@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
       content,
       excerpt,
       author,
+      featured: featured || false,
     });
 
     return NextResponse.json(

@@ -13,6 +13,12 @@ interface Newsletter {
   featured: boolean;
 }
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
 export default function Home() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,14 +26,29 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredNewsletters, setFilteredNewsletters] = useState<Newsletter[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
+    fetchUser();
     fetchNewsletters();
   }, [page]);
 
   useEffect(() => {
     filterNewsletters();
   }, [searchQuery, newsletters]);
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch('/api/auth/me');
+      const data = await res.json();
+      if (data.success) {
+        setUser(data.user);
+      }
+    } catch (error) {
+      // User not logged in
+    }
+  };
 
   const fetchNewsletters = async () => {
     try {
@@ -61,18 +82,73 @@ export default function Home() {
     setFilteredNewsletters(filtered);
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setUser(null);
+      setShowUserMenu(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-blue-600">GDG Newsletter</h1>
-          <Link
-            href="/login"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            Admin Panel
-          </Link>
+          <div className="flex items-center gap-4">
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                >
+                  <span>{user.name}</span>
+                  <span className="text-lg">▼</span>
+                </button>
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 border-b"
+                    >
+                      My Profile
+                    </Link>
+                    <Link
+                      href="/admin"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 border-b"
+                    >
+                      Admin Panel
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-50"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 

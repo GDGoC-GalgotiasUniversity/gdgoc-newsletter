@@ -19,11 +19,13 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     excerpt: '',
     author: '',
+    featured: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
@@ -34,9 +36,17 @@ export default function AdminPanel() {
 
   const checkAuth = async () => {
     try {
-      // Check if token exists in cookies by making a request
-      const res = await fetch('/api/newsletters?limit=1');
-      if (res.ok) {
+      // Check if user is authenticated (either user or admin)
+      const userRes = await fetch('/api/auth/me');
+      if (userRes.ok) {
+        setIsAuthenticated(true);
+        fetchNewsletters();
+        return;
+      }
+
+      // Check if admin token exists
+      const adminRes = await fetch('/api/newsletters?limit=1');
+      if (adminRes.ok) {
         setIsAuthenticated(true);
         fetchNewsletters();
       } else {
@@ -69,6 +79,18 @@ export default function AdminPanel() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: checked }));
+  };
+
+  const insertTemplate = (template: string) => {
+    setFormData(prev => ({
+      ...prev,
+      content: prev.content + '\n' + template
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.content || !formData.excerpt || !formData.author) {
@@ -87,8 +109,9 @@ export default function AdminPanel() {
       const data = await res.json();
       if (data.success) {
         alert('Newsletter created successfully!');
-        setFormData({ title: '', content: '', excerpt: '', author: '' });
+        setFormData({ title: '', content: '', excerpt: '', author: '', featured: false });
         setShowForm(false);
+        setActiveTab('edit');
         fetchNewsletters();
       } else {
         alert('Error: ' + data.error);
@@ -172,41 +195,43 @@ export default function AdminPanel() {
 
         {/* Create Newsletter Form */}
         {showForm && (
-          <div className="bg-white rounded-lg shadow-md p-8 mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Newsletter</h2>
+          <div className="bg-black rounded-lg shadow-md p-8 mb-12">
+            <h2 className="text-2xl font-bold text-white mb-6">Create New Newsletter</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="Newsletter title"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Newsletter title"
+                    className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Author
+                  </label>
+                  <input
+                    type="text"
+                    name="author"
+                    value={formData.author}
+                    onChange={handleInputChange}
+                    placeholder="Author name"
+                    className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Author
-                </label>
-                <input
-                  type="text"
-                  name="author"
-                  value={formData.author}
-                  onChange={handleInputChange}
-                  placeholder="Author name"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white mb-2">
                   Excerpt
                 </label>
                 <textarea
@@ -215,25 +240,133 @@ export default function AdminPanel() {
                   onChange={handleInputChange}
                   placeholder="Brief summary of the newsletter"
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Content
+                <label className="flex items-center gap-2 text-sm font-medium text-white mb-4">
+                  <input
+                    type="checkbox"
+                    name="featured"
+                    checked={formData.featured}
+                    onChange={handleCheckboxChange}
+                    className="w-4 h-4 rounded border-gray-600 bg-gray-900"
+                  />
+                  Mark as Featured
                 </label>
-                <textarea
-                  name="content"
-                  value={formData.content}
-                  onChange={handleInputChange}
-                  placeholder="Full newsletter content"
-                  rows={10}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                  required
-                />
               </div>
+
+              {/* Tabs */}
+              <div className="border-b border-gray-700">
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('edit')}
+                    className={`px-4 py-2 font-medium border-b-2 transition ${
+                      activeTab === 'edit'
+                        ? 'border-blue-600 text-blue-400'
+                        : 'border-transparent text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('preview')}
+                    className={`px-4 py-2 font-medium border-b-2 transition ${
+                      activeTab === 'preview'
+                        ? 'border-blue-600 text-blue-400'
+                        : 'border-transparent text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    Preview
+                  </button>
+                </div>
+              </div>
+
+              {activeTab === 'edit' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Content (HTML + CSS)
+                    </label>
+                    <textarea
+                      name="content"
+                      value={formData.content}
+                      onChange={handleInputChange}
+                      placeholder="Enter HTML and CSS for your artistic newsletter..."
+                      rows={15}
+                      className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                      required
+                    />
+                  </div>
+
+                  {/* Quick Templates */}
+                  <div>
+                    <p className="text-sm font-medium text-white mb-3">Quick Templates:</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => insertTemplate(`<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 10px; color: white; text-align: center;">
+  <h1 style="font-size: 32px; margin: 0; font-weight: bold;">Your Title Here</h1>
+  <p style="font-size: 16px; margin-top: 10px;">Your content here</p>
+</div>`)}
+                        className="px-3 py-2 bg-purple-900 text-purple-300 rounded text-sm hover:bg-purple-800 transition text-left"
+                      >
+                        Gradient Card
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertTemplate(`<div style="border-left: 4px solid #3b82f6; padding: 20px; background: #1e3a8a; border-radius: 5px; color: white;">
+  <h2 style="color: #60a5fa; margin-top: 0;">Important Notice</h2>
+  <p style="color: #93c5fd;">Your message here</p>
+</div>`)}
+                        className="px-3 py-2 bg-blue-900 text-blue-300 rounded text-sm hover:bg-blue-800 transition text-left"
+                      >
+                        Info Box
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertTemplate(`<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+  <div style="background: #1f2937; padding: 20px; border-radius: 8px; text-align: center; color: white;">
+    <h3 style="margin-top: 0;">Column 1</h3>
+    <p>Content here</p>
+  </div>
+  <div style="background: #1f2937; padding: 20px; border-radius: 8px; text-align: center; color: white;">
+    <h3 style="margin-top: 0;">Column 2</h3>
+    <p>Content here</p>
+  </div>
+</div>`)}
+                        className="px-3 py-2 bg-green-900 text-green-300 rounded text-sm hover:bg-green-800 transition text-left"
+                      >
+                        Two Column
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertTemplate(`<div style="background: #78350f; border: 2px solid #f59e0b; padding: 20px; border-radius: 8px; text-align: center; color: white;">
+  <h2 style="color: #fbbf24; margin-top: 0;">⚠️ Alert</h2>
+  <p style="color: #fcd34d;">Your alert message here</p>
+</div>`)}
+                        className="px-3 py-2 bg-yellow-900 text-yellow-300 rounded text-sm hover:bg-yellow-800 transition text-left"
+                      >
+                        Alert Box
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'preview' && (
+                <div>
+                  <p className="text-sm font-medium text-white mb-3">Preview:</p>
+                  <div
+                    className="border border-gray-700 rounded-lg p-6 bg-gray-900 overflow-auto max-h-96"
+                    dangerouslySetInnerHTML={{ __html: formData.content }}
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -247,54 +380,66 @@ export default function AdminPanel() {
         )}
 
         {/* Newsletters List */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="px-8 py-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900">
+        <div className="bg-black rounded-lg shadow-md overflow-hidden">
+          <div className="px-8 py-6 border-b border-gray-700">
+            <h2 className="text-2xl font-bold text-white">
               Newsletters ({newsletters.length})
             </h2>
           </div>
 
           {loading ? (
             <div className="px-8 py-12 text-center">
-              <p className="text-gray-600">Loading newsletters...</p>
+              <p className="text-gray-400">Loading newsletters...</p>
             </div>
           ) : newsletters.length === 0 ? (
             <div className="px-8 py-12 text-center">
-              <p className="text-gray-600">No newsletters yet. Create one to get started!</p>
+              <p className="text-gray-400">No newsletters yet. Create one to get started!</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-900 border-b border-gray-700">
                   <tr>
-                    <th className="px-8 py-4 text-left text-sm font-semibold text-gray-900">
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-white">
                       Title
                     </th>
-                    <th className="px-8 py-4 text-left text-sm font-semibold text-gray-900">
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-white">
                       Author
                     </th>
-                    <th className="px-8 py-4 text-left text-sm font-semibold text-gray-900">
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-white">
                       Published
                     </th>
-                    <th className="px-8 py-4 text-left text-sm font-semibold text-gray-900">
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-white">
+                      Featured
+                    </th>
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-white">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {newsletters.map((newsletter) => (
-                    <tr key={newsletter._id} className="border-b border-gray-200 hover:bg-gray-50">
+                    <tr key={newsletter._id} className="border-b border-gray-700 hover:bg-gray-900">
                       <td className="px-8 py-4">
                         <Link
                           href={`/newsletter/${newsletter.slug}`}
-                          className="text-blue-600 hover:text-blue-700 font-medium"
+                          className="text-blue-400 hover:text-blue-300 font-medium"
                         >
                           {newsletter.title}
                         </Link>
                       </td>
-                      <td className="px-8 py-4 text-gray-600">{newsletter.author}</td>
-                      <td className="px-8 py-4 text-gray-600">
+                      <td className="px-8 py-4 text-gray-300">{newsletter.author}</td>
+                      <td className="px-8 py-4 text-gray-300">
                         {new Date(newsletter.publishedAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-8 py-4">
+                        {newsletter.featured ? (
+                          <span className="px-3 py-1 bg-yellow-900 text-yellow-300 rounded-full text-sm font-medium">
+                            Featured
+                          </span>
+                        ) : (
+                          <span className="text-gray-600">-</span>
+                        )}
                       </td>
                       <td className="px-8 py-4">
                         <button
