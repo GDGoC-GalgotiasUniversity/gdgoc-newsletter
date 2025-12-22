@@ -66,7 +66,7 @@ Stores all newsletters with Markdown content.
 **Rules:**
 - Slug must be unique (enforced at DB level)
 - Slug must be lowercase with hyphens only (no spaces or special characters)
-- Slug does not change after publishing (stability requirement)
+- Slug should remain stable after publishing (recommended for URL stability; enforce via schema middleware if required)
 - Each newsletter must have its own URL route
 - Content is stored as Markdown, not HTML
 - Template must be one of: `event-recap`, `workshop`, `announcement`, or `default`
