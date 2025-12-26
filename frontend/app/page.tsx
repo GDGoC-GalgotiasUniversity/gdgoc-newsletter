@@ -1,18 +1,21 @@
 import Link from 'next/link';
+import AnimatedLogo from '@/components/AnimatedLogo';
+import HeroBackgroundVideo from '@/components/HeroBackgroundVideo';
 
 export default function HomePage() {
   return (
     <main>
-      {/* Hero Section */}
-      <section className="py-24 bg-[var(--gray-50)]">
-        <div className="container text-center">
-          {/* Google Colored Dots */}
-          <div className="flex justify-center gap-2 mb-8">
-            <span className="w-4 h-4 rounded-full bg-[var(--google-blue)]"></span>
-            <span className="w-4 h-4 rounded-full bg-[var(--google-red)]"></span>
-            <span className="w-4 h-4 rounded-full bg-[var(--google-yellow)]"></span>
-            <span className="w-4 h-4 rounded-full bg-[var(--google-green)]"></span>
-          </div>
+      {/* Hero Section with Video Background */}
+      <section className="relative py-24 bg-[var(--gray-50)] overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+          <HeroBackgroundVideo />
+        </div>
+
+        {/* Content */}
+        <div className="container text-center relative z-10">
+          {/* Video Logo */}
+      <br/><br/><br/>
 
           <h1 className="text-5xl font-normal mb-6">
             GDGoC <span className="text-[var(--google-blue)]">Galgotias University</span>
@@ -26,9 +29,7 @@ export default function HomePage() {
             <Link href="/newsletter" className="btn-primary">
               Browse Newsletters
             </Link>
-            <Link href="/admin" className="btn-secondary">
-              Admin 
-            </Link>
+           
           </div>
         </div>
       </section>

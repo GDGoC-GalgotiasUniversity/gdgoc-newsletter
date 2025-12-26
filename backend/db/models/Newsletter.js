@@ -67,6 +67,10 @@ const newsletterSchema = new mongoose.Schema(
       },
       default: 'draft',
     },
+    coverImage: {
+      type: String,
+      default: null,
+    },
     publishedAt: {
       type: Date,
       default: null,

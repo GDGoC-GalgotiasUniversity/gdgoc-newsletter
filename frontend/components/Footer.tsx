@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import AnimatedLogo from './AnimatedLogo';
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
@@ -10,12 +11,7 @@ export default function Footer() {
                     {/* Brand Section */}
                     <div className="md:col-span-2 mt-8">
                         <Link href="/" className="flex items-center gap-3 mb-4">
-                            <div className="grid grid-cols-2 gap-0.5">
-                                <span className="w-2.5 h-2.5 rounded-full bg-[var(--google-blue)]"></span>
-                                <span className="w-2.5 h-2.5 rounded-full bg-[var(--google-red)]"></span>
-                                <span className="w-2.5 h-2.5 rounded-full bg-[var(--google-yellow)]"></span>
-                                <span className="w-2.5 h-2.5 rounded-full bg-[var(--google-green)]"></span>
-                            </div>
+                            <AnimatedLogo className="w-8 h-8" />
                             <span className="font-medium text-[var(--gray-900)]">GDGoC Galgotias University</span>
                         </Link>
                         <p className="text-sm text-[var(--gray-500)] max-w-sm mb-4">
