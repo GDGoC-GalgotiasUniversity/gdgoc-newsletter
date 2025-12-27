@@ -1,24 +1,29 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const connectDB = require('./db/connection');
 
-// Load env vars
-dotenv.config();
+// Import Routes
+const newsletterRoutes = require('./routes/newsletters');
+const authRoutes = require('./routes/auth');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Connect to Database
 connectDB();
-
-const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use('/auth', require('./routes/auth'));
-app.use('/newsletters', require('./routes/newsletters'));
+// Routes configuration
+
+// Mount Auth at /api/auth -> results in /api/auth/signin
+app.use('/api/auth', authRoutes);
+
+// Mount Newsletters at root -> results in /api/newsletters (as defined in the router file)
+app.use('/', newsletterRoutes);
 
 // Base route
 app.get('/', (req, res) => {
@@ -34,8 +39,6 @@ app.use((err, req, res, next) => {
     error: err.message
   });
 });
-
-const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

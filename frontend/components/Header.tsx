@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import AnimatedLogo from './AnimatedLogo';
 
 export default function Header() {
     const pathname = usePathname();
@@ -22,13 +23,8 @@ export default function Header() {
                 <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2 sm:gap-3 md:gap-4 group">
-                        {/* Google Colors Icon */}
-                        <div className="grid grid-cols-2 gap-0.5 sm:gap-1">
-                            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3.5 md:h-3.5 rounded-full bg-[var(--google-blue)]"></span>
-                            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3.5 md:h-3.5 rounded-full bg-[var(--google-red)]"></span>
-                            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3.5 md:h-3.5 rounded-full bg-[var(--google-yellow)]"></span>
-                            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3.5 md:h-3.5 rounded-full bg-[var(--google-green)]"></span>
-                        </div>
+                        {/* Animated Logo - Play once, stay on last frame */}
+                        <AnimatedLogo className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
                         <div className="flex items-baseline gap-1 sm:gap-1.5">
                             <span className="font-medium text-sm sm:text-base md:text-lg text-[var(--gray-900)]">GDGoC</span>
                             <span className="text-[var(--gray-500)] text-xs sm:text-sm md:text-base hidden md:inline">Galgotias University</span>

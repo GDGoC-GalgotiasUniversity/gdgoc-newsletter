@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital@0;1&display=swap');
+
+/* Admin Panel Typography */
+.admin-heading {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 24px;
+  font-style: italic;
+  color: rgb(107, 62, 94);
+  margin-bottom: 30px;
+  font-weight: 400;
+  animation: 1s ease-out 0.3s 1 normal backwards running fadeIn;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

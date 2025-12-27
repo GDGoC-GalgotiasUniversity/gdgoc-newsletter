@@ -1,32 +1,28 @@
 /**
  * Authentication Routes
- * 
- * Unified login/signup for all users (admin and reader roles)
+ * * Unified login/signup for all users (admin and reader roles)
  * - All users stored in MongoDB with role field
  * - Admin users created via database (not hardcoded)
  * - Role-based access control at route level
  */
 
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const { User } = require('../db/models');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const { User } = require('../db/models'); // utilizing the index export
+const verifyToken = require('../middleware/auth'); // Preserved for admin routes
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 /**
  * POST /auth/signin
- * 
- * Login endpoint for all users (admin and reader roles determined by role field)
- * 
- * Logic:
+ * * Login endpoint for all users (admin and reader roles determined by role field)
+ * * Logic:
  * 1. Find user by email in database
  * 2. Verify password hash
  * 3. Return JWT token with user role
- * 
- * Frontend sends: { email, password }
- * 
- * Returns: { success: true, token, role: 'admin'|'reader' }
+ * * Frontend sends: { email, password }
+ * * Returns: { success: true, token, role: 'admin'|'reader' }
  */
 router.post('/signin', async (req, res) => {
   try {
@@ -40,7 +36,7 @@ router.post('/signin', async (req, res) => {
       });
     }
 
-    // Check if user exists in database
+    // Check if user exists in database and include password hash
     const user = await User.findOne({ email }).select('+passwordHash');
 
     if (!user) {
@@ -91,12 +87,9 @@ router.post('/signin', async (req, res) => {
 
 /**
  * POST /auth/signup
- * 
- * Create new reader account
- * 
- * Frontend sends: { email, password, name }
- * 
- * Returns: { success: true, token, role: 'reader' }
+ * * Create new reader account
+ * * Frontend sends: { email, password, name }
+ * * Returns: { success: true, token, role: 'reader' }
  */
 router.post('/signup', async (req, res) => {
   try {
@@ -178,8 +171,7 @@ router.post('/signup', async (req, res) => {
 
 /**
  * POST /auth/verify
- * 
- * Verify JWT token validity
+ * * Verify JWT token validity
  */
 router.post('/verify', async (req, res) => {
   try {
@@ -205,6 +197,74 @@ router.post('/verify', async (req, res) => {
     res.status(401).json({
       success: false,
       message: 'Invalid or expired token',
+    });
+  }
+});
+
+/**
+ * GET /api/auth/users
+ * Get all users (admin only)
+ * RESTORED FROM PREVIOUS VERSION
+ */
+router.get('/users', verifyToken, async (req, res) => {
+  try {
+    console.log('👥 Admin fetching all users...');
+    
+    const users = await User.find()
+      .select('-passwordHash') // Don't return password hashes
+      .sort({ createdAt: -1 });
+    
+    console.log(`✅ Found ${users.length} users`);
+    
+    res.json({
+      success: true,
+      data: users.map(user => ({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        joinedAt: user.createdAt,
+      })),
+    });
+  } catch (error) {
+    console.error('❌ Error fetching users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching users',
+    });
+  }
+});
+
+/**
+ * GET /api/auth/users/public
+ * Get all users (public - no auth required)
+ * RESTORED FROM PREVIOUS VERSION
+ */
+router.get('/users/public', async (req, res) => {
+  try {
+    console.log('👥 Fetching all users (public)...');
+    
+    const users = await User.find()
+      .select('-passwordHash') // Don't return password hashes
+      .sort({ createdAt: -1 });
+    
+    console.log(`✅ Found ${users.length} users`);
+    
+    res.json({
+      success: true,
+      data: users.map(user => ({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        joinedAt: user.createdAt,
+      })),
+    });
+  } catch (error) {
+    console.error('❌ Error fetching users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching users',
     });
   }
 });

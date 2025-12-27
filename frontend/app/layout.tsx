@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PageTransition from "@/components/PageTransition";
 
 export const metadata: Metadata = {
   title: "GDGoC Newsletter",
@@ -23,7 +24,9 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning className="flex flex-col min-h-screen">
         <Header />
-        <div className="flex-1">{children}</div>
+        <PageTransition>
+          <div className="flex-1">{children}</div>
+        </PageTransition>
         <Footer />
       </body>
     </html>

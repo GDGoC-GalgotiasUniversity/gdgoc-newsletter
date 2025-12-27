@@ -1,21 +1,19 @@
 /**
  * Newsletter Routes
- * 
- * Public routes:
- *   GET /api/newsletters - Get all published newsletters
- *   GET /api/newsletters/:slug - Get single newsletter by slug
- * 
- * Admin-only routes (requires JWT token):
- *   POST /admin/newsletters - Create newsletter
- *   PUT /admin/newsletters/:id - Edit newsletter
- *   DELETE /admin/newsletters/:id - Delete newsletter
+ * * Public routes:
+ * GET /api/newsletters - Get all published newsletters
+ * GET /api/newsletters/:slug - Get single newsletter by slug
+ * * Admin-only routes (requires JWT token):
+ * GET /admin/newsletters/all - Get all newsletters (drafts & published)
+ * POST /admin/newsletters - Create newsletter
+ * PUT /admin/newsletters/:id - Edit newsletter
+ * DELETE /admin/newsletters/:id - Delete newsletter
  */
 
 const express = require('express');
-const verifyToken = require('../middleware/auth');
-const { Newsletter } = require('../db/models');
-
 const router = express.Router();
+const { Newsletter } = require('../db/models');
+const verifyToken = require('../middleware/auth');
 
 /**
  * PUBLIC ROUTES (No authentication required)
@@ -27,10 +25,12 @@ const router = express.Router();
  */
 router.get('/api/newsletters', async (req, res) => {
   try {
+    console.log('📰 Fetching published newsletters...');
     const newsletters = await Newsletter.find({ status: 'published' })
       .sort({ publishedAt: -1 })
       .select('-__v');
 
+    console.log(`✅ Found ${newsletters.length} published newsletters`);
     res.json({
       success: true,
       count: newsletters.length,
@@ -51,6 +51,7 @@ router.get('/api/newsletters', async (req, res) => {
  */
 router.get('/api/newsletters/:slug', async (req, res) => {
   try {
+    console.log(`📄 Fetching newsletter with slug: ${req.params.slug}`);
     const newsletter = await Newsletter.findOne({ slug: req.params.slug });
 
     if (!newsletter) {
@@ -64,7 +65,7 @@ router.get('/api/newsletters/:slug', async (req, res) => {
     if (newsletter.status !== 'published') {
       return res.status(404).json({
         success: false,
-        message: 'Newsletter not found',
+        message: 'Newsletter not found', // Hide drafts from public
       });
     }
 
@@ -85,23 +86,29 @@ router.get('/api/newsletters/:slug', async (req, res) => {
  * ADMIN-ONLY ROUTES (Requires JWT token with admin role)
  */
 
+// Get all newsletters (admin only) - Merged from your code
+router.get('/admin/newsletters/all', verifyToken, async (req, res) => {
+  try {
+    console.log('👨‍💼 Admin fetching all newsletters...');
+    const newsletters = await Newsletter.find().sort({ createdAt: -1 });
+    console.log(`✅ Found ${newsletters.length} total newsletters`);
+    res.json({ success: true, data: newsletters });
+  } catch (error) {
+    console.error('❌ Error fetching admin newsletters:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 /**
  * POST /admin/newsletters
  * Create new newsletter (admin only)
- * 
- * Body:
- * {
- *   title: string,
- *   slug: string,
- *   excerpt: string (optional),
- *   contentMarkdown: string,
- *   template: "event-recap" | "workshop" | "announcement" | "default",
- *   status: "draft" | "published" (default: draft)
- * }
  */
 router.post('/admin/newsletters', verifyToken, async (req, res) => {
   try {
-    const { title, slug, excerpt, contentMarkdown, template, status } = req.body;
+    // Merged: Added coverImage support back
+    const { title, slug, excerpt, contentMarkdown, template, status, coverImage } = req.body;
+
+    console.log(`📝 Creating newsletter: ${title}`);
 
     // Validate required fields
     if (!title || !slug || !contentMarkdown || !template) {
@@ -119,6 +126,8 @@ router.post('/admin/newsletters', verifyToken, async (req, res) => {
       contentMarkdown,
       template,
       status: status || 'draft',
+      coverImage: coverImage || null, // Preserved
+      publishedAt: status === 'published' ? new Date() : null,
     });
 
     res.status(201).json({
@@ -133,7 +142,7 @@ router.post('/admin/newsletters', verifyToken, async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: `Slug "${error.keyValue.slug}" already exists`,
+        message: `Slug "${error.keyValue?.slug || 'provided'}" already exists`,
       });
     }
 
@@ -161,7 +170,10 @@ router.post('/admin/newsletters', verifyToken, async (req, res) => {
  */
 router.put('/admin/newsletters/:id', verifyToken, async (req, res) => {
   try {
-    const { title, slug, excerpt, contentMarkdown, template, status } = req.body;
+    // Merged: Added coverImage support back
+    const { title, slug, excerpt, contentMarkdown, template, status, coverImage } = req.body;
+
+    console.log(`✏️  Updating newsletter: ${req.params.id}`);
 
     // Get current newsletter to check if status is changing to published
     const currentNewsletter = await Newsletter.findById(req.params.id);
@@ -181,6 +193,7 @@ router.put('/admin/newsletters/:id', verifyToken, async (req, res) => {
       contentMarkdown,
       template,
       status,
+      coverImage: coverImage || null, // Preserved
     };
 
     // If status is being changed to "published" and publishedAt is not yet set, set it
@@ -207,7 +220,7 @@ router.put('/admin/newsletters/:id', verifyToken, async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: `Slug "${error.keyValue.slug}" already exists`,
+        message: `Slug "${error.keyValue?.slug || 'provided'}" already exists`,
       });
     }
 
@@ -235,6 +248,7 @@ router.put('/admin/newsletters/:id', verifyToken, async (req, res) => {
  */
 router.delete('/admin/newsletters/:id', verifyToken, async (req, res) => {
   try {
+    console.log(`🗑️  Deleting newsletter: ${req.params.id}`);
     const newsletter = await Newsletter.findByIdAndDelete(req.params.id);
 
     if (!newsletter) {
