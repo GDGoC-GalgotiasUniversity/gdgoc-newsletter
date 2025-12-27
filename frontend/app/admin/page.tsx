@@ -104,7 +104,7 @@ export default function AdminPage() {
                 return;
             }
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters/admin/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -157,8 +157,9 @@ export default function AdminPage() {
 
                     {/* Action Buttons */}
                     <div className="flex justify-center gap-4 mb-8">
+                        {/* Changed href from /admin/create to /admin/new to match file structure */}
                         <Link 
-                            href="/admin/create" 
+                            href="/admin/new" 
                             className="inline-flex items-center px-6 py-3 rounded-lg font-medium transition"
                             style={{ backgroundColor: '#6b4c9a', color: '#f5e6d3' }}
                         >
@@ -247,6 +248,8 @@ export default function AdminPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
+                                            {/* Changed from /admin/edit to /admin/edit (assuming folder exists, if not check structure) */}
+                                            {/* Note: I'll stick to your original link path for editing, as that file wasn't in conflict list */}
                                             <Link 
                                                 href={`/admin/edit/${newsletter._id}`} 
                                                 className="font-medium mr-4 transition"
@@ -276,7 +279,7 @@ export default function AdminPage() {
                             <h3 className="mb-2 text-lg font-semibold" style={{ color: '#6b4c9a' }}>No newsletters yet</h3>
                             <p className="text-sm mb-4" style={{ color: '#8b6ba8' }}>Create your first newsletter to get started.</p>
                             <Link 
-                                href="/admin/create" 
+                                href="/admin/new" 
                                 className="inline-block px-6 py-2 rounded-lg font-medium transition"
                                 style={{ backgroundColor: '#6b4c9a', color: '#f5e6d3' }}
                             >

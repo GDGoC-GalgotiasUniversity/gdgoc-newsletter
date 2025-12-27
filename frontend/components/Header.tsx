@@ -38,7 +38,7 @@ export default function Header() {
                                 key={link.href}
                                 href={link.href}
                                 className={`px-2 sm:px-3 md:px-5 py-1.5 sm:py-2 md:py-2.5 text-xs sm:text-sm md:text-base font-medium rounded-full transition ${isActive(link.href)
-                                    ? 'text-[var(--google-blue)] bg-[rgba(66,133,244,0.08)]'
+                                    ? `${pathname.startsWith('/newsletter') ? 'text-[var(--primary-purple)] bg-[rgba(106,42,154,0.08)]' : 'text-[var(--google-blue)] bg-[rgba(66,133,244,0.08)]'}`
                                     : 'text-[var(--gray-700)] hover:bg-[var(--gray-100)]'
                                     }`}
                             >
@@ -48,7 +48,11 @@ export default function Header() {
                         <div className="ml-2 sm:ml-3 md:ml-4 pl-2 sm:pl-3 md:pl-4 border-l border-[var(--gray-200)]">
                             <Link
                                 href="/login"
-                                className="btn-primary text-xs sm:text-sm md:text-base py-1.5 sm:py-2 md:py-2.5 px-3 sm:px-4 md:px-6"
+                                className={`btn-primary text-xs sm:text-sm md:text-base py-1.5 sm:py-2 md:py-2.5 px-3 sm:px-4 md:px-6 ${
+                                    pathname.startsWith('/newsletter')
+                                        ? 'newsletter-page-join-btn'
+                                        : ''
+                                }`}
                             >
                                 Join
                             </Link>

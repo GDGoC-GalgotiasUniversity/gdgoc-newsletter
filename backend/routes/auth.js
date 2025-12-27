@@ -1,16 +1,30 @@
+/**
+ * Authentication Routes
+ * * Unified login/signup for all users (admin and reader roles)
+ * - All users stored in MongoDB with role field
+ * - Admin users created via database (not hardcoded)
+ * - Role-based access control at route level
+ */
+
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const User = require('../db/models/User');
-const verifyToken = require('../middleware/auth');
+const { User } = require('../db/models'); // utilizing the index export
+const verifyToken = require('../middleware/auth'); // Preserved for admin routes
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 /**
- * POST /api/auth/login
- * Login with email and password
+ * POST /auth/signin
+ * * Login endpoint for all users (admin and reader roles determined by role field)
+ * * Logic:
+ * 1. Find user by email in database
+ * 2. Verify password hash
+ * 3. Return JWT token with user role
+ * * Frontend sends: { email, password }
+ * * Returns: { success: true, token, role: 'admin'|'reader' }
  */
-router.post('/login', async (req, res) => {
+router.post('/signin', async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -22,7 +36,7 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Find user and include password hash
+    // Check if user exists in database and include password hash
     const user = await User.findOne({ email }).select('+passwordHash');
 
     if (!user) {
@@ -32,7 +46,7 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Compare passwords
+    // Verify password
     const isPasswordValid = await user.comparePassword(password);
 
     if (!isPasswordValid) {
@@ -42,112 +56,147 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Generate JWT token
+    // Generate JWT token with user role
     const token = jwt.sign(
       {
-        userId: user._id,
         email: user.email,
         role: user.role,
-        name: user.name,
+        userId: user._id,
       },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    res.json({
+    return res.json({
       success: true,
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      role: user.role,
+      name: user.name,
+      email: user.email,
+      userId: user._id,
+      message: `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} login successful`,
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Sign in error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error during login',
+      message: 'Sign in failed',
     });
   }
 });
 
 /**
- * POST /api/auth/register
- * Register a new user
+ * POST /auth/signup
+ * * Create new reader account
+ * * Frontend sends: { email, password, name }
+ * * Returns: { success: true, token, role: 'reader' }
  */
-router.post('/register', async (req, res) => {
+router.post('/signup', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { email, password, name } = req.body;
 
     // Validate input
-    if (!name || !email || !password) {
+    if (!email || !password || !name) {
       return res.status(400).json({
         success: false,
-        message: 'Name, email, and password are required',
+        message: 'Email, password, and name are required',
       });
     }
 
-    // Check if user already exists
+    // Check if email is already taken
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
-      return res.status(409).json({
+      return res.status(400).json({
         success: false,
         message: 'Email already registered',
       });
     }
 
-    // Create new user
-    const user = new User({
+    // Create new user (readers signup with reader role)
+    const newUser = await User.create({
       name,
       email,
       passwordHash: password,
-      role: role === 'admin' ? 'admin' : 'reader',
+      role: 'reader',
     });
-
-    await user.save();
 
     // Generate JWT token
     const token = jwt.sign(
       {
-        userId: user._id,
-        email: user.email,
-        role: user.role,
-        name: user.name,
+        email: newUser.email,
+        role: newUser.role,
+        userId: newUser._id,
       },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      role: 'reader',
+      name: newUser.name,
+      email: newUser.email,
+      userId: newUser._id,
+      message: 'Reader account created successfully',
     });
   } catch (error) {
-    console.error('Register error:', error);
+    console.error('Sign up error:', error);
+
+    // Handle duplicate email error
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already registered',
+      });
+    }
 
     // Handle validation errors
-    if (error.name === 'ValidationError') {
+    if (error.errors) {
       const messages = Object.values(error.errors)
         .map((err) => err.message)
         .join(', ');
       return res.status(400).json({
         success: false,
-        message: messages,
+        message: `Validation error: ${messages}`,
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Server error during registration',
+      message: 'Sign up failed',
+    });
+  }
+});
+
+/**
+ * POST /auth/verify
+ * * Verify JWT token validity
+ */
+router.post('/verify', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'No token provided',
+      });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    res.json({
+      success: true,
+      role: decoded.role,
+      email: decoded.email,
+      message: 'Token is valid',
+    });
+  } catch (error) {
+    console.error('Token verification error:', error.message);
+    res.status(401).json({
+      success: false,
+      message: 'Invalid or expired token',
     });
   }
 });
@@ -155,6 +204,7 @@ router.post('/register', async (req, res) => {
 /**
  * GET /api/auth/users
  * Get all users (admin only)
+ * RESTORED FROM PREVIOUS VERSION
  */
 router.get('/users', verifyToken, async (req, res) => {
   try {
@@ -188,6 +238,7 @@ router.get('/users', verifyToken, async (req, res) => {
 /**
  * GET /api/auth/users/public
  * Get all users (public - no auth required)
+ * RESTORED FROM PREVIOUS VERSION
  */
 router.get('/users/public', async (req, res) => {
   try {

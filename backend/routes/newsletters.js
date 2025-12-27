@@ -1,44 +1,93 @@
+/**
+ * Newsletter Routes
+ * * Public routes:
+ * GET /api/newsletters - Get all published newsletters
+ * GET /api/newsletters/:slug - Get single newsletter by slug
+ * * Admin-only routes (requires JWT token):
+ * GET /admin/newsletters/all - Get all newsletters (drafts & published)
+ * POST /admin/newsletters - Create newsletter
+ * PUT /admin/newsletters/:id - Edit newsletter
+ * DELETE /admin/newsletters/:id - Delete newsletter
+ */
+
 const express = require('express');
 const router = express.Router();
-const Newsletter = require('../db/models/Newsletter');
+const { Newsletter } = require('../db/models');
 const verifyToken = require('../middleware/auth');
 
-// Get all published newsletters
-router.get('/', async (req, res) => {
+/**
+ * PUBLIC ROUTES (No authentication required)
+ */
+
+/**
+ * GET /api/newsletters
+ * Get all published newsletters
+ */
+router.get('/api/newsletters', async (req, res) => {
   try {
     console.log('📰 Fetching published newsletters...');
     const newsletters = await Newsletter.find({ status: 'published' })
-      .sort({ publishedAt: -1 });
-    
+      .sort({ publishedAt: -1 })
+      .select('-__v');
+
     console.log(`✅ Found ${newsletters.length} published newsletters`);
-    res.json({ success: true, data: newsletters });
+    res.json({
+      success: true,
+      count: newsletters.length,
+      data: newsletters,
+    });
   } catch (error) {
-    console.error('❌ Error fetching newsletters:', error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Error fetching newsletters:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching newsletters',
+    });
   }
 });
 
-// Get single newsletter by slug
-router.get('/:slug', async (req, res) => {
+/**
+ * GET /api/newsletters/:slug
+ * Get single newsletter by slug
+ */
+router.get('/api/newsletters/:slug', async (req, res) => {
   try {
     console.log(`📄 Fetching newsletter with slug: ${req.params.slug}`);
     const newsletter = await Newsletter.findOne({ slug: req.params.slug });
-    
+
     if (!newsletter) {
-      console.log(`❌ Newsletter not found: ${req.params.slug}`);
-      return res.status(404).json({ success: false, message: 'Newsletter not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Newsletter not found',
+      });
     }
-    
-    console.log(`✅ Found newsletter: ${newsletter.title}`);
-    res.json({ success: true, data: newsletter });
+
+    // Only return published newsletters to public
+    if (newsletter.status !== 'published') {
+      return res.status(404).json({
+        success: false,
+        message: 'Newsletter not found', // Hide drafts from public
+      });
+    }
+
+    res.json({
+      success: true,
+      data: newsletter,
+    });
   } catch (error) {
-    console.error('❌ Error fetching newsletter:', error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Error fetching newsletter:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching newsletter',
+    });
   }
 });
 
-// Get all newsletters (admin only) - MUST BE BEFORE POST
-router.get('/admin/all', verifyToken, async (req, res) => {
+/**
+ * ADMIN-ONLY ROUTES (Requires JWT token with admin role)
+ */
+
+// Get all newsletters (admin only) - Merged from your code
+router.get('/admin/newsletters/all', verifyToken, async (req, res) => {
   try {
     console.log('👨‍💼 Admin fetching all newsletters...');
     const newsletters = await Newsletter.find().sort({ createdAt: -1 });
@@ -50,110 +99,176 @@ router.get('/admin/all', verifyToken, async (req, res) => {
   }
 });
 
-// Create newsletter (admin only)
-router.post('/', verifyToken, async (req, res) => {
+/**
+ * POST /admin/newsletters
+ * Create new newsletter (admin only)
+ */
+router.post('/admin/newsletters', verifyToken, async (req, res) => {
   try {
-    const { title, slug, excerpt, contentHtml, template, status, coverImage } = req.body;
+    // Merged: Added coverImage support back
+    const { title, slug, excerpt, contentMarkdown, template, status, coverImage } = req.body;
 
     console.log(`📝 Creating newsletter: ${title}`);
 
     // Validate required fields
-    if (!title || !title.trim()) {
-      return res.status(400).json({ success: false, message: 'Title is required' });
-    }
-    if (!slug || !slug.trim()) {
-      return res.status(400).json({ success: false, message: 'Slug is required' });
-    }
-    if (!contentHtml || !contentHtml.trim()) {
-      return res.status(400).json({ success: false, message: 'Content is required' });
-    }
-
-    // Validate slug format
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Slug must be lowercase with numbers and hyphens only' 
+    if (!title || !slug || !contentMarkdown || !template) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: title, slug, contentMarkdown, template',
       });
     }
 
-    const newsletter = new Newsletter({
-      title: title.trim(),
-      slug: slug.trim().toLowerCase(),
-      excerpt: excerpt?.trim() || '',
-      contentMarkdown: contentHtml,
-      template: template || 'default',
+    // Create newsletter
+    const newsletter = await Newsletter.create({
+      title,
+      slug,
+      excerpt,
+      contentMarkdown,
+      template,
       status: status || 'draft',
-      coverImage: coverImage || null,
+      coverImage: coverImage || null, // Preserved
+      publishedAt: status === 'published' ? new Date() : null,
     });
 
-    await newsletter.save();
-    console.log(`✅ Newsletter created: ${title}`);
-    res.status(201).json({ success: true, data: newsletter });
+    res.status(201).json({
+      success: true,
+      message: 'Newsletter created successfully',
+      data: newsletter,
+    });
   } catch (error) {
-    console.error('❌ Error creating newsletter:', error);
-    
+    console.error('Error creating newsletter:', error);
+
     // Handle duplicate slug error
-    if (error.code === 11000 && error.keyPattern?.slug) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'A newsletter with this slug already exists' 
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: `Slug "${error.keyValue?.slug || 'provided'}" already exists`,
       });
     }
-    
-    res.status(400).json({ success: false, message: error.message });
+
+    // Handle validation errors
+    if (error.errors) {
+      const messages = Object.values(error.errors)
+        .map((err) => err.message)
+        .join(', ');
+      return res.status(400).json({
+        success: false,
+        message: `Validation error: ${messages}`,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Error creating newsletter',
+    });
   }
 });
 
-// Update newsletter (admin only)
-router.put('/:id', verifyToken, async (req, res) => {
+/**
+ * PUT /admin/newsletters/:id
+ * Edit existing newsletter (admin only)
+ */
+router.put('/admin/newsletters/:id', verifyToken, async (req, res) => {
   try {
-    const { title, slug, excerpt, contentHtml, template, status, coverImage } = req.body;
+    // Merged: Added coverImage support back
+    const { title, slug, excerpt, contentMarkdown, template, status, coverImage } = req.body;
 
     console.log(`✏️  Updating newsletter: ${req.params.id}`);
 
-    const newsletter = await Newsletter.findByIdAndUpdate(
-      req.params.id,
-      {
-        title,
-        slug,
-        excerpt,
-        contentMarkdown: contentHtml,
-        template,
-        status,
-        coverImage: coverImage || null,
-      },
-      { new: true, runValidators: true }
-    );
-
-    if (!newsletter) {
-      console.log(`❌ Newsletter not found: ${req.params.id}`);
-      return res.status(404).json({ success: false, message: 'Newsletter not found' });
+    // Get current newsletter to check if status is changing to published
+    const currentNewsletter = await Newsletter.findById(req.params.id);
+    
+    if (!currentNewsletter) {
+      return res.status(404).json({
+        success: false,
+        message: 'Newsletter not found',
+      });
     }
 
-    console.log(`✅ Newsletter updated: ${title}`);
-    res.json({ success: true, data: newsletter });
+    // Prepare update object
+    const updateData = {
+      title,
+      slug,
+      excerpt,
+      contentMarkdown,
+      template,
+      status,
+      coverImage: coverImage || null, // Preserved
+    };
+
+    // If status is being changed to "published" and publishedAt is not yet set, set it
+    if (status === 'published' && !currentNewsletter.publishedAt) {
+      updateData.publishedAt = new Date();
+    }
+
+    // Find and update newsletter
+    const newsletter = await Newsletter.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true } // Return updated doc and validate
+    );
+
+    res.json({
+      success: true,
+      message: 'Newsletter updated successfully',
+      data: newsletter,
+    });
   } catch (error) {
-    console.error('❌ Error updating newsletter:', error);
-    res.status(400).json({ success: false, message: error.message });
+    console.error('Error updating newsletter:', error);
+
+    // Handle duplicate slug error
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: `Slug "${error.keyValue?.slug || 'provided'}" already exists`,
+      });
+    }
+
+    // Handle validation errors
+    if (error.errors) {
+      const messages = Object.values(error.errors)
+        .map((err) => err.message)
+        .join(', ');
+      return res.status(400).json({
+        success: false,
+        message: `Validation error: ${messages}`,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Error updating newsletter',
+    });
   }
 });
 
-// Delete newsletter (admin only)
-router.delete('/:id', verifyToken, async (req, res) => {
+/**
+ * DELETE /admin/newsletters/:id
+ * Delete newsletter (admin only)
+ */
+router.delete('/admin/newsletters/:id', verifyToken, async (req, res) => {
   try {
     console.log(`🗑️  Deleting newsletter: ${req.params.id}`);
     const newsletter = await Newsletter.findByIdAndDelete(req.params.id);
-    
+
     if (!newsletter) {
-      console.log(`❌ Newsletter not found: ${req.params.id}`);
-      return res.status(404).json({ success: false, message: 'Newsletter not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Newsletter not found',
+      });
     }
-    
-    console.log(`✅ Newsletter deleted: ${newsletter.title}`);
-    res.json({ success: true, message: 'Newsletter deleted' });
+
+    res.json({
+      success: true,
+      message: 'Newsletter deleted successfully',
+      data: newsletter,
+    });
   } catch (error) {
-    console.error('❌ Error deleting newsletter:', error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Error deleting newsletter:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting newsletter',
+    });
   }
 });
 
