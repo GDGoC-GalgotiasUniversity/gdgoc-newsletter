@@ -1,271 +1,102 @@
-/**
- * Authentication Routes
- * * Unified login/signup for all users (admin and reader roles)
- * - All users stored in MongoDB with role field
- * - Admin users created via database (not hardcoded)
- * - Role-based access control at route level
- */
-
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../db/models'); // utilizing the index export
-const verifyToken = require('../middleware/auth'); // Preserved for admin routes
+const User = require('../db/models/User');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+// --- HELPER: Generate Token ---
+const generateToken = (user) => {
+  return jwt.sign(
+    { userId: user._id, role: user.role },
+    process.env.JWT_SECRET || 'secret',
+    { expiresIn: '24h' }
+  );
+};
 
-/**
- * POST /auth/signin
- * * Login endpoint for all users (admin and reader roles determined by role field)
- * * Logic:
- * 1. Find user by email in database
- * 2. Verify password hash
- * 3. Return JWT token with user role
- * * Frontend sends: { email, password }
- * * Returns: { success: true, token, role: 'admin'|'reader' }
- */
-router.post('/signin', async (req, res) => {
+// 🟢 NEW: REGISTER ROUTE (Add this part)
+router.post('/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // 1. Validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Please provide name, email, and password.' });
+    }
+
+    // 2. Check if user exists
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
+    }
+
+    // 3. Hash Password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 4. Create User (Default role: 'user')
+    user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'user'
+    });
+
+    // 5. Create Token
+    const token = generateToken(user);
+
+    // 6. Return Data
+    res.status(201).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    console.error('Register Error:', error);
+    res.status(500).json({ success: false, message: 'Server error during registration' });
+  }
+});
+
+// POST /api/auth/login
+router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and password are required',
-      });
-    }
-
-    // Check if user exists in database and include password hash
-    const user = await User.findOne({ email }).select('+passwordHash');
-
+    // 1. Check if user exists
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-      });
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Verify password
-    const isPasswordValid = await user.comparePassword(password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-      });
+    // 2. Validate Password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Generate JWT token with user role
-    const token = jwt.sign(
-      {
-        email: user.email,
-        role: user.role,
-        userId: user._id,
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // 3. Create Token
+    const token = generateToken(user);
 
-    return res.json({
-      success: true,
-      token,
-      role: user.role,
-      name: user.name,
-      email: user.email,
-      userId: user._id,
-      message: `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} login successful`,
-    });
-  } catch (error) {
-    console.error('Sign in error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Sign in failed',
-    });
-  }
-});
-
-/**
- * POST /auth/signup
- * * Create new reader account
- * * Frontend sends: { email, password, name }
- * * Returns: { success: true, token, role: 'reader' }
- */
-router.post('/signup', async (req, res) => {
-  try {
-    const { email, password, name } = req.body;
-
-    // Validate input
-    if (!email || !password || !name) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email, password, and name are required',
-      });
-    }
-
-    // Check if email is already taken
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already registered',
-      });
-    }
-
-    // Create new user (readers signup with reader role)
-    const newUser = await User.create({
-      name,
-      email,
-      passwordHash: password,
-      role: 'reader',
-    });
-
-    // Generate JWT token
-    const token = jwt.sign(
-      {
-        email: newUser.email,
-        role: newUser.role,
-        userId: newUser._id,
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    return res.status(201).json({
-      success: true,
-      token,
-      role: 'reader',
-      name: newUser.name,
-      email: newUser.email,
-      userId: newUser._id,
-      message: 'Reader account created successfully',
-    });
-  } catch (error) {
-    console.error('Sign up error:', error);
-
-    // Handle duplicate email error
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already registered',
-      });
-    }
-
-    // Handle validation errors
-    if (error.errors) {
-      const messages = Object.values(error.errors)
-        .map((err) => err.message)
-        .join(', ');
-      return res.status(400).json({
-        success: false,
-        message: `Validation error: ${messages}`,
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: 'Sign up failed',
-    });
-  }
-});
-
-/**
- * POST /auth/verify
- * * Verify JWT token validity
- */
-router.post('/verify', async (req, res) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1];
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'No token provided',
-      });
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET);
-
+    // 4. Return Data
     res.json({
       success: true,
-      role: decoded.role,
-      email: decoded.email,
-      message: 'Token is valid',
-    });
-  } catch (error) {
-    console.error('Token verification error:', error.message);
-    res.status(401).json({
-      success: false,
-      message: 'Invalid or expired token',
-    });
-  }
-});
-
-/**
- * GET /api/auth/users
- * Get all users (admin only)
- * RESTORED FROM PREVIOUS VERSION
- */
-router.get('/users', verifyToken, async (req, res) => {
-  try {
-    console.log('👥 Admin fetching all users...');
-    
-    const users = await User.find()
-      .select('-passwordHash') // Don't return password hashes
-      .sort({ createdAt: -1 });
-    
-    console.log(`✅ Found ${users.length} users`);
-    
-    res.json({
-      success: true,
-      data: users.map(user => ({
+      token,
+      user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,
-        joinedAt: user.createdAt,
-      })),
+        role: user.role
+      }
     });
-  } catch (error) {
-    console.error('❌ Error fetching users:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching users',
-    });
-  }
-});
 
-/**
- * GET /api/auth/users/public
- * Get all users (public - no auth required)
- * RESTORED FROM PREVIOUS VERSION
- */
-router.get('/users/public', async (req, res) => {
-  try {
-    console.log('👥 Fetching all users (public)...');
-    
-    const users = await User.find()
-      .select('-passwordHash') // Don't return password hashes
-      .sort({ createdAt: -1 });
-    
-    console.log(`✅ Found ${users.length} users`);
-    
-    res.json({
-      success: true,
-      data: users.map(user => ({
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        joinedAt: user.createdAt,
-      })),
-    });
   } catch (error) {
-    console.error('❌ Error fetching users:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching users',
-    });
+    console.error('Login Error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

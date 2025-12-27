@@ -82,8 +82,8 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/login" className="text-sm text-[var(--gray-500)] hover:text-[var(--google-blue)] transition">
-                                    Admin Login
+                                <Link href="https://gdg-socials.vercel.app/" className="text-sm text-[var(--gray-500)] hover:text-[var(--google-blue)] transition">
+                                    Linktree
                                 </Link>
                             </li>
                         </ul>

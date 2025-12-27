@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
+// 1. Import the AuthProvider
+import { AuthProvider } from "@/context/AuthContext"; 
+// (If "@/" doesn't work for context, try "../context/AuthContext")
 
 export const metadata: Metadata = {
   title: "GDGoC Newsletter",
@@ -23,11 +26,14 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning className="flex flex-col min-h-screen">
-        <Header />
-        <PageTransition>
-          <div className="flex-1">{children}</div>
-        </PageTransition>
-        <Footer />
+        {/* 2. Wrap everything inside body with AuthProvider */}
+        <AuthProvider>
+          <Header />
+          <PageTransition>
+            <div className="flex-1">{children}</div>
+          </PageTransition>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

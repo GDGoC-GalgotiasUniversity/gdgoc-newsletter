@@ -1,32 +1,25 @@
 @import "tailwindcss";
 
 /* -----------------------------
-   Newsletter Theme Colors
+   Theme: Dark Academia / Newspaper
 ------------------------------ */
 :root {
-  /* Google Theme Colors */
-  --google-blue: #4285F4;
-  --google-red: #EA4335;
-  --google-yellow: #FBBC04;
-  --google-green: #34A853;
-  --gray-50: #F8F9FA;
-  --gray-100: #F1F3F4;
-  --gray-200: #E8EAED;
-  --gray-300: #DADCE0;
-  --gray-500: #9AA0A6;
-  --gray-700: #5F6368;
-  --gray-900: #202124;
-
-  /* Newsletter-specific colors */
-  --primary-purple: #6A2A9A;
-  --accent-purple: #8B4BBE;
-  --cream-bg: #FAD1B3;
-  --peach-light: #F5D5C0;
-  --dark-text: #3A3A3A;
+  /* Paper & Ink */
+  --paper-bg: #FDF6E3;
+  --paper-accent: #F5E6D0; /* Slightly darker for cards */
+  --ink-black: #2c2c2c;    /* Soft Black for text */
+  --ink-gray: #595959;     /* Secondary text */
+  
+  /* Brand Accents */
+  --brand-purple: #4A148C; /* Deep Royal Purple */
+  --brand-purple-light: #7c43bd;
+  
+  /* Functional */
+  --border-color: #3E2723; /* Dark brown for dividing lines */
 }
 
 /* -----------------------------
-   CSS Reset & Base Styles
+   Base Styles
 ------------------------------ */
 * {
   box-sizing: border-box;
@@ -36,402 +29,113 @@ html,
 body {
   padding: 0;
   margin: 0;
-  scroll-behavior: smooth;
-  background-color: #ffffff;
-  color: var(--gray-900);
-  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  line-height: 1.6;
-}
-
-/* -----------------------------
-   Typography - Google Style (Default for Home Page)
------------------------------- */
-h1 {
-  font-size: 2.5rem;
-  font-weight: 400;
-  letter-spacing: -0.5px;
-  color: var(--gray-900);
-}
-
-h2 {
-  font-size: 1.75rem;
-  font-weight: 400;
-  color: var(--gray-900);
-}
-
-h3 {
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: var(--gray-900);
-}
-
-p {
-
-  color: var(--gray-700);
-  line-height: 1.75;
-}
-
-/* -----------------------------
-   Buttons
------------------------------- */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  color: white;
-  background-color: var(--google-blue);
-  border: none;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: background-color 0.2s, box-shadow 0.2s;
-}
-
-.btn-primary:hover {
-  background-color: #1a73e8;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--google-blue);
-  background-color: white;
-  border: 1px solid var(--gray-300);
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.btn-secondary:hover {
-  background-color: var(--gray-50);
-  border-color: var(--google-blue);
-}
-
-/* -----------------------------
-   Form Inputs
------------------------------- */
-.input {
-  width: 100%;
-  padding: 12px 20px;
-  font-size: 16px;
-  color: var(--gray-900);
-  background-color: var(--gray-50);
-  border: 1px solid var(--gray-300);
-  border-radius: 9999px;
-  transition: border-color 0.2s, background-color 0.2s;
-}
-
-.input:focus {
-  outline: none;
-  background-color: white;
-  border-color: var(--google-blue);
-  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
-}
-
-.textarea {
-  width: 100%;
-  padding: 16px 20px;
-  font-size: 16px;
-  min-height: 160px;
-  color: var(--gray-900);
-  background-color: var(--gray-50);
-  border: 1px solid var(--gray-300);
-  border-radius: 24px;
-  resize: vertical;
-}
-
-.textarea:focus {
-  outline: none;
-  background-color: white;
-  border-color: var(--google-blue);
-  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
-}
-
-/* -----------------------------
-   Cards
------------------------------- */
-.card1 {
-  background: white;
-  border: 1px solid rgb(0, 0, 0);
-  border-radius: 16px;
-  transition: box-shadow 0.2s;
-}
-
-.card:hover {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-/* -----------------------------
-   Layout
------------------------------- */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-/* -----------------------------
-   Prose Content
------------------------------- */
-.prose {
-  max-width: 720px;
-}
-
-.prose p {
-  margin-bottom: 1.5em;
-}
-
-.prose h2 {
-  margin-top: 2em;
-  margin-bottom: 0.75em;
-}
-
-.prose h3 {
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-}
-
-.prose ul,
-.prose ol {
-  padding-left: 1.5em;
-  margin-bottom: 1.5em;
-}
-
-.prose li {
-  margin-bottom: 0.5em;
-  color: var(--gray-700);
-}
-
-/* -----------------------------
-   Utility
------------------------------- */
-::selection {
-  background-color: var(--google-blue);
-  color: white;
-}
-
-/* Color Accents */
-.text-google-blue {
-  color: var(--google-blue);
-}
-
-.text-google-red {
-  color: var(--google-red);
-}
-
-.text-google-yellow {
-  color: var(--google-yellow);
-}
-
-.text-google-green {
-  color: var(--google-green);
-}
-
-.bg-google-blue {
-  background-color: var(--google-blue);
-}
-
-.bg-google-red {
-  background-color: var(--google-red);
-}
-
-.bg-google-yellow {
-  background-color: var(--google-yellow);
-}
-
-.bg-google-green {
-  background-color: var(--google-green);
-}
-
-/* Newsletter Specific Styles */
-.newsletter-page {
-  background-color: var(--cream-bg) !important;
-  background-image:
-    linear-gradient(0deg, transparent 24%, rgba(180, 150, 100, 0.08) 25%, rgba(180, 150, 100, 0.08) 26%, transparent 27%, transparent 74%, rgba(180, 150, 100, 0.08) 75%, rgba(180, 150, 100, 0.08) 76%, transparent 77%, transparent),
-    linear-gradient(90deg, transparent 24%, rgba(180, 150, 100, 0.08) 25%, rgba(180, 150, 100, 0.08) 26%, transparent 27%, transparent 74%, rgba(180, 150, 100, 0.08) 75%, rgba(180, 150, 100, 0.08) 76%, transparent 77%, transparent) !important;
-  background-size: 40px 40px !important;
-  background-attachment: fixed !important;
-  color: var(--dark-text);
-  font-family: 'Lora', 'Georgia', serif;
+  background-color: var(--paper-bg);
+  color: var(--ink-black);
+  /* The Paper Texture Effect */
+  background-image: radial-gradient(#d6d3c9 1px, transparent 1px);
+  background-size: 20px 20px;
+  
+  /* Typography - Default Body */
+  font-family: 'Lora', 'Times New Roman', serif;
   line-height: 1.8;
-  min-height: 100vh;
+  font-size: 18px; /* Slightly larger for readability */
 }
 
-/* Apply background to parent wrapper of newsletter-page */
-body:has(.newsletter-page) {
-  background-color: var(--cream-bg);
-  background-image:
-    linear-gradient(0deg, transparent 24%, rgba(180, 150, 100, 0.08) 25%, rgba(180, 150, 100, 0.08) 26%, transparent 27%, transparent 74%, rgba(180, 150, 100, 0.08) 75%, rgba(180, 150, 100, 0.08) 76%, transparent 77%, transparent),
-    linear-gradient(90deg, transparent 24%, rgba(180, 150, 100, 0.08) 25%, rgba(180, 150, 100, 0.08) 26%, transparent 27%, transparent 74%, rgba(180, 150, 100, 0.08) 75%, rgba(180, 150, 100, 0.08) 76%, transparent 77%, transparent);
-  background-size: 40px 40px;
-  background-attachment: fixed;
-}
-
-/* Newsletter page typography */
-.newsletter-page h1 {
-  font-family: 'UnifrakturCook', cursive !important;
-  font-size: 4.5rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  color: var(--primary-purple);
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.newsletter-page h2 {
+/* -----------------------------
+   Typography Utils
+------------------------------ */
+h1, h2, h3, h4, h5 {
   font-family: 'Playfair Display', serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary-purple);
+  color: var(--brand-purple);
+  margin: 0;
 }
 
-.newsletter-page h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--dark-text);
+/* The Blackletter Logo Font */
+.font-gothic {
+  font-family: 'UnifrakturCook', cursive;
+  font-weight: 400;
 }
 
-.newsletter-page h4 {
-  font-family: 'Lora', serif;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+/* The "Date/Tag" Font */
+.font-sans-accent {
+  font-family: 'Google Sans', sans-serif; /* Keeping Google Sans for subtle branding */
   text-transform: uppercase;
-  color: var(--primary-purple);
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
-.newsletter-page p {
-  color: var(--dark-text);
-  line-height: 1.8;
+/* The Drop Cap (Big First Letter) */
+.drop-cap::first-letter {
+  float: left;
+  font-size: 4.5rem;
+  line-height: 3.5rem;
+  font-weight: 700;
+  color: var(--brand-purple);
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  font-family: 'UnifrakturCook', cursive;
 }
 
-/* Newsletter page buttons */
-.newsletter-page .btn-primary {
-  background-color: var(--primary-purple) !important;
+/* -----------------------------
+   Component Styles
+------------------------------ */
+/* Classic Newspaper Button */
+.btn-classic {
+  display: inline-block;
+  padding: 12px 32px;
+  background: transparent;
+  /* Double border looks more like a printed frame */
+  border: 3px double var(--brand-purple); 
+  color: var(--brand-purple);
+  font-family: 'Google Sans', sans-serif;
+  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 4px 4px 0px 0px rgba(74, 20, 140, 0.2); /* Ink shadow */
 }
 
-.newsletter-page .btn-primary:hover {
-  background-color: var(--accent-purple) !important;
+/* Hover: Lifts up slightly */
+.btn-classic:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px var(--brand-purple);
+  background: var(--paper-bg);
 }
 
-.newsletter-page .btn-secondary {
-  color: var(--primary-purple);
-  border-color: var(--gray-300);
+/* Active: The "Scrunch" / Stamp Effect */
+.btn-classic:active {
+  transform: translate(2px, 2px) scale(0.96) rotate(-2deg); /* Crunches and tilts */
+  box-shadow: 0px 0px 0px 0px var(--brand-purple); /* Shadow disappears */
 }
 
-.newsletter-page .btn-secondary:hover {
-  border-color: var(--primary-purple);
-}
-
-/* Newsletter header button styling */
-.btn-primary.newsletter-page-join-btn {
-  background-color: var(--primary-purple) !important;
-}
-
-.btn-primary.newsletter-page-join-btn:hover {
-  background-color: var(--accent-purple) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-/* Newsletter page form inputs */
-.newsletter-page .input {
-  background-color: rgba(255, 255, 255, 0.8);
-  border-color: var(--primary-purple);
-  color: var(--dark-text);
-  font-family: 'Lora', serif;
-}
-
-.newsletter-page .input:focus {
-  border-color: var(--accent-purple);
-  box-shadow: 0 0 0 2px rgba(106, 42, 154, 0.2);
-}
-
-.newsletter-page .textarea {
-  background-color: rgba(255, 255, 255, 0.8);
-  border-color: var(--primary-purple);
-  color: var(--dark-text);
-  font-family: 'Lora', serif;
-}
-
-.newsletter-page .textarea:focus {
-  border-color: var(--accent-purple);
-  box-shadow: 0 0 0 2px rgba(106, 42, 154, 0.2);
-}
-
-/* Newsletter page cards */
-.newsletter-page .card {
-  background: white;
-  border: 2px solid #000000;
-  border-radius: 0;
-}
-
-.newsletter-page .card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-.newsletter-divider {
-  border-top: 2px solid var(--primary-purple);
+/* Horizontal Rules */
+.separator-thick {
+  border: 0;
+  height: 3px;
+  background: var(--brand-purple);
   margin: 2rem 0;
 }
 
-.newsletter-page .newsletter-section-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--primary-purple);
-  text-align: center;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 3rem 0 2rem;
-}
-
-.newsletter-page .newsletter-section-title::before,
-.newsletter-page .newsletter-section-title::after {
-  content: '';
-  flex: 1;
+.separator-thin {
+  border: 0;
   height: 1px;
-  background-color: var(--primary-purple);
+  background: var(--brand-purple);
+  margin: 1rem 0;
+  opacity: 0.3;
+}
+/* Newspaper Column Utility */
+.newspaper-columns {
+  column-count: 1; /* Mobile default */
+  column-gap: 2rem;
 }
 
-.newsletter-page .newsletter-badge {
-  display: inline-block;
-  font-family: 'Lora', serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--primary-purple);
-  margin-bottom: 0.5rem;
-}
-
-.newsletter-page .newsletter-subtitle {
-  font-family: 'Lora', serif;
-  font-style: italic;
-  color: var(--dark-text);
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.newsletter-page .diamond-divider {
-  text-align: center;
-  color: var(--primary-purple);
-  font-size: 1.5rem;
-  margin: 1.5rem 0;
-  letter-spacing: 0.3rem;
-}
-
-.newsletter-page .newsletter-divider {
-  border-top-color: var(--primary-purple);
+@media (min-width: 768px) {
+  .newspaper-columns {
+    column-count: 2; /* Split into 2 columns on tablets/desktop */
+    text-align: justify;
+  }
 }

@@ -1,76 +1,30 @@
-/**
- * Authentication Middleware
- * 
- * Protects admin routes by verifying JWT tokens
- * Used to guard create/edit/delete newsletter routes
- */
-
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
-/**
- * Middleware to verify JWT token
- * 
- * Usage in routes:
- *   router.post('/admin/newsletters', verifyToken, createNewsletter);
- * 
- * Returns 401 if token is invalid or missing
- * Calls next() if token is valid
- */
+// 1. Verify Token (Authentication)
 const verifyToken = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Access Denied: No Token' });
+  }
+
   try {
-    const token = req.headers.authorization?.split(' ')[1]; // Extract from "Bearer TOKEN"
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'No token provided. Please login first.',
-      });
-    }
-
-    // Allow key-verified access for admin operations
-    if (token === 'key-verified') {
-      req.user = {
-        email: 'admin@key-verified',
-        role: 'admin',
-      };
-      return next();
-    }
-
-    // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET);
-
-    // Attach user info to request for use in route handlers
-    req.user = {
-      email: decoded.email,
-      role: decoded.role,
-    };
-
-    // Check if user is admin
-    if (decoded.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. Admin role required.',
-      });
-    }
-
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    req.user = decoded; // Attaches { userId, role } to the request
     next();
   } catch (error) {
-    console.error('Token verification error:', error.message);
-
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        success: false,
-        message: 'Token has expired. Please login again.',
-      });
-    }
-
-    res.status(401).json({
-      success: false,
-      message: 'Invalid token',
-    });
+    res.status(400).json({ success: false, message: 'Invalid Token' });
   }
 };
 
-module.exports = verifyToken;
+// 2. Verify Admin (Authorization)
+const verifyAdmin = (req, res, next) => {
+  // We assume verifyToken has already run, so req.user exists
+  if (req.user && req.user.role === 'admin') {
+    next(); // Proceed
+  } else {
+    res.status(403).json({ success: false, message: 'Access Denied: Admins Only' });
+  }
+};
+
+module.exports = { verifyToken, verifyAdmin };

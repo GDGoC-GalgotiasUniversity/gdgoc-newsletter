@@ -1,77 +1,170 @@
 import Link from 'next/link';
-import AnimatedLogo from '@/components/AnimatedLogo';
-import HeroBackgroundVideo from '@/components/HeroBackgroundVideo';
 
-export default function HomePage() {
+// 1. Fetch Logic (Server Side)
+async function getLatestNewsletters() {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    // Ensure we are hitting the PUBLIC endpoint
+    const res = await fetch(`${apiUrl}/api/newsletters`, { cache: 'no-store' });
+    
+    if (!res.ok) return [];
+    
+    const json = await res.json();
+    return json.data || [];
+  } catch (e) {
+    console.error("Failed to fetch home newsletters", e);
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const newsletters = await getLatestNewsletters();
+  const hasNewsletters = newsletters.length > 0;
+  
+  // Safe Fallback if no data
+  const coverStory = hasNewsletters ? newsletters[0] : {
+    title: "Welcome to GDGoC",
+    excerpt: "The latest updates from our campus community will appear here soon.",
+    slug: "#",
+    createdAt: new Date()
+  };
+
+  // Sidebar Stories (Take next 2 or use placeholders)
+  const sideStories = hasNewsletters ? newsletters.slice(1, 3) : [
+    { title: "Kickstart Session", excerpt: "The introductory session...", slug: "#" },
+    { title: "Web Development", excerpt: "Beyond the basics...", slug: "#" }
+  ];
+
   return (
-    <main>
-      {/* Hero Section with Video Background */}
-      <section className="relative py-24 bg-[var(--gray-50)] overflow-hidden">
-        {/* Video Background */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-          <HeroBackgroundVideo />
+    <main className="container mx-auto px-4 max-w-6xl py-8 md:py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+
+        {/* === LEFT COLUMN: MAIN CONTENT === */}
+        <div className="lg:col-span-8 flex flex-col gap-12">
+          
+          {/* LEAD STORY */}
+          <section className="border-b-2 border-[var(--border-color)] pb-8">
+            <span className="font-sans-accent text-[var(--brand-purple)] text-xs mb-2 block">
+              COVER STORY &bull; {hasNewsletters ? 'LATEST ISSUE' : 'PREVIEW'}
+            </span>
+            
+            <h2 className="text-4xl md:text-6xl font-serif font-bold leading-tight mb-4 text-[var(--ink-black)]">
+              {coverStory.title}
+            </h2>
+
+            <div className="flex flex-col md:flex-row gap-6 mb-6">
+               <div className="font-sans-accent text-xs text-[var(--ink-gray)] border-t border-b border-[var(--ink-gray)] py-2 w-full md:w-auto self-start">
+                  By <span className="text-[var(--brand-purple)]">GDGoC Team</span> &bull; {new Date(coverStory.createdAt || Date.now()).toLocaleDateString()}
+               </div>
+            </div>
+
+            {/* Image Placeholder */}
+            <div className="w-full aspect-[16/9] bg-neutral-200 mb-6 grayscale hover:grayscale-0 transition-all duration-700 ease-in-out relative group overflow-hidden border border-[var(--ink-black)]">
+              <div className="absolute inset-0 flex items-center justify-center bg-[var(--paper-accent)] text-[var(--brand-purple)] font-gothic text-2xl opacity-20 group-hover:opacity-10">
+                [Cover Image]
+              </div>
+            </div>
+
+            <div className="newspaper-columns text-justify text-lg leading-relaxed font-serif text-[var(--ink-black)] mb-6">
+              <p className="first-letter:float-left first-letter:text-5xl first-letter:pr-2 first-letter:font-gothic first-letter:text-[var(--brand-purple)]">
+                 {coverStory.excerpt ? coverStory.excerpt.charAt(0) : 'W'}
+              </p>
+              <p>
+                 {coverStory.excerpt ? coverStory.excerpt.substring(1) : "Welcome to the GDGoC Newsletter. This is a placeholder story."}
+              </p>
+            </div>
+            
+            {hasNewsletters ? (
+               <Link href={`/newsletter/${coverStory.slug}`} className="btn-classic">
+                  Continue Reading &rarr;
+               </Link>
+            ) : (
+               <div className="inline-block px-4 py-2 bg-yellow-100 text-yellow-800 text-sm font-bold border border-yellow-300">
+                 No newsletters published yet
+               </div>
+            )}
+          </section>
+
+          {/* SECONDARY STORIES */}
+          <section>
+            <div className="flex items-center gap-4 mb-6">
+               <h3 className="text-2xl font-serif font-bold italic">Recent Dispatches</h3>
+               <div className="h-[1px] bg-[var(--border-color)] flex-1 opacity-30"></div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {sideStories.map((story, i) => (
+                  <article key={i} className="flex flex-col gap-3">
+                    <div className="aspect-[4/3] bg-[var(--paper-accent)] border border-[var(--ink-black)] relative opacity-50"></div>
+                    <h4 className="text-xl font-serif font-bold leading-tight">{story.title}</h4>
+                    <p className="text-sm font-sans text-[var(--ink-gray)] line-clamp-3">
+                       {story.excerpt}
+                    </p>
+                  </article>
+              ))}
+            </div>
+          </section>
         </div>
 
-        {/* Content */}
-        <div className="container text-center relative z-10">
-          {/* Video Logo */}
-      <br/><br/><br/>
-
-          <h1 className="text-5xl font-normal mb-6">
-            GDGoC <span className="text-[var(--google-blue)]">Galgotias University</span>
-          </h1>
-          <p className="text-xl text-[var(--gray-700)] max-w-2xl mx-auto mb-10">
-            Stay updated with the latest events, workshops, and community highlights
-            from Google Developer Groups on Campus at Galgotias University.
-          </p>
-
-          <div className="flex justify-center gap-4">
-            <Link href="/newsletter" className="btn-primary">
-              Browse Newsletters
-            </Link>
-           
+        {/* === RIGHT COLUMN: SIDEBAR === */}
+        <aside className="lg:col-span-4 flex flex-col gap-8 lg:border-l lg:border-[var(--border-color)] lg:pl-8">
+          
+          {/* 1. SUBSCRIPTION BOX */}
+          <div className="bg-[var(--paper-accent)] p-6 border-2 border-[var(--brand-purple)] border-dashed relative">
+             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--paper-bg)] px-2 font-sans-accent text-[var(--brand-purple)] text-xs font-bold">
+               SUBSCRIBE NOW
+             </div>
+             <h3 className="font-gothic text-3xl text-center mb-2">Join the Club</h3>
+             <p className="text-center font-serif italic text-sm mb-4">
+               Get the latest campus updates delivered via carrier pigeon (or email).
+             </p>
+             <div className="flex flex-col gap-2">
+               <input type="email" placeholder="Your email address" className="bg-white border border-[var(--ink-black)] px-3 py-2 font-serif text-sm focus:outline-none focus:border-[var(--brand-purple)]" />
+               <button className="bg-[var(--brand-purple)] text-white font-sans-accent text-xs py-2 hover:opacity-90 transition-opacity">
+                 Sign Me Up
+               </button>
+             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-20">
-        <div className="container">
-          <h2 className="text-center mb-12">What We Share</h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="card p-8 text-center">
-              <div className="w-12 h-12 rounded-full bg-[var(--google-blue)] mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="mb-2">Events</h3>
-              <p>Workshops, hackathons, and tech talks happening on campus.</p>
-            </div>
-
-            <div className="card p-8 text-center">
-              <div className="w-12 h-12 rounded-full bg-[var(--google-red)] mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h3 className="mb-2">Community</h3>
-              <p>Spotlights on members and their achievements in tech.</p>
-            </div>
-
-            <div className="card p-8 text-center">
-              <div className="w-12 h-12 rounded-full bg-[var(--google-green)] mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-              <h3 className="mb-2">Resources</h3>
-              <p>Learning materials, tutorials, and Google technologies.</p>
-            </div>
+          {/* 2. IN BRIEF / ANNOUNCEMENTS (Restored) */}
+          <div className="flex flex-col gap-0">
+             <div className="border-b-4 border-double border-[var(--ink-black)] mb-4 pb-1">
+               <h3 className="font-sans-accent text-lg font-bold">In Brief</h3>
+             </div>
+             
+             {/* List Items */}
+             <ul className="flex flex-col gap-4">
+                <li className="pb-4 border-b border-[var(--border-color)] border-dotted">
+                   <span className="text-[var(--brand-purple)] font-bold text-xs block mb-1">UPCOMING</span>
+                   <Link href="#" className="font-serif hover:text-[var(--brand-purple)] font-medium leading-tight block">
+                     Hackathon 2025 registration opens this Friday. Teams of 4 required.
+                   </Link>
+                </li>
+                <li className="pb-4 border-b border-[var(--border-color)] border-dotted">
+                   <span className="text-[var(--brand-purple)] font-bold text-xs block mb-1">ANNOUNCEMENT</span>
+                   <Link href="#" className="font-serif hover:text-[var(--brand-purple)] font-medium leading-tight block">
+                     New core team members announced for the Web Dev domain.
+                   </Link>
+                </li>
+                <li className="pb-4 border-b border-[var(--border-color)] border-dotted">
+                   <span className="text-[var(--brand-purple)] font-bold text-xs block mb-1">REMINDER</span>
+                   <Link href="#" className="font-serif hover:text-[var(--brand-purple)] font-medium leading-tight block">
+                     Don't forget to claim your Cloud Study Jam badges before the 30th.
+                   </Link>
+                </li>
+             </ul>
           </div>
-        </div>
-      </section>
+
+          {/* 3. WEATHER WIDGET (Restored) */}
+          <div className="border border-[var(--ink-black)] p-4 text-center">
+             <div className="font-gothic text-2xl text-[var(--ink-gray)] mb-1">Campus Weather</div>
+             <div className="font-serif text-4xl font-bold mb-1">24°C</div>
+             <div className="font-sans-accent text-xs text-[var(--brand-purple)]">SUNNY &bull; CODE COMPILING</div>
+          </div>
+
+        </aside>
+
+      </div>
     </main>
   );
 }
