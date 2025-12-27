@@ -1,152 +1,117 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '../../context/AuthContext'; // Import hook
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
+  const router = useRouter();
+  const { login } = useAuth(); // Get login function
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-        try {
-            // Using localhost:5000 as defined in backend/.env
-            const res = await fetch('http://localhost:5000/auth/signin', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      
+      const res = await fetch(`${apiUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-            const data = await res.json();
+      const data = await res.json();
 
-            if (!res.ok || !data.success) {
-                throw new Error(data.message || 'Invalid email or password');
-            }
+      if (!res.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
 
-            // Save token and user info to localStorage
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify({
-                name: data.name,
-                email: data.email,
-                role: data.role
-            }));
+      // 🟢 USE CONTEXT LOGIN (Updates Header immediately)
+      login(data.token, data.user);
 
-            console.log('Login successful:', data.message);
+      // Redirect based on Role
+      if (data.user.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
 
-            // Redirect based on role
-            if (data.role === 'admin') {
-                router.push('/admin');
-            } else {
-                router.push('/');
-            }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        } catch (err: any) {
-            console.error('Login error:', err);
-            setError(err.message || 'Something went wrong. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-[var(--paper-bg)] px-4">
+      <div className="w-full max-w-md bg-[var(--paper-accent)] border-2 border-[var(--ink-black)] p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        
+        <div className="text-center mb-8">
+          <h1 className="font-gothic text-4xl text-[var(--brand-purple)] mb-2">Member Login</h1>
+          <p className="font-serif italic text-sm">Please identify yourself to access the archives.</p>
+        </div>
 
-    return (
-        <main className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 bg-[var(--gray-50)]">
-            <div className="w-full max-w-md">
-                {/* Card */}
-                <div className="card p-10">
-                    {/* Logo */}
-                    <div className="flex justify-center gap-2 mb-6">
-                        <span className="w-3 h-3 rounded-full bg-[var(--google-blue)]"></span>
-                        <span className="w-3 h-3 rounded-full bg-[var(--google-red)]"></span>
-                        <span className="w-3 h-3 rounded-full bg-[var(--google-yellow)]"></span>
-                        <span className="w-3 h-3 rounded-full bg-[var(--google-green)]"></span>
-                    </div>
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-500 text-red-700 text-sm font-sans-accent">
+            Error: {error}
+          </div>
+        )}
 
-                    <div className="text-center mb-8">
-                        <h1 className="text-2xl mb-2">Sign in</h1>
-                        <p className="text-[var(--gray-500)]">to get early access to GDGoCGU newsletter</p>
-                    </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="block font-sans-accent text-xs font-bold mb-1 uppercase">Email Address</label>
+            <input
+              type="email"
+              required
+              className="w-full p-3 border border-[var(--ink-black)] bg-white focus:outline-none focus:border-[var(--brand-purple)] font-serif"
+              placeholder="name@example.com"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+          </div>
 
-                    {/* Error Message */}
-                    {error && (
-                        <div className="mb-6 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                            {error}
-                        </div>
-                    )}
+          <div>
+            <label className="block font-sans-accent text-xs font-bold mb-1 uppercase">Password</label>
+            <input
+              type="password"
+              required
+              className="w-full p-3 border border-[var(--ink-black)] bg-white focus:outline-none focus:border-[var(--brand-purple)] font-serif"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            />
+          </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-[var(--gray-700)] mb-2">
-                                Email
-                            </label>
-                            <input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="input w-full"
-                                placeholder="you@example.com"
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-4 bg-[var(--brand-purple)] text-white font-sans-accent font-bold py-3 hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {loading ? 'Authenticating...' : 'Sign In'}
+          </button>
+        </form>
 
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-[var(--gray-700)] mb-2">
-                                Password
-                            </label>
-                            <input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="input w-full"
-                                placeholder="Enter your password"
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
+        <div className="mt-6 text-center border-t border-[var(--ink-black)] pt-4 flex flex-col gap-2">
+           <span className="font-serif italic text-sm">New to the campus?</span>
+           <Link href="/register" className="font-sans-accent text-xs font-bold text-[var(--brand-purple)] hover:underline">
+             CREATE AN ACCOUNT
+           </Link>
+        </div>
 
-                        <div className="flex items-center justify-between text-sm">
-                            <label className="flex items-center gap-2 text-[var(--gray-700)]">
-                                <input type="checkbox" className="rounded border-[var(--gray-300)]" />
-                                Remember me
-                            </label>
-                            <a href="#" className="text-[var(--google-blue)] hover:underline">
-                                Forgot password?
-                            </a>
-                        </div>
+        <div className="mt-2 text-center">
+            <Link href="/" className="font-serif italic text-sm hover:underline text-[var(--ink-gray)]">
+                &larr; Return to Front Page
+            </Link>
+        </div>
 
-                        <button 
-                            type="submit" 
-                            className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Signing in...' : 'Sign in'}
-                        </button>
-                    </form>
-
-                    <div className="mt-8 pt-6 border-t border-[var(--gray-200)] text-center">
-                        <p className="text-sm text-[var(--gray-500)]">
-                            By signing in, you agree to our terms and conditions.
-                        </p>
-                    </div>
-                </div>
-
-                <p className="mt-6 text-center text-sm text-[var(--gray-500)]">
-                    <Link href="/" className="text-[var(--google-blue)] hover:underline">
-                        ← Back to Home
-                    </Link>
-                </p>
-            </div>
-        </main>
-    );
+      </div>
+    </main>
+  );
 }

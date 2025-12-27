@@ -1,65 +1,95 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import AnimatedLogo from './AnimatedLogo';
+import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
-    const pathname = usePathname();
+    const { user, logout } = useAuth();
 
-    const navLinks = [
-        { href: '/', label: 'Home' },
-        { href: '/newsletter', label: 'Newsletters' },
-    ];
-
-    const isActive = (href: string) => {
-        if (href === '/') return pathname === '/';
-        return pathname.startsWith(href);
-    };
+    const today = new Date().toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
 
     return (
-        <div className="sticky top-0 z-50 px-2 sm:px-4 py-3 sm:py-6">
-            <header className="max-w-6xl mx-auto border border-[var(--gray-200)] bg-white/80 backdrop-blur-md rounded-full shadow-lg px-3 sm:px-6 md:px-8">
-                <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 sm:gap-3 md:gap-4 group">
-                        {/* Animated Logo - Play once, stay on last frame */}
-                        <AnimatedLogo className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
-                        <div className="flex items-baseline gap-1 sm:gap-1.5">
-                            <span className="font-medium text-sm sm:text-base md:text-lg text-[var(--gray-900)]">GDGoC</span>
-                            <span className="text-[var(--gray-500)] text-xs sm:text-sm md:text-base hidden md:inline">Galgotias University</span>
+        /* 1. Main Background changed to var(--paper-bg) to match the rest of the site */
+        <header className="w-full bg-[var(--paper-bg)] text-[var(--ink-black)] font-serif border-b-4 border-double border-[var(--ink-black)]">
+            
+            {/* === TIER 1: UTILITY BAR === */}
+            <div className="border-b border-[var(--ink-gray)]/30">
+                <div className="max-w-6xl mx-auto px-4 py-1 flex justify-between items-center text-[10px] md:text-xs font-sans-accent tracking-widest uppercase text-[var(--ink-gray)]">
+                    <div>{today}</div>
+                    <div>
+                        {user ? (
+                            <div className="flex gap-4 items-center">
+                                <span>Ed. {user.name}</span>
+                                <button onClick={logout} className="hover:text-[var(--brand-purple)] underline">Sign Out</button>
+                            </div>
+                        ) : (
+                            <div className="flex gap-4">
+                                <Link href="/login" className="hover:text-[var(--brand-purple)]">Log In</Link>
+                                <Link href="/register" className="hover:text-[var(--brand-purple)]">Subscribe</Link>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* === TIER 2: THE MASTHEAD === */}
+            <div className="py-8 text-center px-4">
+                <div className="relative inline-block">
+                    {/* Decorative Side Text */}
+                    <span className="hidden md:block absolute -left-24 top-1/2 -translate-y-1/2 font-sans-accent text-[10px] tracking-widest -rotate-90 text-[var(--ink-gray)] origin-center">
+                        EST. 2025
+                    </span>
+                    
+                    <Link href="/" className="group block">
+                        {/* 2. Title Changed back to "Google Developer Groups" */}
+                        <h1 className="font-gothic text-5xl md:text-7xl lg:text-8xl leading-none text-[var(--brand-purple)] group-hover:opacity-90 transition-opacity duration-300">
+                            Google Developer Groups
+                        </h1>
+                        
+                        <div className="flex items-center justify-center gap-3 mt-3">
+                             <div className="h-[1px] bg-[var(--ink-black)] w-12 hidden md:block"></div>
+                             <p className="font-serif italic text-lg md:text-xl text-[var(--ink-gray)]">
+                                On Campus Galgotias University
+                             </p>
+                             <div className="h-[1px] bg-[var(--ink-black)] w-12 hidden md:block"></div>
                         </div>
                     </Link>
 
-                    {/* Navigation */}
-                    <nav className="flex items-center gap-1 sm:gap-2">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={`px-2 sm:px-3 md:px-5 py-1.5 sm:py-2 md:py-2.5 text-xs sm:text-sm md:text-base font-medium rounded-full transition ${isActive(link.href)
-                                    ? `${pathname.startsWith('/newsletter') ? 'text-[var(--primary-purple)] bg-[rgba(106,42,154,0.08)]' : 'text-[var(--google-blue)] bg-[rgba(66,133,244,0.08)]'}`
-                                    : 'text-[var(--gray-700)] hover:bg-[var(--gray-100)]'
-                                    }`}
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
-                        <div className="ml-2 sm:ml-3 md:ml-4 pl-2 sm:pl-3 md:pl-4 border-l border-[var(--gray-200)]">
-                            <Link
-                                href="/login"
-                                className={`btn-primary text-xs sm:text-sm md:text-base py-1.5 sm:py-2 md:py-2.5 px-3 sm:px-4 md:px-6 ${
-                                    pathname.startsWith('/newsletter')
-                                        ? 'newsletter-page-join-btn'
-                                        : ''
-                                }`}
-                            >
-                                Join
-                            </Link>
-                        </div>
-                    </nav>
+                    <span className="hidden md:block absolute -right-24 top-1/2 -translate-y-1/2 font-sans-accent text-[10px] tracking-widest rotate-90 text-[var(--ink-gray)] origin-center">
+                        VOL. I
+                    </span>
                 </div>
-            </header>
-        </div>
+            </div>
+
+            {/* === TIER 3: NAVIGATION === */}
+            {/* 3. Sticky Nav Background changed from white to var(--paper-bg) */}
+            <div className="border-t border-b border-[var(--ink-black)] py-2 bg-[var(--paper-bg)] sticky top-0 z-50 shadow-sm">
+                <nav className="max-w-6xl mx-auto flex justify-center flex-wrap gap-6 md:gap-12 text-xs md:text-sm font-sans-accent font-bold tracking-widest uppercase">
+                    
+                    <Link href="/" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
+                        Front Page
+                    </Link>
+                    
+                    <Link href="/newsletter" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
+                        Archives
+                    </Link>
+                    
+                    <Link href="/about" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
+                        About Us
+                    </Link>
+
+                    {user?.role === 'admin' && (
+                        <Link href="/admin" className="text-red-700 hover:text-red-900 bg-red-50 px-2 rounded-sm border border-red-100">
+                            Editor's Desk
+                        </Link>
+                    )}
+                </nav>
+            </div>
+        </header>
     );
 }
