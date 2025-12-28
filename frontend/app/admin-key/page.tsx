@@ -13,7 +13,17 @@ export default function AdminKeyPage() {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Check if already verified
+    // Check if already logged in with valid token
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (token && user.role === 'admin') {
+      // Already logged in as admin, skip key verification
+      router.push('/admin');
+      return;
+    }
+    
+    // Check if already verified the key
     const verified = localStorage.getItem('adminKeyVerified');
     if (verified) {
       router.push('/admin');
