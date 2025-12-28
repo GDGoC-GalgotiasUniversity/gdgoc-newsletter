@@ -1,5 +1,8 @@
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // 1. Fetch Logic (Server Side)
 async function getLatestNewsletters() {
   try {

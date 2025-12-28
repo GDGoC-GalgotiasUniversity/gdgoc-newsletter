@@ -1,5 +1,8 @@
 import NewsletterSearch from '@/components/NewsletterSearch';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function getNewsletters() {
   try {
     // Determine API URL based on environment or default to local
