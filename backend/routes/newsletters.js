@@ -52,9 +52,27 @@ router.get('/api/newsletters/:slug', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Newsletter not found' });
     }
 
-    // Security: Do not reveal drafts to the public API
+    // Security: Do not reveal drafts to public, UNLESS valid Admin Token is present
     if (newsletter.status !== 'published') {
-      return res.status(404).json({ success: false, message: 'Newsletter not found' });
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      let isAdmin = false;
+
+      if (token) {
+        try {
+          // Inline verification to avoid requiring middleware for public route
+          const jwt = require('jsonwebtoken');
+          const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+          if (decoded && decoded.role === 'admin') {
+            isAdmin = true;
+          }
+        } catch (e) {
+          // Token invalid/expired - treat as public user
+        }
+      }
+
+      if (!isAdmin) {
+        return res.status(404).json({ success: false, message: 'Newsletter not found (Draft)' });
+      }
     }
 
     res.json({ success: true, data: newsletter });
@@ -129,7 +147,7 @@ router.post('/admin/newsletters', verifyToken, verifyAdmin, async (req, res) => 
 router.put('/admin/newsletters/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { title, slug, excerpt, contentMarkdown, template, status, coverImage } = req.body;
-    
+
     // Check if it exists
     const currentNewsletter = await Newsletter.findById(req.params.id);
     if (!currentNewsletter) {
@@ -174,7 +192,7 @@ router.put('/admin/newsletters/:id', verifyToken, verifyAdmin, async (req, res) 
 router.delete('/admin/newsletters/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const newsletter = await Newsletter.findByIdAndDelete(req.params.id);
-    
+
     if (!newsletter) {
       return res.status(404).json({ success: false, message: 'Newsletter not found' });
     }

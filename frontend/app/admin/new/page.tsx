@@ -39,7 +39,11 @@ export default function NewNewsletterPage() {
         throw new Error('Content is required');
       }
 
-      const token = localStorage.getItem('adminToken') || 'key-verified';
+      // Use the standard 'token' key that AuthContext/Login uses
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
 
       // Transform contentHtml to contentMarkdown for backend compatibility
       const payload = {
@@ -59,7 +63,8 @@ export default function NewNewsletterPage() {
         token: token === 'key-verified' ? 'key-verified' : 'jwt-token',
       });
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/newsletters`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/admin/newsletters`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,9 +76,9 @@ export default function NewNewsletterPage() {
       const responseData = await response.json();
 
       if (response.status === 401) {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminUser');
-        router.push('/admin-key');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/login');
         return;
       }
 

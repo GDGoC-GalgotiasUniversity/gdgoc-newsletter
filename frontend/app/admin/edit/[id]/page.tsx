@@ -25,13 +25,17 @@ export default function EditNewsletterPage() {
     }
 
     setIsAuthorized(true);
-    const token = localStorage.getItem('adminToken') || 'key-verified';
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
     fetchNewsletter(id, token);
   }, [id, router]);
 
   const fetchNewsletter = async (newsletterId: string, token: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/admin/newsletters/all`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -39,9 +43,9 @@ export default function EditNewsletterPage() {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminUser');
-        router.push('/admin');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/login');
         return;
       }
 
@@ -69,7 +73,7 @@ export default function EditNewsletterPage() {
     setError('');
 
     try {
-      const token = localStorage.getItem('adminToken') || 'key-verified';
+      const token = localStorage.getItem('token');
 
       // Transform contentHtml to contentMarkdown for backend compatibility
       const payload = {
@@ -82,7 +86,7 @@ export default function EditNewsletterPage() {
         coverImage: formData.coverImage,
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/newsletters/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/admin/newsletters/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -92,9 +96,9 @@ export default function EditNewsletterPage() {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminUser');
-        router.push('/admin-key');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/login');
         return;
       }
 

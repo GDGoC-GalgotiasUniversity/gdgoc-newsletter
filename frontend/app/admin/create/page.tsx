@@ -2,199 +2,142 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import NewsletterEditor from '@/components/NewsletterEditor';
 
-export default function CreateNewsletterPage() {
+export default function NewNewsletterPage() {
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
-  
-  // Form State
-  const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    excerpt: '',
-    contentMarkdown: '',
-    status: 'draft',
-    coverImage: ''
-  });
-  
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-  // 1. Check Auth on Load
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-    
-    if (!storedToken || !userStr) {
-      router.push('/login');
+    // Check if key is verified
+    const keyVerified = localStorage.getItem('adminKeyVerified');
+    if (!keyVerified) {
+      router.push('/admin-key');
       return;
     }
 
-    const user = JSON.parse(userStr);
-    
-    if (user.role !== 'admin') {
-      router.push('/'); 
-      return;
-    }
-
-    setToken(storedToken);
+    // Allow access with just key verification
+    setIsAuthorized(true);
   }, [router]);
 
-  // 2. Auto-generate Slug from Title
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const title = e.target.value;
-    const autoSlug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-') 
-      .replace(/^-+|-+$/g, '');   
-      
-    setFormData(prev => ({ ...prev, title, slug: autoSlug }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: any) => {
+    setIsLoading(true);
     setError('');
-    setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      
-      // --- FIX IS HERE: Removed '/api' from the path ---
-      // Backend route is defined as router.post('/admin/newsletters') in newsletters.js
-      // and mounted at root '/' in server.js
-      const res = await fetch(`${apiUrl}/admin/newsletters`, {
+      // Validate form data
+      if (!formData.title?.trim()) {
+        throw new Error('Title is required');
+      }
+      if (!formData.slug?.trim()) {
+        throw new Error('Slug is required');
+      }
+      if (!formData.contentHtml?.trim()) {
+        throw new Error('Content is required');
+      }
+
+      const token = localStorage.getItem('adminToken') || 'key-verified';
+
+      // Transform contentHtml to contentMarkdown for backend compatibility
+      const payload = {
+        title: formData.title,
+        slug: formData.slug,
+        excerpt: formData.excerpt,
+        contentMarkdown: formData.contentHtml, // Backend expects contentMarkdown
+        template: formData.template,
+        status: formData.status,
+        coverImage: formData.coverImage,
+      };
+
+      console.log('📝 Submitting newsletter:', {
+        title: payload.title,
+        slug: payload.slug,
+        status: payload.status,
+        token: token === 'key-verified' ? 'key-verified' : 'jwt-token',
+      });
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/newsletters`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
-      // Handle non-JSON errors (like 404 HTML pages)
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        // If we get here, the URL is likely still wrong or the server crashed
-        const text = await res.text();
-        console.error("Non-JSON Response:", text);
-        throw new Error(`Server returned a non-JSON response (${res.status}). Check console for details.`);
+      const responseData = await response.json();
+
+      if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        router.push('/admin-key');
+        return;
       }
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to create newsletter');
+      if (!response.ok) {
+        console.error('❌ API Error:', responseData);
+        throw new Error(responseData.message || `Failed to create newsletter (${response.status})`);
       }
 
-      // Success!
+      console.log('✅ Newsletter created successfully');
       router.push('/admin');
-
     } catch (err: any) {
-      console.error("Submission Error:", err);
-      setError(err.message);
+      console.error('❌ Error:', err);
+      setError(err.message || 'An unexpected error occurred');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  if (!token) return null; 
+  if (!isAuthorized) {
+    return (
+      <main className="min-h-[calc(100vh-64px)]" style={{ backgroundColor: '#f5e6d3' }}>
+        <div className="container text-center py-8">
+          <p style={{ color: '#6b4c9a' }}>Checking authorization...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-[var(--paper-bg)] py-12 px-4">
-      <div className="max-w-4xl mx-auto bg-white border-2 border-[var(--ink-black)] p-8 shadow-lg">
-        
-        <h1 className="font-gothic text-4xl mb-6 text-[var(--brand-purple)]">Draft New Issue</h1>
-        
+    <main className="newsletter-page min-h-screen py-16">
+      <div className="container max-w-3xl mx-auto px-6">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <p className="text-lg tracking-widest text-[var(--primary-purple)] mb-2 font-semibold">
+            CREATE NEWSLETTER
+          </p>
+          <h1 className="mb-3">Create Newsletter</h1>
+          <div className="diamond-divider">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>
+          <div className="newsletter-divider"></div>
+        </div>
+
+        {/* Back Link */}
+        <Link href="/admin" className="inline-flex items-center mb-6" style={{ color: '#6b4c9a' }}>
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Admin
+        </Link>
+
+        {/* Error Message */}
         {error && (
-          <div className="bg-red-50 text-red-700 border border-red-200 p-3 mb-6 text-sm font-sans-accent">
-            Error: {error}
+          <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: '#fde2e4', color: '#c5192d', border: '1px solid #f1919b' }}>
+            <p className="font-medium">Error:</p>
+            <p>{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 font-serif">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-xs font-bold font-sans-accent uppercase mb-2">Headline</label>
-              <input 
-                type="text" 
-                required
-                value={formData.title}
-                onChange={handleTitleChange}
-                className="w-full p-3 border border-gray-300 focus:border-[var(--brand-purple)] outline-none"
-                placeholder="e.g. The Cloud Jam Recap"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold font-sans-accent uppercase mb-2">URL Slug</label>
-              <input 
-                type="text" 
-                required
-                value={formData.slug}
-                onChange={(e) => setFormData({...formData, slug: e.target.value})}
-                className="w-full p-3 border border-gray-300 bg-gray-50 text-gray-600 font-mono text-sm"
-                placeholder="auto-generated-slug"
-              />
-            </div>
-          </div>
+        {/* Form */}
+        <div className="rounded-lg p-8 newsletter-page" style={{ backgroundColor: '#fff', border: '2px solid #000' }}>
+          <NewsletterEditor onSubmit={handleSubmit} isLoading={isLoading} />
+        </div>
 
-          <div>
-            <label className="block text-xs font-bold font-sans-accent uppercase mb-2">Short Excerpt</label>
-            <textarea 
-              rows={3}
-              value={formData.excerpt}
-              onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
-              className="w-full p-3 border border-gray-300 focus:border-[var(--brand-purple)] outline-none"
-              placeholder="A brief summary..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold font-sans-accent uppercase mb-2">Article Content (Markdown)</label>
-            <textarea 
-              rows={15}
-              required
-              value={formData.contentMarkdown}
-              onChange={(e) => setFormData({...formData, contentMarkdown: e.target.value})}
-              className="w-full p-3 border border-gray-300 focus:border-[var(--brand-purple)] outline-none font-mono text-sm"
-              placeholder="# Section 1&#10;Write your content here..."
-            />
-          </div>
-
-          <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-             <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="status" 
-                    value="draft"
-                    checked={formData.status === 'draft'}
-                    onChange={() => setFormData({...formData, status: 'draft'})}
-                  />
-                  <span className="text-sm">Save as Draft</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="status" 
-                    value="published"
-                    checked={formData.status === 'published'}
-                    onChange={() => setFormData({...formData, status: 'published'})}
-                  />
-                  <span className="text-sm font-bold text-green-700">Publish Immediately</span>
-                </label>
-             </div>
-
-             <button 
-               type="submit" 
-               disabled={loading}
-               className="bg-[var(--brand-purple)] text-white px-8 py-3 font-sans-accent font-bold hover:bg-[var(--ink-black)] transition-colors disabled:opacity-50"
-             >
-               {loading ? 'Saving...' : 'Save Issue'}
-             </button>
-          </div>
-
-        </form>
+        {/* Bottom Divider */}
+        <div className="newsletter-divider mt-12"></div>
       </div>
     </main>
   );

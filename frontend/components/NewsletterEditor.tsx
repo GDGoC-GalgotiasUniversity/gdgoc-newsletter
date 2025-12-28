@@ -63,6 +63,43 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
 <p style="color: #555; line-height: 1.8;"><strong>Next Steps:</strong> Here's what you need to do next...</p>`
   };
 
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${apiUrl}/api/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || 'Upload failed');
+
+      // Full URL for the image
+      const fullImageUrl = `${apiUrl}${data.imageUrl}`;
+
+      setFormData(prev => ({
+        ...prev,
+        coverImage: fullImageUrl
+      }));
+
+    } catch (error) {
+      console.error('Upload Error:', error);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedTemplate = e.target.value as keyof typeof templates;
     setFormData(prev => ({
@@ -74,7 +111,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
+
     // Auto-generate slug from title if title is being changed
     if (name === 'title' && !initialData) {
       const generatedSlug = value
@@ -84,7 +121,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
         .replace(/\s+/g, '-') // Replace spaces with hyphens
         .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
         .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-      
+
       setFormData(prev => ({
         ...prev,
         [name]: value,
@@ -135,24 +172,24 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate slug format
     if (!formData.slug.match(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)) {
       alert('Invalid slug format. Use lowercase letters, numbers, and hyphens only.');
       return;
     }
-    
+
     // Validate required fields
     if (!formData.title.trim()) {
       alert('Title is required');
       return;
     }
-    
+
     if (!formData.contentHtml.trim()) {
       alert('Content is required');
       return;
     }
-    
+
     onSubmit(formData);
   };
 
@@ -260,17 +297,32 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
           Cover Image URL
         </label>
         <div className="flex gap-4">
-          <div className="flex-1">
+          <div className="flex-1 flex flex-col gap-2">
+            <div className="flex gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="block w-full text-sm text-slate-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-violet-50 file:text-violet-700
+                        hover:file:bg-violet-100"
+                disabled={uploading}
+              />
+              {uploading && <span className="text-sm text-gray-500 self-center">Uploading...</span>}
+            </div>
             <input
               type="url"
               name="coverImage"
               value={formData.coverImage}
               onChange={handleInputChange}
-              placeholder="https://example.com/image.jpg"
+              placeholder="or paste image URL"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition"
               style={{ borderColor: '#d4a574', '--tw-ring-color': '#6b4c9a' } as any}
             />
-            <p className="text-xs mt-1" style={{ color: '#8b6ba8' }}>Paste the URL of the cover image</p>
+            <p className="text-xs mt-1" style={{ color: '#8b6ba8' }}>Upload an image or paste a URL</p>
           </div>
           {formData.coverImage && (
             <div className="w-24 h-24 rounded-lg overflow-hidden border" style={{ borderColor: '#d4a574' }}>
@@ -294,7 +346,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
           <label className="block text-sm font-semibold mb-2" style={{ color: '#6b4c9a' }}>
             Content (HTML)
           </label>
-          
+
           {/* Formatting Toolbar */}
           <div className="mb-3 p-3 rounded-lg flex flex-wrap gap-2" style={{ backgroundColor: '#f5e6d3' }}>
             <button
@@ -400,6 +452,6 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
           {isLoading ? 'Saving...' : initialData ? 'Update Newsletter' : 'Create Newsletter'}
         </button>
       </div>
-    </form>
+    </form >
   );
 }

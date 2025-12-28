@@ -17,13 +17,28 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// Request Logging Middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 // Routes configuration
 
 // Mount Auth at /api/auth -> results in /api/auth/signin
 app.use('/api/auth', authRoutes);
 
 // Mount Newsletters at root -> results in /api/newsletters (as defined in the router file)
+// Mount Newsletters at root -> results in /api/newsletters
 app.use('/', newsletterRoutes);
+
+// Upload Route
+const uploadRoutes = require('./routes/upload');
+app.use('/api/upload', uploadRoutes);
+
+// Serve Static Uploads
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Base route
 app.get('/', (req, res) => {
