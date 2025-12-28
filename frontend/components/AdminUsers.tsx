@@ -60,16 +60,16 @@ export default function AdminUsers({ token }: AdminUsersProps) {
   }
 
   return (
-    <div className="card overflow-hidden">
-      <div className="p-6 border-b border-[var(--gray-200)]">
-        <h2 className="text-xl font-medium">Registered Users</h2>
-        <p className="text-sm text-[var(--gray-500)] mt-1">
+    <div className="card overflow-hidden" style={{ backgroundColor: '#fff', border: '2px solid #000' }}>
+      <div className="p-6 border-b" style={{ borderColor: '#d4a574', borderWidth: '2px' }}>
+        <h2 className="text-xl font-medium" style={{ color: '#6b4c9a' }}>Registered Users</h2>
+        <p className="text-sm mt-1" style={{ color: '#8b6ba8' }}>
           Total: {users.length} user{users.length !== 1 ? 's' : ''}
         </p>
       </div>
 
       {error && (
-        <div className="p-6 bg-red-50 border-b border-red-200 text-red-700">
+        <div className="p-6" style={{ backgroundColor: '#fde2e4', borderBottom: '1px solid #f1919b', color: '#c5192d' }}>
           {error}
         </div>
       )}
@@ -77,37 +77,44 @@ export default function AdminUsers({ token }: AdminUsersProps) {
       {users.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[var(--gray-50)] border-b border-[var(--gray-200)]">
+            <thead style={{ backgroundColor: '#f5e6d3', borderBottom: '2px solid #d4a574' }}>
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-medium text-[var(--gray-700)]">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-[var(--gray-700)]">Email</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-[var(--gray-700)]">Role</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-[var(--gray-700)]">Joined</th>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{ color: '#6b4c9a' }}>Name</th>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{ color: '#6b4c9a' }}>Email</th>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{ color: '#6b4c9a' }}>Role</th>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{ color: '#6b4c9a' }}>Joined</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--gray-200)]">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-[var(--gray-50)] transition">
+            <tbody>
+              {users.map((user, index) => (
+                <tr 
+                  key={user.id} 
+                  style={{ 
+                    backgroundColor: index % 2 === 0 ? '#fafaf8' : '#fff',
+                    borderBottom: '1px solid #e5d5c8'
+                  }}
+                  className="hover:opacity-80 transition"
+                >
                   <td className="px-6 py-4">
-                    <span className="font-medium text-[var(--gray-900)]">{user.name}</span>
+                    <span className="font-medium" style={{ color: '#6b4c9a' }}>{user.name}</span>
                   </td>
-                  <td className="px-6 py-4 text-[var(--gray-700)]">{user.email}</td>
+                  <td className="px-6 py-4" style={{ color: '#8b6ba8' }}>{user.email}</td>
                   <td className="px-6 py-4">
                     <span
-                      className="inline-flex px-3 py-1 text-xs font-medium rounded-full"
+                      className="inline-flex px-3 py-1 text-xs font-semibold rounded-full"
                       style={{
                         backgroundColor: user.role === 'admin'
-                          ? 'rgba(59, 130, 246, 0.1)'
-                          : 'rgba(107, 114, 128, 0.1)',
+                          ? '#d4a574'
+                          : '#e8d4c4',
                         color: user.role === 'admin'
-                          ? '#3b82f6'
-                          : '#6b7280',
+                          ? '#fff'
+                          : '#6b4c9a'
                       }}
                     >
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-[var(--gray-500)] text-sm">
+                  <td className="px-6 py-4 text-sm" style={{ color: '#8b6ba8' }}>
                     {new Date(user.joinedAt).toISOString().split('T')[0]}
                   </td>
                 </tr>
@@ -117,7 +124,7 @@ export default function AdminUsers({ token }: AdminUsersProps) {
         </div>
       ) : (
         <div className="p-12 text-center">
-          <p className="text-[var(--gray-500)]">
+          <p style={{ color: '#8b6ba8' }}>
             {error ? error : 'No users registered yet'}
           </p>
         </div>

@@ -52,7 +52,11 @@ export default function EditNewsletterPage() {
 
       if (!newsletter) throw new Error('Newsletter not found');
 
-      setInitialData(newsletter);
+      // Transform contentMarkdown to contentHtml for the editor
+      setInitialData({
+        ...newsletter,
+        contentHtml: newsletter.contentMarkdown,
+      });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -67,13 +71,24 @@ export default function EditNewsletterPage() {
     try {
       const token = localStorage.getItem('adminToken') || 'key-verified';
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters/${id}`, {
+      // Transform contentHtml to contentMarkdown for backend compatibility
+      const payload = {
+        title: formData.title,
+        slug: formData.slug,
+        excerpt: formData.excerpt,
+        contentMarkdown: formData.contentHtml, // Backend expects contentMarkdown
+        template: formData.template,
+        status: formData.status,
+        coverImage: formData.coverImage,
+      };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/newsletters/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.status === 401) {
@@ -117,18 +132,25 @@ export default function EditNewsletterPage() {
   }
 
   return (
-    <main className="min-h-[calc(100vh-64px)]" style={{ backgroundColor: '#f5e6d3' }}>
-      <div className="container max-w-3xl py-8">
+    <main className="newsletter-page min-h-screen py-16">
+      <div className="container max-w-3xl mx-auto px-6">
         {/* Header */}
-        <div className="mb-8">
-          <Link href="/admin" className="inline-flex items-center mb-6" style={{ color: '#6b4c9a' }}>
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Admin
-          </Link>
-          <h1 className="text-4xl font-bold" style={{ color: '#6b4c9a' }}>Edit Newsletter</h1>
+        <div className="mb-8 text-center">
+          <p className="text-lg tracking-widest text-[var(--primary-purple)] mb-2 font-semibold">
+            EDIT NEWSLETTER
+          </p>
+          <h1 className="mb-3">Edit Newsletter</h1>
+          <div className="diamond-divider">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>
+          <div className="newsletter-divider"></div>
         </div>
+
+        {/* Back Link */}
+        <Link href="/admin" className="inline-flex items-center mb-6" style={{ color: '#6b4c9a' }}>
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Admin
+        </Link>
 
         {/* Error Message */}
         {error && (
@@ -140,7 +162,7 @@ export default function EditNewsletterPage() {
 
         {/* Form */}
         {initialData && (
-          <div className="rounded-lg p-8" style={{ backgroundColor: '#fff' }}>
+          <div className="rounded-lg p-8 newsletter-page" style={{ backgroundColor: '#fff', border: '2px solid #000' }}>
             <NewsletterEditor
               initialData={initialData}
               onSubmit={handleSubmit}
@@ -148,6 +170,9 @@ export default function EditNewsletterPage() {
             />
           </div>
         )}
+
+        {/* Bottom Divider */}
+        <div className="newsletter-divider mt-12"></div>
       </div>
     </main>
   );

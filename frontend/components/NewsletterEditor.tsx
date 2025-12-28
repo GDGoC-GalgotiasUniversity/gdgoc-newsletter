@@ -13,7 +13,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
     title: initialData?.title || '',
     slug: initialData?.slug || '',
     excerpt: initialData?.excerpt || '',
-    contentHtml: initialData?.contentMarkdown || '',
+    contentHtml: initialData?.contentHtml || initialData?.contentMarkdown || '',
     template: initialData?.template || 'default',
     status: initialData?.status || 'draft',
     coverImage: initialData?.coverImage || '',

@@ -1,208 +1,144 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import NewsletterEditor from '@/components/NewsletterEditor';
 
 export default function NewNewsletterPage() {
-    const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [formData, setFormData] = useState({
-        title: '',
-        slug: '',
-        excerpt: '',
-        contentMarkdown: '',
-        template: 'default',
-        status: 'draft'
-    });
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+  useEffect(() => {
+    // Check if key is verified
+    const keyVerified = localStorage.getItem('adminKeyVerified');
+    if (!keyVerified) {
+      router.push('/admin-key');
+      return;
+    }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
+    // Allow access with just key verification
+    setIsAuthorized(true);
+  }, [router]);
 
-        try {
-            // Get token from localStorage (assuming it's stored there after login)
-            const token = localStorage.getItem('token');
+  const handleSubmit = async (formData: any) => {
+    setIsLoading(true);
+    setError('');
 
-            if (!token) {
-                throw new Error('Not authenticated. Please login explicitly first.');
-            }
+    try {
+      // Validate form data
+      if (!formData.title?.trim()) {
+        throw new Error('Title is required');
+      }
+      if (!formData.slug?.trim()) {
+        throw new Error('Slug is required');
+      }
+      if (!formData.contentHtml?.trim()) {
+        throw new Error('Content is required');
+      }
 
-            const res = await fetch('http://localhost:5000/admin/newsletters', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            });
+      const token = localStorage.getItem('adminToken') || 'key-verified';
 
-            const data = await res.json();
+      // Transform contentHtml to contentMarkdown for backend compatibility
+      const payload = {
+        title: formData.title,
+        slug: formData.slug,
+        excerpt: formData.excerpt,
+        contentMarkdown: formData.contentHtml, // Backend expects contentMarkdown
+        template: formData.template,
+        status: formData.status,
+        coverImage: formData.coverImage,
+      };
 
-            if (!res.ok) {
-                throw new Error(data.message || 'Failed to create newsletter');
-            }
+      console.log('📝 Submitting newsletter:', {
+        title: payload.title,
+        slug: payload.slug,
+        status: payload.status,
+        token: token === 'key-verified' ? 'key-verified' : 'jwt-token',
+      });
 
-            // Redirect on success
-            router.push('/admin');
-            router.refresh();
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/newsletters`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
+      const responseData = await response.json();
+
+      if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        router.push('/admin-key');
+        return;
+      }
+
+      if (!response.ok) {
+        console.error('❌ API Error:', responseData);
+        throw new Error(responseData.message || `Failed to create newsletter (${response.status})`);
+      }
+
+      console.log('✅ Newsletter created successfully');
+      router.push('/admin');
+    } catch (err: any) {
+      console.error('❌ Error:', err);
+      setError(err.message || 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!isAuthorized) {
     return (
-        <main className="py-8 bg-[var(--gray-50)] min-h-[calc(100vh-64px)]">
-            <div className="container max-w-2xl">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <Link href="/admin" className="text-[var(--gray-500)] hover:text-[var(--gray-700)] mb-1 inline-block text-sm">
-                            ← Back to Dashboard
-                        </Link>
-                        <h1 className="text-2xl font-medium">Create Newsletter</h1>
-                    </div>
-                </div>
-
-                <div className="card p-8">
-                    {error && (
-                        <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6 text-sm border border-red-100">
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Title */}
-                        <div>
-                            <label className="block text-sm font-medium text-[var(--gray-700)] mb-1">
-                                Title <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="title"
-                                required
-                                value={formData.title}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border border-[var(--gray-300)] rounded-lg focus:ring-2 focus:ring-[var(--google-blue)] focus:border-transparent outline-none transition"
-                                placeholder="e.g. January 2024 Roundup"
-                            />
-                        </div>
-
-                        {/* Slug */}
-                        <div>
-                            <label className="block text-sm font-medium text-[var(--gray-700)] mb-1">
-                                Slug <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="slug"
-                                required
-                                value={formData.slug}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border border-[var(--gray-300)] rounded-lg focus:ring-2 focus:ring-[var(--google-blue)] focus:border-transparent outline-none transition font-mono text-sm"
-                                placeholder="e.g. jan-2024-roundup"
-                            />
-                            <p className="text-xs text-[var(--gray-500)] mt-1">Unique identifier for the URL</p>
-                        </div>
-
-                        {/* Excerpt */}
-                        <div>
-                            <label className="block text-sm font-medium text-[var(--gray-700)] mb-1">
-                                Excerpt
-                            </label>
-                            <textarea
-                                name="excerpt"
-                                rows={3}
-                                value={formData.excerpt}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border border-[var(--gray-300)] rounded-lg focus:ring-2 focus:ring-[var(--google-blue)] focus:border-transparent outline-none transition"
-                                placeholder="Brief summary for the card view..."
-                            />
-                        </div>
-
-                        {/* Content */}
-                        <div>
-                            <label className="block text-sm font-medium text-[var(--gray-700)] mb-1">
-                                Content (Markdown) <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                name="contentMarkdown"
-                                required
-                                rows={10}
-                                value={formData.contentMarkdown}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border border-[var(--gray-300)] rounded-lg focus:ring-2 focus:ring-[var(--google-blue)] focus:border-transparent outline-none transition font-mono text-sm"
-                                placeholder="# Heading&#10;&#10;Write your content here in Markdown..."
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Template */}
-                            <div>
-                                <label className="block text-sm font-medium text-[var(--gray-700)] mb-1">
-                                    Template
-                                </label>
-                                <select
-                                    name="template"
-                                    value={formData.template}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-[var(--gray-300)] rounded-lg focus:ring-2 focus:ring-[var(--google-blue)] focus:border-transparent outline-none transition bg-white"
-                                >
-                                    <option value="default">Default</option>
-                                    <option value="event-recap">Event Recap</option>
-                                    <option value="workshop">Workshop</option>
-                                    <option value="announcement">Announcement</option>
-                                </select>
-                            </div>
-
-                            {/* Status */}
-                            <div>
-                                <label className="block text-sm font-medium text-[var(--gray-700)] mb-1">
-                                    Status
-                                </label>
-                                <select
-                                    name="status"
-                                    value={formData.status}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-[var(--gray-300)] rounded-lg focus:ring-2 focus:ring-[var(--google-blue)] focus:border-transparent outline-none transition bg-white"
-                                >
-                                    <option value="draft">Draft</option>
-                                    <option value="published">Published</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--gray-200)]">
-                            <Link
-                                href="/admin"
-                                className="px-4 py-2 text-[var(--gray-600)] hover:text-[var(--gray-900)] font-medium transition"
-                            >
-                                Cancel
-                            </Link>
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isLoading ? 'Creating...' : 'Create Newsletter'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </main>
+      <main className="min-h-[calc(100vh-64px)]" style={{ backgroundColor: '#f5e6d3' }}>
+        <div className="container text-center py-8">
+          <p style={{ color: '#6b4c9a' }}>Checking authorization...</p>
+        </div>
+      </main>
     );
+  }
+
+  return (
+    <main className="newsletter-page min-h-screen py-16">
+      <div className="container max-w-3xl mx-auto px-6">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <p className="text-lg tracking-widest text-[var(--primary-purple)] mb-2 font-semibold">
+            CREATE NEWSLETTER
+          </p>
+          <h1 className="mb-3">Create Newsletter</h1>
+          <div className="diamond-divider">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>
+          <div className="newsletter-divider"></div>
+        </div>
+
+        {/* Back Link */}
+        <Link href="/admin" className="inline-flex items-center mb-6" style={{ color: '#6b4c9a' }}>
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Admin
+        </Link>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: '#fde2e4', color: '#c5192d', border: '1px solid #f1919b' }}>
+            <p className="font-medium">Error:</p>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* Form */}
+        <div className="rounded-lg p-8 newsletter-page" style={{ backgroundColor: '#fff', border: '2px solid #000' }}>
+          <NewsletterEditor onSubmit={handleSubmit} isLoading={isLoading} />
+        </div>
+
+        {/* Bottom Divider */}
+        <div className="newsletter-divider mt-12"></div>
+      </div>
+    </main>
+  );
 }
