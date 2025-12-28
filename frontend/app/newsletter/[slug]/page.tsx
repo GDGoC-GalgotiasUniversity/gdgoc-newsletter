@@ -2,6 +2,9 @@ import Link from 'next/link';
 import NewsletterDetail from '@/components/NewsletterDetail';
 import DraftLoader from '@/components/DraftLoader';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function getNewsletter(slug: string) {
   try {
     // FIX: Add localhost fallback like you have in the main list page
