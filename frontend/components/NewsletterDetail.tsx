@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
+
 
 interface Newsletter {
     title: string;
@@ -14,13 +14,13 @@ interface Newsletter {
 
 export default function NewsletterDetail({ newsletter }: { newsletter: Newsletter }) {
     // Format Date: "Saturday, December 27, 2025"
-    const dateStr = newsletter.publishedAt 
+    const dateStr = newsletter.publishedAt
         ? new Date(newsletter.publishedAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
         : 'Draft Preview';
 
     return (
         <article className="min-h-screen bg-[var(--paper-bg)] pb-24 pt-8">
-            
+
             {/* --- ARTICLE HEADER --- */}
             <div className="container mx-auto px-4 max-w-3xl text-center mb-12">
                 {/* Breadcrumb / Top Tag */}
@@ -46,20 +46,27 @@ export default function NewsletterDetail({ newsletter }: { newsletter: Newslette
                         {dateStr}
                     </span>
                 </div>
+
+                {/* Excerpt / Short Description */}
+                {newsletter.excerpt && (
+                    <div className="mt-8 text-2xl md:text-3xl font-serif italic text-[var(--ink-black)] opacity-80 leading-relaxed border-l-4 border-[var(--brand-purple)] pl-6 py-2">
+                        {newsletter.excerpt}
+                    </div>
+                )}
             </div>
 
             {/* --- CONTENT BODY --- */}
             <div className="container mx-auto px-4 max-w-3xl">
-                
+
                 {/* Optional Cover Image */}
                 {newsletter.coverImage && (
                     <div className="w-full aspect-video relative mb-12 border-4 border-double border-[var(--ink-black)] p-1 bg-white">
-                        <img 
-                            src={newsletter.coverImage} 
-                            alt={newsletter.title} 
+                        <img
+                            src={newsletter.coverImage}
+                            alt={newsletter.title}
                             className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
                         />
-                         <div className="text-center mt-2 font-sans-accent text-xs text-[var(--ink-gray)] italic">
+                        <div className="text-center mt-2 font-sans-accent text-xs text-[var(--ink-gray)] italic">
                             Figure 1.1: Event visual documentation
                         </div>
                     </div>
@@ -67,35 +74,23 @@ export default function NewsletterDetail({ newsletter }: { newsletter: Newslette
 
                 {/* Markdown Content */}
                 <div className="prose prose-lg max-w-none font-serif text-[var(--ink-black)] leading-loose text-justify">
-                    
-                    {/* The content itself with styles override */}
-                    <ReactMarkdown
-                        components={{
-                            // Override Paragraphs for that newspaper look
-                            p: ({node, ...props}) => <p className="mb-6" {...props} />,
-                            
-                            // Override Headings
-                            h1: ({node, ...props}) => <h2 className="text-3xl font-bold text-[var(--brand-purple)] mt-12 mb-6 font-serif border-b border-[var(--brand-purple)] pb-2" {...props} />,
-                            h2: ({node, ...props}) => <h3 className="text-2xl font-bold text-[var(--ink-black)] mt-10 mb-4 font-serif" {...props} />,
-                            h3: ({node, ...props}) => <h4 className="text-xl font-bold text-[var(--ink-black)] mt-8 mb-2 font-serif uppercase tracking-wide" {...props} />,
-                            
-                            // Override Blockquotes (The "Pull Quote" style)
-                            blockquote: ({node, ...props}) => (
-                                <blockquote className="border-l-4 border-[var(--brand-purple)] pl-6 py-2 my-8 italic text-2xl text-[var(--brand-purple)] bg-[var(--paper-accent)] font-serif">
-                                    {props.children}
-                                </blockquote>
-                            ),
 
-                            // Override Lists
-                            ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-6 space-y-2 marker:text-[var(--brand-purple)]" {...props} />,
-                            ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-6 space-y-2 marker:font-bold" {...props} />,
-                            
-                            // Override Links
-                            a: ({node, ...props}) => <a className="text-[var(--brand-purple)] underline decoration-dotted hover:decoration-solid underline-offset-4" {...props} />,
-                        }}
-                    >
-                        {newsletter.contentMarkdown}
-                    </ReactMarkdown>
+                    {/* The content itself with styles override via Prose classes to match previous aesthetic */}
+                    <div
+                        className="
+                            prose-p:mb-6 prose-p:font-serif
+                            prose-headings:font-serif prose-headings:font-bold prose-headings:text-[var(--ink-black)]
+                            prose-h1:text-3xl prose-h1:text-[var(--brand-purple)] prose-h1:mt-12 prose-h1:mb-6 prose-h1:border-b prose-h1:border-[var(--brand-purple)] prose-h1:pb-2
+                            prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
+                            prose-h3:text-xl prose-h3:uppercase prose-h3:tracking-wide prose-h3:mt-8 prose-h3:mb-2
+                            prose-blockquote:border-l-4 prose-blockquote:border-[var(--brand-purple)] prose-blockquote:pl-6 prose-blockquote:py-2 prose-blockquote:my-8 prose-blockquote:italic prose-blockquote:text-2xl prose-blockquote:text-[var(--brand-purple)] prose-blockquote:bg-[var(--paper-accent)] prose-blockquote:not-italic
+                            prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-6 prose-ul:marker:text-[var(--brand-purple)]
+                            prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-6 prose-ol:marker:font-bold
+                            prose-a:text-[var(--brand-purple)] prose-a:underline prose-a:decoration-dotted hover:prose-a:decoration-solid prose-a:underline-offset-4
+                            max-w-none
+                        "
+                        dangerouslySetInnerHTML={{ __html: newsletter.contentMarkdown }}
+                    />
 
                     {/* End Sign-off */}
                     <div className="mt-16 flex justify-center">
@@ -107,7 +102,7 @@ export default function NewsletterDetail({ newsletter }: { newsletter: Newslette
 
                 </div>
             </div>
-            
-        </article>
+
+        </article >
     );
 }
