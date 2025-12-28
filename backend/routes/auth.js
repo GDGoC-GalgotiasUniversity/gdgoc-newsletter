@@ -100,4 +100,66 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// GET /api/auth/users - Fetch all users (admin only)
+router.get('/users', async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'No token provided' });
+    }
+
+    // Verify token and check admin role
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+
+    const users = await User.find().select('-password -__v').sort({ createdAt: -1 });
+    
+    res.json({
+      success: true,
+      count: users.length,
+      data: users.map(user => ({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        joinedAt: user.createdAt
+      }))
+    });
+
+  } catch (error) {
+    console.error('Fetch users error:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ success: false, message: 'Invalid token' });
+    }
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// GET /api/auth/users/public - Fetch users without auth (for admin-key verification)
+router.get('/users/public', async (req, res) => {
+  try {
+    const users = await User.find().select('-password -__v').sort({ createdAt: -1 });
+    
+    res.json({
+      success: true,
+      count: users.length,
+      data: users.map(user => ({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        joinedAt: user.createdAt
+      }))
+    });
+
+  } catch (error) {
+    console.error('Fetch public users error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 module.exports = router;
