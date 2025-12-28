@@ -1,162 +1,113 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import AnimatedLogo from './AnimatedLogo';
+import ReactMarkdown from 'react-markdown';
 
-interface NewsletterDetailProps {
-  newsletter: any;
+interface Newsletter {
+    title: string;
+    contentMarkdown: string;
+    publishedAt?: string;
+    slug: string;
+    coverImage?: string;
+    excerpt?: string;
 }
 
-export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const contentRef = useRef<HTMLDivElement>(null);
+export default function NewsletterDetail({ newsletter }: { newsletter: Newsletter }) {
+    // Format Date: "Saturday, December 27, 2025"
+    const dateStr = newsletter.publishedAt 
+        ? new Date(newsletter.publishedAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+        : 'Draft Preview';
 
-  const matchCount = useMemo(() => {
-    if (!searchQuery.trim() || !contentRef.current) return 0;
-    
-    const text = contentRef.current.innerText.toLowerCase();
-    const query = searchQuery.toLowerCase();
-    const regex = new RegExp(query, 'g');
-    const matches = text.match(regex);
-    return matches ? matches.length : 0;
-  }, [searchQuery]);
+    return (
+        <article className="min-h-screen bg-[var(--paper-bg)] pb-24 pt-8">
+            
+            {/* --- ARTICLE HEADER --- */}
+            <div className="container mx-auto px-4 max-w-3xl text-center mb-12">
+                {/* Breadcrumb / Top Tag */}
+                <div className="flex justify-center items-center gap-3 mb-6 font-sans-accent text-xs text-[var(--brand-purple)] tracking-widest">
+                    <Link href="/" className="hover:underline">FRONT PAGE</Link>
+                    <span>/</span>
+                    <Link href="/newsletter" className="hover:underline">ARCHIVES</Link>
+                    <span>/</span>
+                    <span className="font-bold">ARTICLE</span>
+                </div>
 
-  useEffect(() => {
-    if (!contentRef.current || !searchQuery.trim()) {
-      // Reset to original content
-      contentRef.current!.innerHTML = newsletter.contentMarkdown;
-      return;
-    }
+                {/* Headline */}
+                <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight mb-6 text-[var(--ink-black)]">
+                    {newsletter.title}
+                </h1>
 
-    // Create a temporary container to parse HTML
-    const temp = document.createElement('div');
-    temp.innerHTML = newsletter.contentMarkdown;
-
-    // Function to highlight text in nodes
-    const highlightTextNodes = (node: Node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent || '';
-        const query = searchQuery;
-        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        
-        if (regex.test(text)) {
-          const span = document.createElement('span');
-          span.innerHTML = text.replace(
-            regex,
-            '<mark style="background-color: #fbbf24; padding: 2px 4px; border-radius: 2px;">$1</mark>'
-          );
-          node.parentNode?.replaceChild(span, node);
-        }
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        // Don't highlight inside script or style tags
-        if ((node as Element).tagName !== 'SCRIPT' && (node as Element).tagName !== 'STYLE') {
-          Array.from(node.childNodes).forEach(highlightTextNodes);
-        }
-      }
-    };
-
-    highlightTextNodes(temp);
-    contentRef.current!.innerHTML = temp.innerHTML;
-  }, [searchQuery, newsletter.contentMarkdown]);
-
-  return (
-    <main className="py-12">
-      <div className="container">
-        {/* Back Link */}
-        <Link
-          href="/newsletter"
-          className="inline-flex items-center text-[var(--google-blue)] hover:underline mb-8"
-        >
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back
-        </Link>
-
-        <article className="max-w-3xl">
-          {/* Header */}
-          <header className="mb-10 pb-8 border-b border-[var(--gray-200)]">
-            {/* Video Logo */}
-            <div className="mb-6">
-              <AnimatedLogo className="w-12 h-12" />
+                {/* Metadata Row */}
+                <div className="border-t border-b border-[var(--border-color)] py-3 flex flex-col md:flex-row justify-between items-center text-sm font-sans-accent text-[var(--ink-gray)] gap-2">
+                    <span>
+                        <span className="font-bold text-[var(--ink-black)]">By GDGoC Team</span> &bull; Galgotias University
+                    </span>
+                    <span className="uppercase tracking-wider">
+                        {dateStr}
+                    </span>
+                </div>
             </div>
 
-            <h1 className="text-4xl mb-4">{newsletter.title}</h1>
+            {/* --- CONTENT BODY --- */}
+            <div className="container mx-auto px-4 max-w-3xl">
+                
+                {/* Optional Cover Image */}
+                {newsletter.coverImage && (
+                    <div className="w-full aspect-video relative mb-12 border-4 border-double border-[var(--ink-black)] p-1 bg-white">
+                        <img 
+                            src={newsletter.coverImage} 
+                            alt={newsletter.title} 
+                            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                        />
+                         <div className="text-center mt-2 font-sans-accent text-xs text-[var(--ink-gray)] italic">
+                            Figure 1.1: Event visual documentation
+                        </div>
+                    </div>
+                )}
 
-            <div className="flex items-center gap-4 text-[var(--gray-500)]">
-              <span>{new Date(newsletter.publishedAt || newsletter.createdAt).toISOString().split('T')[0]}</span>
-              <span>•</span>
-              <span>By GDGoC Team</span>
+                {/* Markdown Content */}
+                <div className="prose prose-lg max-w-none font-serif text-[var(--ink-black)] leading-loose text-justify">
+                    
+                    {/* The content itself with styles override */}
+                    <ReactMarkdown
+                        components={{
+                            // Override Paragraphs for that newspaper look
+                            p: ({node, ...props}) => <p className="mb-6" {...props} />,
+                            
+                            // Override Headings
+                            h1: ({node, ...props}) => <h2 className="text-3xl font-bold text-[var(--brand-purple)] mt-12 mb-6 font-serif border-b border-[var(--brand-purple)] pb-2" {...props} />,
+                            h2: ({node, ...props}) => <h3 className="text-2xl font-bold text-[var(--ink-black)] mt-10 mb-4 font-serif" {...props} />,
+                            h3: ({node, ...props}) => <h4 className="text-xl font-bold text-[var(--ink-black)] mt-8 mb-2 font-serif uppercase tracking-wide" {...props} />,
+                            
+                            // Override Blockquotes (The "Pull Quote" style)
+                            blockquote: ({node, ...props}) => (
+                                <blockquote className="border-l-4 border-[var(--brand-purple)] pl-6 py-2 my-8 italic text-2xl text-[var(--brand-purple)] bg-[var(--paper-accent)] font-serif">
+                                    {props.children}
+                                </blockquote>
+                            ),
+
+                            // Override Lists
+                            ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-6 space-y-2 marker:text-[var(--brand-purple)]" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-6 space-y-2 marker:font-bold" {...props} />,
+                            
+                            // Override Links
+                            a: ({node, ...props}) => <a className="text-[var(--brand-purple)] underline decoration-dotted hover:decoration-solid underline-offset-4" {...props} />,
+                        }}
+                    >
+                        {newsletter.contentMarkdown}
+                    </ReactMarkdown>
+
+                    {/* End Sign-off */}
+                    <div className="mt-16 flex justify-center">
+                        <div className="text-center">
+                            <div className="font-gothic text-4xl text-[var(--ink-black)] mb-2">***</div>
+                            <p className="font-sans-accent text-xs text-[var(--ink-gray)] uppercase">End of Transmission</p>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-          </header>
-
-          {/* Search Bar */}
-          <div className="mb-8">
-            <div className="relative">
-              <svg
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[var(--gray-400)]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search keywords or headings in this newsletter..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-[var(--gray-300)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--google-blue)] focus:border-transparent transition"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[var(--gray-400)] hover:text-[var(--gray-600)] transition"
-                  aria-label="Clear search"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
-                  </svg>
-                </button>
-              )}
-            </div>
-            {searchQuery && (
-              <p className="text-sm text-[var(--gray-500)] mt-2">
-                Found {matchCount} match{matchCount !== 1 ? 'es' : ''} for "{searchQuery}"
-              </p>
-            )}
-          </div>
-
-          {/* Content */}
-          <div
-            ref={contentRef}
-            className="prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: newsletter.contentMarkdown }}
-          />
-
-          {/* Share Section */}
-          <div className="mt-12 pt-8 border-t border-[var(--gray-200)]">
-            <p className="text-[var(--gray-500)] text-sm mb-4">Share this newsletter</p>
-            <div className="flex gap-3">
-              <button className="btn-secondary text-sm py-2 px-4">
-                Twitter
-              </button>
-              <button className="btn-secondary text-sm py-2 px-4">
-                LinkedIn
-              </button>
-              <button className="btn-secondary text-sm py-2 px-4">
-                Copy Link
-              </button>
-            </div>
-          </div>
+            
         </article>
-      </div>
-    </main>
-  );
+    );
 }
