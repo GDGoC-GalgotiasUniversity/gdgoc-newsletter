@@ -36,20 +36,20 @@ export default function AdminStats({
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
       {stats.map((stat) => (
         <div 
           key={stat.label} 
-          className="p-6 rounded-lg"
-          style={{ backgroundColor: stat.bgColor }}
+          className="p-4 rounded-lg"
+          style={{ backgroundColor: stat.bgColor, border: '2px solid #000' }}
         >
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-semibold" style={{ color: stat.color }}>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold" style={{ color: stat.color }}>
               {stat.label}
             </p>
-            <span className="text-3xl">{stat.icon}</span>
+            <span className="text-2xl">{stat.icon}</span>
           </div>
-          <p className="text-4xl font-bold" style={{ color: stat.color }}>
+          <p className="text-3xl font-bold" style={{ color: stat.color }}>
             {stat.value}
           </p>
         </div>
