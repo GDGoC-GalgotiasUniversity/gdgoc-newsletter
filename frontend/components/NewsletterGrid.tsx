@@ -42,7 +42,7 @@ export default function NewsletterGrid({ newsletters }: NewsletterGridProps) {
           <Link
             key={newsletter._id}
             href={`/newsletter/${newsletter.slug}`}
-            className="card group block overflow-hidden"
+            className="card group block overflow-hidden effect-scrunch h-full"
           >
             <div className="relative h-48 w-full overflow-hidden bg-[var(--gray-200)]">
               {newsletter.coverImage ? (

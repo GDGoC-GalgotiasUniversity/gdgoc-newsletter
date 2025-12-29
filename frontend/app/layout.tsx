@@ -1,11 +1,11 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import Script from "next/script"; // <--- Import Script
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
-// 1. Import the AuthProvider
 import { AuthProvider } from "@/context/AuthContext";
-import { Toaster } from "sonner"; // <--- Import Toaster
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "GDGoC Newsletter",
@@ -26,7 +26,6 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning className="flex flex-col min-h-screen">
-        {/* 2. Wrap everything inside body with AuthProvider */}
         <AuthProvider>
           <Header />
           <PageTransition>
@@ -34,9 +33,31 @@ export default function RootLayout({
           </PageTransition>
           <Footer />
         </AuthProvider>
-        
-        {/* 3. Add the Toaster component here */}
+
         <Toaster position="top-center" richColors />
+
+        {/* EASTER EGG SCRIPT */}
+        <Script id="console-easter-egg" strategy="lazyOnload">
+          {`
+            console.log(
+              "%c HEY DEVELOPER! 🛠️",
+              "color: #F5E6D0; background: #4A148C; font-size: 24px; padding: 10px; border-radius: 5px; font-weight: bold; border: 2px solid #2c2c2c;"
+            );
+            console.log(
+              \`%c
+      /\\_/\\
+     ( o.o )   <-- Looking for bugs?
+      > ^ <
+   
+     "Yeh code mast hai,
+      chhed-khaani mat karna!"
+   
+     (Babu Bhaiya is watching...)
+              \`,
+              "font-family: monospace; color: #4A148C; font-size: 14px; font-weight: bold;"
+            );
+          `}
+        </Script>
       </body>
     </html>
   );

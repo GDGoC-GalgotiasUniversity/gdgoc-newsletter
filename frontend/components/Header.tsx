@@ -46,10 +46,10 @@ export default function Header() {
                     </span>
                     
                     <Link href="/" className="group block">
-                        {/* 2. Title Changed back to "Google Developer Groups" */}
-                        <h1 className="font-gothic text-5xl md:text-7xl lg:text-8xl leading-none text-[var(--brand-purple)] group-hover:opacity-90 transition-opacity duration-300">
-                            Google Developer Groups
-                        </h1>
+                        {/* Added 'tracking-wide' and 'drop-shadow-md' */}
+<h1 className="font-gothic text-5xl md:text-7xl lg:text-8xl leading-none text-[var(--brand-purple)] tracking-wide drop-shadow-md group-hover:opacity-90 transition-opacity duration-300">
+    Google Developer Groups
+</h1>
                         
                         <div className="flex items-center justify-center gap-3 mt-3">
                              <div className="h-[1px] bg-[var(--ink-black)] w-12 hidden md:block"></div>
