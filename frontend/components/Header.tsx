@@ -75,12 +75,17 @@ export default function Header() {
                         Front Page
                     </Link>
                     
+                    
                     <Link href="/newsletter" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
                         Archives
                     </Link>
                     
                     <Link href="/about" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
                         About Us
+                    </Link>
+
+                     <Link href="https://gdg-socials.vercel.app/" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
+                        Socials
                     </Link>
 
                     {user?.role === 'admin' && (
