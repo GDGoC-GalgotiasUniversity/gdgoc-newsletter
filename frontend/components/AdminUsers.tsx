@@ -26,9 +26,10 @@ export default function AdminUsers({ token }: AdminUsersProps) {
   const fetchUsers = async () => {
     try {
       // Use public endpoint for key-verified access
-      const endpoint = token === 'key-verified' 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/auth/users/public`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/auth/users`;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const endpoint = token === 'key-verified'
+        ? `${apiUrl}/api/auth/users/public`
+        : `${apiUrl}/api/auth/users`;
 
       const headers: any = {
         'Content-Type': 'application/json',
@@ -87,9 +88,9 @@ export default function AdminUsers({ token }: AdminUsersProps) {
             </thead>
             <tbody>
               {users.map((user, index) => (
-                <tr 
-                  key={user.id} 
-                  style={{ 
+                <tr
+                  key={user.id}
+                  style={{
                     backgroundColor: index % 2 === 0 ? '#fafaf8' : '#fff',
                     borderBottom: '1px solid #e5d5c8'
                   }}
