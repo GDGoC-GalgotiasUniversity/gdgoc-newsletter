@@ -43,6 +43,7 @@ export default async function HomePage() {
 
   return (
     <main className="container mx-auto px-4 max-w-6xl py-8 md:py-12">
+    
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
         {/* === LEFT COLUMN: MAIN CONTENT === */}

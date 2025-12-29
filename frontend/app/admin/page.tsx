@@ -1,4 +1,5 @@
 'use client';
+import WeatherWidget from '@/components/WeatherWidget';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';

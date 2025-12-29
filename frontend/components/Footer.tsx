@@ -12,10 +12,10 @@ export default function Footer() {
                     <div className="md:col-span-2 mt-8">
                         <Link href="/" className="flex items-center gap-3 mb-4">
                             <AnimatedLogo className="w-8 h-8" />
-                            <span className="font-medium text-[var(--gray-900)]">GDGoC Galgotias University</span>
+                            <span className="font-medium text-[var(--gray-900)]">GDG on Campus</span>
                         </Link>
                         <p className="text-sm text-[var(--gray-500)] max-w-sm mb-4">
-                            Google Developer Groups on Campus at Galgotias University.
+                            Google Developer Groups on Campus.
                             Building developers who build the future.
                         </p>
                         {/* Social Links */}
@@ -114,6 +114,7 @@ export default function Footer() {
                                 </a>
                             </li>
                             <li>
+                                
                                 <a
                                     href="https://galgotiasuniversity.edu.in"
                                     target="_blank"
@@ -130,7 +131,7 @@ export default function Footer() {
                 {/* Bottom Bar */}
                 <div className="pt-8 border-t border-[var(--gray-200)] flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-sm text-[var(--gray-500)]">
-                        © {currentYear} GDGoC Galgotias University.
+                        © {currentYear} GDGoC 
                     </p>
                     <div className="flex gap-6">
                         <Link href="/" className="text-sm text-[var(--gray-500)] hover:text-[var(--google-blue)] transition">
