@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 // @ts-ignore
-import AdminUsers from '@/components/AdminUsers'; // Assuming this component exists based on teammate's code
+import AdminUsers from '@/components/AdminUsers'; 
 
 interface Newsletter {
     _id: string;
@@ -28,6 +28,10 @@ export default function AdminDashboard() {
     const [userName, setUserName] = useState('Editor');
     const [showUsers, setShowUsers] = useState(false);
     const [token, setToken] = useState<string | null>(null);
+
+    // --- Pagination State ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     // --- Fetch Data ---
     useEffect(() => {
@@ -72,6 +76,7 @@ export default function AdminDashboard() {
     // --- Search Handler (Teammate's Feature) ---
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value.toLowerCase();
+        setCurrentPage(1); // Reset to first page on search
 
         if (!query.trim()) {
             setNewsletters(allNewsletters);
@@ -102,6 +107,19 @@ export default function AdminDashboard() {
         } catch (err) {
             alert('Could not delete newsletter');
         }
+    };
+
+    // --- Pagination Logic ---
+    const totalPages = Math.ceil(newsletters.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentNewsletters = newsletters.slice(startIndex, startIndex + itemsPerPage);
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
     };
 
     // --- Calculated Stats ---
@@ -197,14 +215,15 @@ export default function AdminDashboard() {
                                 </tr>
                             </thead>
                             <tbody className="font-serif text-sm">
-                                {newsletters.map((newsletter, index) => (
+                                {currentNewsletters.map((newsletter, index) => (
                                     <tr
                                         key={newsletter._id}
                                         onClick={() => router.push(`/newsletter/${newsletter.slug}`)}
                                         className="border-b border-[var(--ink-black)] hover:bg-[var(--paper-bg)] transition-colors group cursor-pointer"
                                     >
                                         <td className="p-4 border-r border-[var(--ink-black)] text-[var(--ink-gray)]">
-                                            {String(index + 1).padStart(2, '0')}
+                                            {/* Adjusted index to be continuous across pages */}
+                                            {String(startIndex + index + 1).padStart(2, '0')}
                                         </td>
                                         <td className="p-4 border-r border-[var(--ink-black)]">
                                             <div className="font-bold text-lg text-[var(--ink-black)] mb-1">{newsletter.title}</div>
@@ -254,6 +273,37 @@ export default function AdminDashboard() {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* --- PAGINATION CONTROLS --- */}
+                    {newsletters.length > 0 && (
+                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+                            <div className="font-sans-accent text-xs text-[var(--ink-gray)]">
+                                Showing <span className="font-bold text-[var(--ink-black)]">{startIndex + 1}</span> to <span className="font-bold text-[var(--ink-black)]">{Math.min(startIndex + itemsPerPage, newsletters.length)}</span> of {newsletters.length} records
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handlePrevPage}
+                                    disabled={currentPage === 1}
+                                    className="flex items-center gap-1 px-4 py-2 border border-[var(--ink-black)] bg-white hover:bg-[var(--paper-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans-accent text-xs uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]"
+                                >
+                                    <span>←</span> Prev
+                                </button>
+                                
+                                <span className="font-serif italic px-2">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+
+                                <button
+                                    onClick={handleNextPage}
+                                    disabled={currentPage === totalPages}
+                                    className="flex items-center gap-1 px-4 py-2 border border-[var(--ink-black)] bg-white hover:bg-[var(--paper-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans-accent text-xs uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]"
+                                >
+                                    Next <span>→</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </section>
 
                 {/* --- USERS MODAL (Teammate's Feature - Styled) --- */}
