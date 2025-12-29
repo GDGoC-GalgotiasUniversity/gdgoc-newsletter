@@ -120,7 +120,7 @@ export default function Footer() {
                                     rel="noopener noreferrer"
                                     className="text-sm text-[var(--gray-500)] hover:text-[var(--google-blue)] transition"
                                 >
-                                    Galgotias University
+                                    GDGoc GU
                                 </a>
                             </li>
                         </ul>
