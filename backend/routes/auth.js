@@ -104,20 +104,20 @@ router.post('/login', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
       return res.status(401).json({ success: false, message: 'No token provided' });
     }
 
     // Verify token and check admin role
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-    
+
     if (decoded.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Admin access required' });
     }
 
     const users = await User.find().select('-password -__v').sort({ createdAt: -1 });
-    
+
     res.json({
       success: true,
       count: users.length,
@@ -143,7 +143,7 @@ router.get('/users', async (req, res) => {
 router.get('/users/public', async (req, res) => {
   try {
     const users = await User.find().select('-password -__v').sort({ createdAt: -1 });
-    
+
     res.json({
       success: true,
       count: users.length,
@@ -158,6 +158,95 @@ router.get('/users/public', async (req, res) => {
 
   } catch (error) {
     console.error('Fetch public users error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// DELETE /api/auth/users/:id - Delete user (admin only)
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'No token provided' });
+    }
+
+    // Verify token and check admin role
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+
+    const { id } = req.params;
+
+    // Prevent deleting self
+    if (id === decoded.userId) {
+      return res.status(400).json({ success: false, message: 'Cannot delete your own account' });
+    }
+
+    const user = await User.findByIdAndDelete(id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({ success: true, message: 'User deleted successfully' });
+
+  } catch (error) {
+    console.error('Delete user error:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ success: false, message: 'Invalid token' });
+    }
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// PUT /api/auth/users/:id/role - Update user role (admin only)
+router.put('/users/:id/role', async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!['user', 'admin'].includes(role)) {
+      return res.status(400).json({ success: false, message: 'Invalid role' });
+    }
+
+    // Prevent demoting self if desired, but for now we'll allow it with a warning in UI if we were doing that check. 
+    // Actually, let's strictly prevent removing your OWN admin status to avoid lockout.
+    if (id === decoded.userId && role !== 'admin') {
+      return res.status(400).json({ success: false, message: 'Cannot demote your own account' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      { role },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({ success: true, user });
+
+  } catch (error) {
+    console.error('Update role error:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ success: false, message: 'Invalid token' });
+    }
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
