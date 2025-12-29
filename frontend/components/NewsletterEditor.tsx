@@ -17,17 +17,14 @@ interface NewsletterEditorProps {
 
 // --- Enhanced Toolbar Component ---
 const MenuBar = ({ editor }: { editor: any }) => {
-  // State for the inline input system
   const [inputMode, setInputMode] = useState<'none' | 'link' | 'image'>('none');
   const [inputValue, setInputValue] = useState('');
 
-  // Reset input when mode changes
   useEffect(() => {
     if (inputMode === 'none') {
       setInputValue('');
-      editor?.commands.focus(); // Ensure focus returns to editor
+      editor?.commands.focus();
     } else if (inputMode === 'link') {
-      // Pre-fill existing link URL if editing
       const previousUrl = editor?.getAttributes('link').href;
       setInputValue(previousUrl || '');
     }
@@ -35,10 +32,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
   if (!editor) return null;
 
-  // --- Actions ---
-  
   const handleInputSubmit = (e?: React.FormEvent | React.KeyboardEvent | React.MouseEvent) => {
-    if (e) e.preventDefault(); // Stop form submission or default key behavior
+    if (e) e.preventDefault();
     
     if (!inputValue.trim()) {
       closeInput();
@@ -46,7 +41,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
     }
 
     if (inputMode === 'image') {
-      // Insert image + paragraph block (prevents cursor trapping)
       editor.chain().focus().insertContent([
         { type: 'image', attrs: { src: inputValue } },
         { type: 'paragraph' }
@@ -54,7 +48,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
       toast.success('Image inserted');
     } 
     else if (inputMode === 'link') {
-      // Add or Update Link
       editor.chain().focus().extendMarkRange('link').setLink({ href: inputValue }).run();
       toast.success('Link added');
     }
@@ -66,7 +59,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
     if (e.key === 'Escape') {
       closeInput();
     } else if (e.key === 'Enter') {
-      // Manually trigger submit on Enter, and STOP propagation so the main form doesn't submit
       e.preventDefault();
       e.stopPropagation();
       handleInputSubmit();
@@ -83,11 +75,9 @@ const MenuBar = ({ editor }: { editor: any }) => {
     closeInput();
   };
 
-  // Helper for button styling
   const btnClass = (isActive: boolean) => 
     `p-1.5 rounded min-w-[32px] flex items-center justify-center transition-colors ${isActive ? 'bg-gray-300 text-black shadow-inner font-bold' : 'text-gray-600 hover:bg-gray-200'}`;
 
-  // --- RENDER: Input Mode (Active) ---
   if (inputMode !== 'none') {
     return (
       <div className="border-b border-gray-200 bg-gray-50 p-2 sticky top-0 z-10 flex gap-2 items-center animate-in fade-in slide-in-from-top-1 duration-200">
@@ -95,7 +85,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
           {inputMode === 'image' ? 'Insert Image' : 'Edit Link'}
         </span>
         
-        {/* FIX: Changed <form> to <div> to avoid nesting forms */}
         <div className="flex-1 flex gap-2">
           <input 
             autoFocus
@@ -107,7 +96,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
             onKeyDown={handleKeyDown}
           />
           <button 
-            type="button" // Explicitly type="button"
+            type="button"
             onClick={handleInputSubmit}
             className="px-3 py-1 bg-[var(--brand-purple)] text-white text-xs font-bold rounded hover:bg-black transition-colors"
           >
@@ -135,36 +124,22 @@ const MenuBar = ({ editor }: { editor: any }) => {
     );
   }
 
-  // --- RENDER: Standard Toolbar ---
   return (
     <div className="border-b border-gray-200 bg-gray-50 p-2 sticky top-0 z-10 flex flex-wrap gap-1 items-center">
-      {/* Headings */}
       <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={btnClass(editor.isActive('heading', { level: 1 }))}>H1</button>
       <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={btnClass(editor.isActive('heading', { level: 2 }))}>H2</button>
-      
       <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-
-      {/* Formatting */}
       <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} disabled={!editor.can().chain().focus().toggleBold().run()} className={btnClass(editor.isActive('bold'))} title="Bold"><span className="font-bold">B</span></button>
       <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} disabled={!editor.can().chain().focus().toggleItalic().run()} className={btnClass(editor.isActive('italic'))} title="Italic"><span className="italic">I</span></button>
       <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={btnClass(editor.isActive('underline'))} title="Underline"><span className="underline">U</span></button>
-
       <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-
-      {/* Alignment */}
       <button type="button" onClick={() => editor.chain().focus().setTextAlign('left').run()} className={btnClass(editor.isActive({ textAlign: 'left' }))} title="Align Left">←</button>
       <button type="button" onClick={() => editor.chain().focus().setTextAlign('center').run()} className={btnClass(editor.isActive({ textAlign: 'center' }))} title="Align Center">↔</button>
-
       <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-
-      {/* Lists & Quotes */}
       <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={btnClass(editor.isActive('bulletList'))} title="Bullet List">• List</button>
       <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={btnClass(editor.isActive('orderedList'))} title="Numbered List">1. List</button>
       <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={btnClass(editor.isActive('blockquote'))} title="Quote">❝ Quote</button>
-
       <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-
-      {/* Inserts (Now triggers inline mode) */}
       <button type="button" onClick={() => setInputMode('link')} className={btnClass(editor.isActive('link'))} title="Add Link">🔗</button>
       <button type="button" onClick={() => setInputMode('image')} className={btnClass(false)} title="Add Image">🖼️</button>
     </div>
@@ -172,15 +147,12 @@ const MenuBar = ({ editor }: { editor: any }) => {
 };
 
 export default function NewsletterEditor({ onSubmit, initialData, isLoading }: NewsletterEditorProps) {
-  // --- State ---
   const [title, setTitle] = useState(initialData?.title || '');
   const [slug, setSlug] = useState(initialData?.slug || '');
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || '');
   const [status, setStatus] = useState(initialData?.status || 'draft');
   const [coverImage, setCoverImage] = useState(initialData?.coverImage || '');
-  const [uploading, setUploading] = useState(false);
 
-  // --- TipTap Editor Setup ---
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -198,38 +170,11 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
     immediatelyRender: false, 
   });
 
-  // --- Handlers ---
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setTitle(val);
     if (!initialData) {
       setSlug(val.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-'));
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const toastId = toast.loading('Uploading cover image...');
-    setUploading(true);
-    
-    const fd = new FormData();
-    fd.append('image', file);
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const res = await fetch(`${apiUrl}/api/upload`, { method: 'POST', body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      
-      setCoverImage(`${apiUrl}${data.imageUrl}`);
-      toast.success('Cover image uploaded!', { id: toastId });
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to upload image', { id: toastId });
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -276,9 +221,17 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
             </select>
           </div>
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-1">Cover Image</label>
-             <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} className="text-sm" />
-             {coverImage && ( <img src={coverImage} alt="Cover" className="mt-2 h-32 object-cover rounded border" /> )}
+             <label className="block text-sm font-bold text-gray-700 mb-1">Cover Image URL</label>
+             <input 
+               type="text" 
+               value={coverImage} 
+               onChange={(e) => setCoverImage(e.target.value)} 
+               placeholder="https://..."
+               className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" 
+             />
+             {coverImage && ( 
+               <img src={coverImage} alt="Cover" className="mt-2 h-32 object-cover rounded border" /> 
+             )}
           </div>
         </div>
       </div>

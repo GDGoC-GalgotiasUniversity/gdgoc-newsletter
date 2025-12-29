@@ -19,6 +19,7 @@ app.use(express.json());
 
 // Request Logging Middleware
 app.use((req, res, next) => {
+  res.setHeader('X-Developer-Note', 'Don ko pakadna mushkil hi nahi, namumkin hai');
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
 });
@@ -51,6 +52,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     message: 'Server Error',
+    devMessage: 'Khopdi tod saale ka! (Something went wrong internally)',
     error: err.message
   });
 });
