@@ -1,11 +1,14 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+// Import BubbleMenu from the specific menus path for v3
+import { BubbleMenu } from '@tiptap/react/menus'; 
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
+// REMOVED: import ExtensionBubbleMenu from '@tiptap/extension-bubble-menu'; <-- Causing the conflict
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -15,7 +18,6 @@ interface NewsletterEditorProps {
   isLoading?: boolean;
 }
 
-// --- Enhanced Toolbar Component ---
 const MenuBar = ({ editor }: { editor: any }) => {
   const [inputMode, setInputMode] = useState<'none' | 'link' | 'image'>('none');
   const [inputValue, setInputValue] = useState('');
@@ -42,7 +44,13 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
     if (inputMode === 'image') {
       editor.chain().focus().insertContent([
-        { type: 'image', attrs: { src: inputValue } },
+        { 
+            type: 'image', 
+            attrs: { 
+                src: inputValue,
+                class: 'w-full block mb-4 rounded-lg'
+            } 
+        },
         { type: 'paragraph' }
       ]).run();
       toast.success('Image inserted');
@@ -152,14 +160,33 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || '');
   const [status, setStatus] = useState(initialData?.status || 'draft');
   const [coverImage, setCoverImage] = useState(initialData?.coverImage || '');
+  
+  const [galleryInput, setGalleryInput] = useState('');
+  const [gallery, setGallery] = useState<string[]>(initialData?.gallery || []);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
       Link.configure({ openOnClick: false }),
-      Image.configure({ inline: false }),
-      TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
+      // REMOVED: ExtensionBubbleMenu.configure(...) to prevent double initialization conflict
+      Image.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            class: {
+              default: 'w-full block mb-4 rounded-lg',
+              parseHTML: element => element.getAttribute('class'),
+              renderHTML: attributes => {
+                return {
+                  class: attributes.class,
+                }
+              },
+            },
+          }
+        },
+      }).configure({ inline: true }),
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
     content: initialData?.contentHtml || initialData?.contentMarkdown || '',
     editorProps: {
@@ -178,6 +205,18 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
     }
   };
 
+  const handleAddGalleryImage = () => {
+    if(!galleryInput.trim()) return;
+    setGallery([...gallery, galleryInput]);
+    setGalleryInput('');
+  };
+
+  const removeGalleryImage = (index: number) => {
+    const newGallery = [...gallery];
+    newGallery.splice(index, 1);
+    setGallery(newGallery);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return toast.error('Please enter a headline');
@@ -189,10 +228,16 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
       excerpt,
       status,
       coverImage,
+      gallery,
       contentHtml: editor.getHTML(),
       template: 'default'
     });
   };
+
+  const setImgLeft = () => editor?.chain().focus().updateAttributes('image', { class: 'float-left mr-6 mb-4 max-w-[50%] rounded-lg' }).run();
+  const setImgRight = () => editor?.chain().focus().updateAttributes('image', { class: 'float-right ml-6 mb-4 max-w-[50%] rounded-lg' }).run();
+  const setImgCenter = () => editor?.chain().focus().updateAttributes('image', { class: 'block mx-auto mb-4 rounded-lg' }).run();
+  const setImgFull = () => editor?.chain().focus().updateAttributes('image', { class: 'w-full block mb-4 rounded-lg' }).run();
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 pb-12">
@@ -233,6 +278,36 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
                <img src={coverImage} alt="Cover" className="mt-2 h-32 object-cover rounded border" /> 
              )}
           </div>
+          
+          <div className="pt-2 border-t border-gray-200 mt-2">
+            <label className="block text-sm font-bold text-gray-700 mb-1">Gallery Images (Optional)</label>
+            <div className="flex gap-2 mb-2">
+                <input 
+                    type="text"
+                    value={galleryInput}
+                    onChange={(e) => setGalleryInput(e.target.value)}
+                    placeholder="Add image URL..."
+                    className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm"
+                />
+                <button type="button" onClick={handleAddGalleryImage} className="bg-gray-200 px-3 py-1 rounded text-xs font-bold hover:bg-gray-300">+</button>
+            </div>
+            {gallery.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                    {gallery.map((img, idx) => (
+                        <div key={idx} className="relative group w-16 h-16">
+                            <img src={img} className="w-full h-full object-cover rounded border" />
+                            <button 
+                                type="button"
+                                onClick={() => removeGalleryImage(idx)}
+                                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -241,9 +316,52 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
          <div className="flex justify-between items-end">
             <label className="text-xl font-bold text-gray-800">Content</label>
          </div>
-         <div className="bg-gray-100 p-4 rounded-lg border border-gray-200 min-h-[800px] flex justify-center">
+         <div className="bg-gray-100 p-4 rounded-lg border border-gray-200 min-h-[800px] flex justify-center relative">
             <div className="w-full max-w-[850px] bg-white shadow-lg min-h-[800px] flex flex-col rounded-sm">
                <MenuBar editor={editor} />
+               
+               {/* --- BUBBLE MENU FOR IMAGES --- */}
+               {editor && (
+                   <BubbleMenu 
+                        editor={editor} 
+                        shouldShow={({ editor }) => editor.isActive('image')}
+                        className="flex gap-1 bg-white border border-gray-200 shadow-xl rounded-lg p-1"
+                   >
+                       <button
+                         type="button"
+                         onClick={setImgLeft}
+                         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'float-left mr-6 mb-4 max-w-[50%] rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
+                         title="Float Left"
+                       >
+                         ⬅️ Left
+                       </button>
+                       <button
+                         type="button"
+                         onClick={setImgCenter}
+                         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'block mx-auto mb-4 rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
+                         title="Center"
+                       >
+                         ⬇️ Center
+                       </button>
+                       <button
+                         type="button"
+                         onClick={setImgRight}
+                         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'float-right ml-6 mb-4 max-w-[50%] rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
+                         title="Float Right"
+                       >
+                         Right ➡️
+                       </button>
+                       <button
+                         type="button"
+                         onClick={setImgFull}
+                         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'w-full block mb-4 rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
+                         title="Full Width"
+                       >
+                         ↔️ Full
+                       </button>
+                   </BubbleMenu>
+               )}
+               
                <EditorContent editor={editor} className="flex-1" />
             </div>
          </div>
@@ -259,6 +377,8 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
       <style jsx global>{`
         .ProseMirror { min-height: 500px; outline: none; }
         .ProseMirror blockquote { border-left: 4px solid #e5e7eb; padding-left: 1rem; font-style: italic; color: #4b5563; }
+        /* Fix for floated images in editor */
+        .ProseMirror::after { content: ""; display: table; clear: both; }
       `}</style>
     </form>
   );

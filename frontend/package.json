@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.7.4",
+    "@tiptap/extension-bubble-menu": "^3.14.0",
     "@tiptap/extension-image": "^3.14.0",
     "@tiptap/extension-link": "^3.14.0",
     "@tiptap/extension-text-align": "^3.14.0",
