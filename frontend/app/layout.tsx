@@ -4,8 +4,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
 // 1. Import the AuthProvider
-import { AuthProvider } from "@/context/AuthContext"; 
-// (If "@/" doesn't work for context, try "../context/AuthContext")
+import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "sonner"; // <--- Import Toaster
 
 export const metadata: Metadata = {
   title: "GDGoC Newsletter",
@@ -34,6 +34,9 @@ export default function RootLayout({
           </PageTransition>
           <Footer />
         </AuthProvider>
+        
+        {/* 3. Add the Toaster component here */}
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

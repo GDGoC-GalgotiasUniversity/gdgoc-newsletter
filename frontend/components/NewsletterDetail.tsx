@@ -1,108 +1,124 @@
 'use client';
 
 import Link from 'next/link';
-
+import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface Newsletter {
-    title: string;
-    contentMarkdown: string;
-    publishedAt?: string;
-    slug: string;
-    coverImage?: string;
-    excerpt?: string;
+  _id: string;
+  title: string;
+  slug: string;
+  contentHtml?: string;
+  contentMarkdown?: string;
+  publishedAt?: string;
+  createdAt: string;
+  coverImage?: string;
+  excerpt?: string;
 }
 
 export default function NewsletterDetail({ newsletter }: { newsletter: Newsletter }) {
-    // Format Date: "Saturday, December 27, 2025"
-    const dateStr = newsletter.publishedAt
-        ? new Date(newsletter.publishedAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-        : 'Draft Preview';
+  const content = newsletter.contentHtml || newsletter.contentMarkdown || '';
+  const date = newsletter.publishedAt || newsletter.createdAt;
 
-    return (
-        <article className="min-h-screen bg-[var(--paper-bg)] pb-24 pt-8">
+  // --- Feature 1: Calculate Reading Time ---
+  const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+  const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
-            {/* --- ARTICLE HEADER --- */}
-            <div className="container mx-auto px-4 max-w-3xl text-center mb-12">
-                {/* Breadcrumb / Top Tag */}
-                <div className="flex justify-center items-center gap-3 mb-6 font-sans-accent text-xs text-[var(--brand-purple)] tracking-widest">
-                    <Link href="/" className="hover:underline">FRONT PAGE</Link>
-                    <span>/</span>
-                    <Link href="/newsletter" className="hover:underline">ARCHIVES</Link>
-                    <span>/</span>
-                    <span className="font-bold">ARTICLE</span>
-                </div>
+  // --- Feature 2: Share Functions ---
+  const handleCopyLink = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    toast.success('Link copied to clipboard!');
+  };
 
-                {/* Headline */}
-                <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight mb-6 text-[var(--ink-black)]">
-                    {newsletter.title}
-                </h1>
+  const handleWhatsAppShare = () => {
+    const url = window.location.href;
+    const text = `Check out this newsletter: ${newsletter.title}\n\nRead here: ${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
 
-                {/* Metadata Row */}
-                <div className="border-t border-b border-[var(--border-color)] py-3 flex flex-col md:flex-row justify-between items-center text-sm font-sans-accent text-[var(--ink-gray)] gap-2">
-                    <span>
-                        <span className="font-bold text-[var(--ink-black)]">By GDGoC Team</span> &bull; Galgotias University
-                    </span>
-                    <span className="uppercase tracking-wider">
-                        {dateStr}
-                    </span>
-                </div>
+  return (
+    <article className="min-h-screen bg-[var(--paper-bg)] text-[#1c1917] font-serif pb-24">
+      
+      {/* Navbar */}
+      <nav className="sticky top-0 z-10 bg-[var(--paper-bg)]/80 backdrop-blur-md border-b border-[#e7e5e4] px-6 py-4">
+        <div className="max-w-3xl mx-auto flex justify-between items-center">
+          <Link 
+            href="/newsletter" 
+            className="text-sm font-sans font-bold tracking-widest text-[#57534e] hover:text-[#7e22ce] transition-colors uppercase"
+          >
+            ← Back to Archives
+          </Link>
+          <div className="flex items-center gap-3 text-xs font-sans text-[#a8a29e]">
+            <span>{format(new Date(date), 'MMMM d, yyyy')}</span>
+            <span>•</span>
+            <span className="font-bold text-[#7e22ce]">{readTime} min read</span>
+          </div>
+        </div>
+      </nav>
 
-                {/* Excerpt / Short Description */}
-                {newsletter.excerpt && (
-                    <div className="mt-8 text-2xl md:text-3xl font-serif italic text-[var(--ink-black)] opacity-80 leading-relaxed border-l-4 border-[var(--brand-purple)] pl-6 py-2">
-                        {newsletter.excerpt}
-                    </div>
-                )}
+      <main className="max-w-3xl mx-auto px-6 mt-12">
+        <header className="mb-12 text-center">
+          {newsletter.coverImage && (
+            <div className="mb-10 rounded-xl overflow-hidden shadow-lg border border-[#e7e5e4]">
+              <img 
+                src={newsletter.coverImage} 
+                alt={newsletter.title} 
+                className="w-full h-auto object-cover max-h-[500px]"
+              />
             </div>
+          )}
+          
+          <h1 className="text-4xl md:text-6xl font-black text-[#1c1917] mb-6 leading-tight">
+            {newsletter.title}
+          </h1>
 
-            {/* --- CONTENT BODY --- */}
-            <div className="container mx-auto px-4 max-w-3xl">
+          {newsletter.excerpt && (
+            <p className="text-xl text-[#57534e] italic leading-relaxed max-w-2xl mx-auto">
+              {newsletter.excerpt}
+            </p>
+          )}
 
-                {/* Optional Cover Image */}
-                {newsletter.coverImage && (
-                    <div className="w-full aspect-video relative mb-12 border-4 border-double border-[var(--ink-black)] p-1 bg-white">
-                        <img
-                            src={newsletter.coverImage}
-                            alt={newsletter.title}
-                            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                        />
-                        <div className="text-center mt-2 font-sans-accent text-xs text-[var(--ink-gray)] italic">
-                            Figure 1.1: Event visual documentation
-                        </div>
-                    </div>
-                )}
+          <div className="mt-8 flex justify-center">
+            <div className="h-1 w-24 bg-[#7e22ce] rounded-full"></div>
+          </div>
+        </header>
 
-                {/* Markdown Content */}
-                <div className="prose prose-lg max-w-none font-serif text-[var(--ink-black)] leading-loose text-justify">
+        {/* Content Area */}
+        <div className="
+          prose prose-lg prose-stone max-w-none
+          prose-headings:font-bold prose-headings:text-[#1c1917]
+          prose-p:leading-loose prose-p:text-[#44403c]
+          prose-a:text-[#7e22ce] prose-a:no-underline hover:prose-a:underline
+          prose-blockquote:border-l-4 prose-blockquote:border-[#7e22ce] prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:bg-black/5 prose-blockquote:py-2 prose-blockquote:pr-4
+          prose-img:rounded-xl prose-img:shadow-md
+          prose-li:marker:text-[#7e22ce]
+        ">
+          <div dangerouslySetInnerHTML={{ __html: content }} />
+        </div>
 
-                    {/* The content itself with styles override via Prose classes to match previous aesthetic */}
-                    <div
-                        className="
-                            prose-p:mb-6 prose-p:font-serif
-                            prose-headings:font-serif prose-headings:font-bold prose-headings:text-[var(--ink-black)]
-                            prose-h1:text-3xl prose-h1:text-[var(--brand-purple)] prose-h1:mt-12 prose-h1:mb-6 prose-h1:border-b prose-h1:border-[var(--brand-purple)] prose-h1:pb-2
-                            prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-                            prose-h3:text-xl prose-h3:uppercase prose-h3:tracking-wide prose-h3:mt-8 prose-h3:mb-2
-                            prose-blockquote:border-l-4 prose-blockquote:border-[var(--brand-purple)] prose-blockquote:pl-6 prose-blockquote:py-2 prose-blockquote:my-8 prose-blockquote:italic prose-blockquote:text-2xl prose-blockquote:text-[var(--brand-purple)] prose-blockquote:bg-[var(--paper-accent)] prose-blockquote:not-italic
-                            prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-6 prose-ul:marker:text-[var(--brand-purple)]
-                            prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-6 prose-ol:marker:font-bold
-                            prose-a:text-[var(--brand-purple)] prose-a:underline prose-a:decoration-dotted hover:prose-a:decoration-solid prose-a:underline-offset-4
-                            max-w-none
-                        "
-                        dangerouslySetInnerHTML={{ __html: newsletter.contentMarkdown }}
-                    />
+        {/* --- Share Section --- */}
+        <div className="mt-20 pt-10 border-t border-[#e7e5e4] flex flex-col items-center gap-4">
+          <p className="font-sans text-sm text-[#a8a29e] tracking-widest uppercase">
+            Share this issue
+          </p>
+          <div className="flex gap-4">
+             <button 
+                onClick={handleCopyLink}
+                className="px-6 py-2 rounded-full border border-[#e7e5e4] hover:border-[#7e22ce] hover:text-[#7e22ce] transition-colors font-sans text-sm font-bold bg-white/50"
+             >
+                Copy Link
+             </button>
+             <button 
+                onClick={handleWhatsAppShare}
+                className="px-6 py-2 rounded-full border border-[#e7e5e4] hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-colors font-sans text-sm font-bold bg-white/50"
+             >
+                WhatsApp
+             </button>
+          </div>
+        </div>
 
-                    {/* End Sign-off */}
-                    <div className="mt-16 flex justify-center">
-                        <div className="text-center">
-                            <div className="font-gothic text-4xl text-[var(--ink-black)] mb-2">***</div>
-                            <p className="font-sans-accent text-xs text-[var(--ink-gray)] uppercase">End of Transmission</p>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-        </article >
-    );
+      </main>
+    </article>
+  );
 }
