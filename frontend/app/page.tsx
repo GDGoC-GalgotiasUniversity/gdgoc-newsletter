@@ -127,6 +127,9 @@ export default async function HomePage() {
                   <p className="text-sm font-sans text-[var(--ink-gray)] line-clamp-3">
                     {story.excerpt}
                   </p>
+                  <Link href={`/newsletter/${story.slug}`} className="text-sm font-sans-accent text-[var(--brand-purple)] font-bold mt-2 inline-block hover:underline">
+                    Read More &rarr;
+                  </Link>
                 </article>
               ))}
             </div>
