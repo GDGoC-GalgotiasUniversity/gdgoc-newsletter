@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import Script from "next/script"; // <--- Import Script
+import Script from "next/script"; // <--- 1. Import Script for the Easter Egg
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
@@ -34,27 +34,29 @@ export default function RootLayout({
           <Footer />
         </AuthProvider>
 
+        {/* 3. Add the Toaster component here */}
         <Toaster position="top-center" richColors />
 
-        {/* EASTER EGG SCRIPT */}
-        <Script id="console-easter-egg" strategy="lazyOnload">
+        {/* 4. EASTER EGG: This script runs only in the browser console */}
+        <Script id="console-easter-egg" strategy="afterInteractive">
           {`
             console.log(
               "%c HEY DEVELOPER! 🛠️",
-              "color: #F5E6D0; background: #4A148C; font-size: 24px; padding: 10px; border-radius: 5px; font-weight: bold; border: 2px solid #2c2c2c;"
+              "color: #fff; background: #EA4335; font-size: 24px; padding: 10px; border-radius: 5px; font-weight: bold;"
             );
             console.log(
               \`%c
-      /\\_/\\
-     ( o.o )   <-- Looking for bugs?
-      > ^ <
+      /\\_/\\  
+     ( o.o ) 
+      > ^ <  
+    
+   Wait... are you looking for bugs?
    
-     "Yeh code mast hai,
-      chhed-khaani mat karna!"
-   
-     (Babu Bhaiya is watching...)
+      (\\__/)
+      (•ㅅ•)      "Yeh code mast hai,
+      / 　 づ        chhed-khaani mat karna!"
               \`,
-              "font-family: monospace; color: #4A148C; font-size: 14px; font-weight: bold;"
+              "font-family: monospace; color: #4285F4; font-size: 14px; font-weight: bold;"
             );
           `}
         </Script>
