@@ -7,9 +7,9 @@ export default function Footer() {
     return (
         /* "Heavy Ink" Footer Styles */
         <footer className="bg-[var(--ink-black)] text-[var(--paper-bg)] border-t-8 border-double border-[var(--brand-purple)] mt-12">
-            <div className="container mx-auto px-4 max-w-6xl py-12">
+            <div className="container mx-auto px-4 max-w-6xl py-6">
                 <div className="grid md:grid-cols-4 gap-8 mb-8">
-                    
+
                     {/* Brand Section */}
                     <div className="md:col-span-2 mt-8">
                         <Link href="/" className="flex items-center gap-3 mb-4 group">
@@ -23,10 +23,10 @@ export default function Footer() {
                         </Link>
                         <p className="font-serif text-[var(--paper-accent)]/80 max-w-sm mb-6 leading-relaxed">
                             Google Developer Groups on Campus at Galgotias University.
-                            <br/>
+                            <br />
                             <span className="italic">Building developers who build the future.</span>
                         </p>
-                        
+
                         {/* Social Links */}
                         <div className="flex gap-4">
                             <SocialLink href="https://discord.gg/TYEJBsY4YD" label="Discord">
@@ -87,8 +87,10 @@ export default function Footer() {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="pt-8 border-t border-[var(--paper-accent)]/20 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-sans-accent text-[var(--paper-accent)]/60">
-                    <p>© {currentYear} GDGoC Galgotias University.</p>
+                <div className="pt-8 border-t border-[var(--gray-200)] flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-sm text-[var(--gray-500)] text-center md:text-left">
+                        © {currentYear} GDGoC Galgotias University. <span className="hidden md:inline mx-2">•</span> <span className="block md:inline mt-1 md:mt-0">Greater Noida, Uttar Pradesh</span>
+                    </p>
                     <div className="flex gap-6">
                         <Link href="/" className="hover:text-[var(--paper-bg)] transition">Privacy Policy</Link>
                         <Link href="/" className="hover:text-[var(--paper-bg)] transition">Terms of Service</Link>
@@ -102,10 +104,10 @@ export default function Footer() {
 // Helper component to keep SVG links clean
 function SocialLink({ href, label, children }: { href: string, label: string, children: React.ReactNode }) {
     return (
-        <a 
-            href={href} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+        <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-[var(--paper-accent)] hover:text-white transition-transform hover:-translate-y-1 p-2 border border-[var(--paper-accent)]/20 rounded-sm hover:border-white"
             aria-label={label}
         >
