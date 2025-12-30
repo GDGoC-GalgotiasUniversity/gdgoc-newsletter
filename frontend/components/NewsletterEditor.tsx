@@ -15,6 +15,7 @@ import { CSS } from '@dnd-kit/utilities';
 import CloudinaryImageButton from './CloudinaryImageButton';
 import ImageLinkGenerator from './ImageLinkGenerator';
 import DragDropImageUploader from './DragDropImageUploader';
+import GalleryImageUploader from './GalleryImageUploader';
 
 interface NewsletterData {
   title?: string;
@@ -77,8 +78,8 @@ function SortableGalleryItem({ id, img, idx, totalImages, onMoveUp, onMoveDown, 
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-600 truncate">{img}</p>
-        <p className="text-xs text-gray-400">Image {idx + 1}</p>
+        <p className="text-xs text-gray-700 font-semibold">Image {idx + 1}</p>
+        <p className="text-xs text-gray-400">Click to view full size</p>
       </div>
 
       <div className="flex gap-1 flex-shrink-0">
@@ -303,7 +304,6 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
   const [status, setStatus] = useState(initialData?.status || 'draft');
   const [coverImage, setCoverImage] = useState(initialData?.coverImage || '');
 
-  const [galleryInput, setGalleryInput] = useState('');
   const [gallery, setGallery] = useState<string[]>(initialData?.gallery || []);
 
   const editor = useEditor({
@@ -346,10 +346,8 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
     }
   };
 
-  const handleAddGalleryImage = () => {
-    if (!galleryInput.trim()) return;
-    setGallery([...gallery, galleryInput]);
-    setGalleryInput('');
+  const handleAddGalleryImage = (url: string) => {
+    setGallery([...gallery, url]);
   };
 
   const removeGalleryImage = (index: number) => {
@@ -450,7 +448,20 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
             />
             {coverImage && (
               <div className="mt-4">
-                <p className="text-xs text-gray-600 mb-2 font-semibold">Current cover image:</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs text-gray-600 font-semibold">Current cover image:</p>
+                  <button
+                    type="button"
+                    onClick={() => setCoverImage('')}
+                    className="text-xs text-red-600 hover:text-red-800 font-semibold flex items-center gap-1 transition-colors"
+                    title="Remove cover image"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Remove
+                  </button>
+                </div>
                 <div className="h-40 w-full relative rounded-lg border-2 border-[var(--brand-purple)] overflow-hidden">
                   <NextImage
                     src={coverImage}
@@ -465,17 +476,11 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
           </div>
 
           <div className="pt-2 border-t border-gray-200 mt-2">
-            <label className="block text-sm font-bold text-gray-700 mb-1">Gallery Images (Optional)</label>
-            <div className="flex gap-2 mb-3">
-              <input
-                type="text"
-                value={galleryInput}
-                onChange={(e) => setGalleryInput(e.target.value)}
-                placeholder="Add image URL..."
-                className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm"
-              />
-              <button type="button" onClick={handleAddGalleryImage} className="bg-gray-200 px-3 py-1 rounded text-xs font-bold hover:bg-gray-300">+</button>
-            </div>
+            <label className="block text-sm font-bold text-gray-700 mb-3">Gallery Images (Carousel)</label>
+            <GalleryImageUploader
+              onImageUpload={handleAddGalleryImage}
+              isLoading={isLoading}
+            />
             {gallery.length > 0 && (
               <DndContext
                 sensors={sensors}

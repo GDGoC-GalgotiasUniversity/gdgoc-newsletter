@@ -10,6 +10,7 @@ interface ImageCarouselProps {
 export default function ImageCarousel({ images }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   // Debug logging
   console.log('ImageCarousel received images:', images);
@@ -40,6 +41,17 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
     setTimeout(() => setIsTransitioning(false), 300);
   };
 
+  // Auto-rotation effect - only if more than 1 image
+  useEffect(() => {
+    if (images.length <= 1 || isPaused) return;
+
+    const interval = setInterval(() => {
+      goToNext();
+    }, 4000); // Change image every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [currentIndex, isPaused, images.length]);
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -54,15 +66,18 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
   return (
     <div className="w-full mb-8">
       {/* Main carousel container */}
-      <div className="relative w-full bg-black/5 rounded-xl overflow-hidden shadow-lg border border-[#e7e5e4]">
+      <div
+        className="relative w-full bg-black/5 rounded-xl overflow-hidden shadow-lg border border-[#e7e5e4]"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
         {/* Image display */}
         <div className="relative w-full aspect-[4/3] md:aspect-[16/9] overflow-hidden bg-black">
           {images.map((image, index) => (
             <div
               key={index}
-              className={`absolute inset-0 transition-opacity duration-300 ${
-                index === currentIndex ? 'opacity-100' : 'opacity-0'
-              }`}
+              className={`absolute inset-0 transition-opacity duration-300 ${index === currentIndex ? 'opacity-100' : 'opacity-0'
+                }`}
             >
               <Image
                 src={image}
@@ -119,11 +134,10 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
               key={index}
               onClick={() => goToSlide(index)}
               disabled={isTransitioning}
-              className={`transition-all rounded-lg overflow-hidden ${
-                index === currentIndex
-                  ? 'ring-2 ring-[#7e22ce] ring-offset-2 w-16 h-12'
-                  : 'w-12 h-12 opacity-60 hover:opacity-100'
-              }`}
+              className={`transition-all rounded-lg overflow-hidden ${index === currentIndex
+                ? 'ring-2 ring-[#7e22ce] ring-offset-2 w-16 h-12'
+                : 'w-12 h-12 opacity-60 hover:opacity-100'
+                }`}
               aria-label={`Go to image ${index + 1}`}
             >
               <div className="relative w-full h-full">
