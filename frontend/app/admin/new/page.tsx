@@ -12,17 +12,17 @@ export default function NewNewsletterPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-  // Check standard Auth Token & Role
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+    // Check standard Auth Token & Role
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  if (!token || user.role !== 'admin') {
-    router.push('/login');
-    return;
-  }
+    if (!token || user.role !== 'admin') {
+      router.push('/login');
+      return;
+    }
 
-  setIsAuthorized(true);
-}, [router]);
+    setIsAuthorized(true);
+  }, [router]);
 
   const handleSubmit = async (formData: any) => {
     setIsLoading(true);

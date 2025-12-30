@@ -13,7 +13,8 @@ const verifyToken = (req, res, next) => {
     req.user = decoded; // Attaches { userId, role } to the request
     next();
   } catch (error) {
-    res.status(400).json({ success: false, message: 'Invalid Token' });
+    console.error('Token verification error:', error.message);
+    res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
 };
 
