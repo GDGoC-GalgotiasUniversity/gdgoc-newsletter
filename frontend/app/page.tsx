@@ -55,7 +55,7 @@ export default async function HomePage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
         {/* === LEFT COLUMN: MAIN CONTENT === */}
-        <div className="lg:col-span-8 flex flex-col gap-12 order-2 lg:order-1">
+        <div className="lg:col-span-8 flex flex-col gap-12 order-1 lg:order-1">
 
           {/* LEAD STORY */}
           <section className="border-b-2 border-[var(--border-color)] pb-8">
@@ -149,14 +149,14 @@ export default async function HomePage() {
         </div>
 
         {/* === RIGHT COLUMN: SIDEBAR === */}
-        <aside className="lg:col-span-4 flex flex-col gap-8 lg:border-l lg:border-[var(--border-color)] lg:pl-8 order-1 lg:order-2">
+        <aside className="lg:col-span-4 flex flex-col gap-8 lg:border-l lg:border-[var(--border-color)] lg:pl-8 order-2 lg:order-2">
 
           {/* 1. WEATHER WIDGET (Moved to top for mobile relevance) */}
           <WeatherWidget />
 
           {/* 2. SUBSCRIPTION BOX */}
           <div className="bg-[var(--paper-accent)] p-6 border-2 border-[var(--brand-purple)] border-dashed relative rounded-lg">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-3 py-1 border border-gray-200 rounded-full font-sans-accent text-[var(--brand-purple)] text-[10px] font-bold tracking-widest shadow-sm">
+            <div className="md:absolute md:-top-3 md:left-1/2 md:-translate-x-1/2 bg-white px-3 py-1 border border-gray-200 rounded-full font-sans-accent text-[var(--brand-purple)] text-[10px] font-bold tracking-widest shadow-sm mb-3 md:mb-0">
               SUBSCRIBE
             </div>
             <h3 className="font-gothic text-3xl text-center mb-2 mt-2">Join the Club</h3>
