@@ -24,6 +24,11 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:ital,wght@0,400;0,600;1,400&family=Manufacturing+Consent&family=New+Rocker&family=UnifrakturCook:wght@700&display=swap"
           rel="stylesheet"
         />
+<<<<<<< HEAD
+=======
+        {/* Favicon GDG logo */}
+        <link rel="icon" type="image/svg+xml" href="./final-gdg-logo.svg" />
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
       </head>
       <body suppressHydrationWarning className="flex flex-col min-h-screen">
         <AuthProvider>

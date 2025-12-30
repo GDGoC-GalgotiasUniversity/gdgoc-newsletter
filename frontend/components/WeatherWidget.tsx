@@ -15,6 +15,7 @@ export default function WeatherWidget() {
     useEffect(() => {
         async function fetchWeather() {
             try {
+<<<<<<< HEAD
                 // Create abort controller with 5 second timeout
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -27,6 +28,13 @@ export default function WeatherWidget() {
 
                 clearTimeout(timeoutId);
 
+=======
+                // Greater Noida coordinates
+                const res = await fetch(
+                    'https://api.open-meteo.com/v1/forecast?latitude=28.4744&longitude=77.5040&current_weather=true'
+                );
+
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
                 if (!res.ok) throw new Error('Failed to fetch');
 
                 const data = await res.json();
@@ -35,6 +43,7 @@ export default function WeatherWidget() {
                     temperature: data.current_weather.temperature,
                     weathercode: data.current_weather.weathercode,
                 });
+<<<<<<< HEAD
             } catch (err: any) {
                 // Silently handle abort errors (timeout)
                 if (err.name === 'AbortError') {
@@ -42,6 +51,9 @@ export default function WeatherWidget() {
                 } else {
                     console.debug('Weather fetch error:', err);
                 }
+=======
+            } catch (err) {
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
                 setError(true);
             } finally {
                 setLoading(false);
@@ -60,6 +72,7 @@ export default function WeatherWidget() {
         );
     }
 
+<<<<<<< HEAD
     // Error state - show fallback weather
     if (error || !weather) {
         return (
@@ -73,6 +86,13 @@ export default function WeatherWidget() {
                 <div className="font-sans-accent text-xs text-[var(--brand-purple)]">
                     SUNNY ☀️ • CODE COMPILING
                 </div>
+=======
+    // Error state
+    if (error || !weather) {
+        return (
+            <div className="border border-[var(--ink-black)] p-4 text-center">
+                <div className="text-sm text-red-500">Weather unavailable</div>
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
             </div>
         );
     }

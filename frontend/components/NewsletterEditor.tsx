@@ -5,11 +5,16 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
+<<<<<<< HEAD
 import Image from '@tiptap/extension-image';
+=======
+import TiptapImage from '@tiptap/extension-image';
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 // REMOVED: import ExtensionBubbleMenu from '@tiptap/extension-bubble-menu'; <-- Causing the conflict
 import { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { toast } from 'sonner';
 import ImageUploader from './ImageUploader';
 import ImageLinkGenerator from './ImageLinkGenerator';
@@ -21,10 +26,35 @@ interface NewsletterEditorProps {
 }
 
 const MenuBar = ({ editor }: { editor: any }) => {
+=======
+import NextImage from 'next/image';
+import type { Editor } from '@tiptap/react';
+import { toast } from 'sonner';
+
+interface NewsletterData {
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  status?: string;
+  coverImage?: string;
+  gallery?: string[];
+  contentHtml?: string;
+  contentMarkdown?: string;
+}
+
+interface NewsletterEditorProps {
+  onSubmit: (data: NewsletterData) => void;
+  initialData?: NewsletterData | null;
+  isLoading?: boolean;
+}
+
+const MenuBar = ({ editor }: { editor: Editor | null }) => {
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
   const [inputMode, setInputMode] = useState<'none' | 'link' | 'image'>('none');
   const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
+<<<<<<< HEAD
     if (inputMode === 'none') {
       setInputValue('');
       editor?.commands.focus();
@@ -37,6 +67,28 @@ const MenuBar = ({ editor }: { editor: any }) => {
   if (!editor) return null;
 
   const handleInputSubmit = (e?: React.FormEvent | React.KeyboardEvent | React.MouseEvent) => {
+=======
+    // keep focus synced with the editor when input mode toggles
+    if (inputMode === 'none') {
+      editor?.commands.focus();
+    }
+  }, [inputMode, editor]);
+
+  const openLinkInput = () => {
+    const previousUrl = editor?.getAttributes('link')?.href || '';
+    setInputValue(previousUrl);
+    setInputMode('link');
+  };
+
+  const openImageInput = () => {
+    setInputValue('');
+    setInputMode('image');
+  };
+
+  if (!editor) return null;
+
+  const handleInputSubmit = (e?: React.SyntheticEvent) => {
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
     if (e) e.preventDefault();
 
     if (!inputValue.trim()) {
@@ -65,7 +117,11 @@ const MenuBar = ({ editor }: { editor: any }) => {
     closeInput();
   };
 
+<<<<<<< HEAD
   const handleKeyDown = (e: React.KeyboardEvent) => {
+=======
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
     if (e.key === 'Escape') {
       closeInput();
     } else if (e.key === 'Enter') {
@@ -102,13 +158,21 @@ const MenuBar = ({ editor }: { editor: any }) => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder={inputMode === 'image' ? "Paste image URL here..." : "Paste link URL here..."}
+<<<<<<< HEAD
             className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-[var(--brand-purple)]"
+=======
+            className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-(--brand-purple)]"
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
             onKeyDown={handleKeyDown}
           />
           <button
             type="button"
             onClick={handleInputSubmit}
+<<<<<<< HEAD
             className="px-3 py-1 bg-[var(--brand-purple)] text-white text-xs font-bold rounded hover:bg-black transition-colors"
+=======
+            className="px-3 py-1 bg-(--brand-purple)] text-white text-xs font-bold rounded hover:bg-black transition-colors"
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
           >
             Apply
           </button>
@@ -150,8 +214,13 @@ const MenuBar = ({ editor }: { editor: any }) => {
       <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={btnClass(editor.isActive('orderedList'))} title="Numbered List">1. List</button>
       <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={btnClass(editor.isActive('blockquote'))} title="Quote">❝ Quote</button>
       <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+<<<<<<< HEAD
       <button type="button" onClick={() => setInputMode('link')} className={btnClass(editor.isActive('link'))} title="Add Link">🔗</button>
       <button type="button" onClick={() => setInputMode('image')} className={btnClass(false)} title="Add Image">🖼️</button>
+=======
+      <button type="button" onClick={openLinkInput} className={btnClass(editor?.isActive?.('link') ?? false)} title="Add Link">🔗</button>
+      <button type="button" onClick={openImageInput} className={btnClass(false)} title="Add Image">🖼️</button>
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
     </div>
   );
 };
@@ -172,7 +241,11 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
       Underline,
       Link.configure({ openOnClick: false }),
       // REMOVED: ExtensionBubbleMenu.configure(...) to prevent double initialization conflict
+<<<<<<< HEAD
       Image.extend({
+=======
+      TiptapImage.extend({
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
         addAttributes() {
           return {
             ...this.parent?.(),
@@ -231,8 +304,12 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
       status,
       coverImage,
       gallery,
+<<<<<<< HEAD
       contentHtml: editor.getHTML(),
       template: 'default'
+=======
+      contentHtml: editor.getHTML()
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
     });
   };
 
@@ -248,7 +325,11 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Headline</label>
+<<<<<<< HEAD
             <input type="text" value={title} onChange={handleTitleChange} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" placeholder="Newsletter Headline" />
+=======
+            <input type="text" value={title} onChange={handleTitleChange} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-(--brand-purple)] focus:outline-none" placeholder="Newsletter Headline" />
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Slug</label>
@@ -256,7 +337,11 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Summary</label>
+<<<<<<< HEAD
             <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" />
+=======
+            <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-(--brand-purple)] focus:outline-none" />
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
           </div>
         </div>
         <div className="space-y-4">
@@ -268,6 +353,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
             </select>
           </div>
           <div>
+<<<<<<< HEAD
              <label className="block text-sm font-bold text-gray-700 mb-3">Cover Image</label>
              <ImageUploader 
                onImageUpload={(url) => setCoverImage(url)}
@@ -279,6 +365,21 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
                  <img src={coverImage} alt="Cover" className="h-32 object-cover rounded border border-gray-300" /> 
                </div>
              )}
+=======
+            <label className="block text-sm font-bold text-gray-700 mb-1">Cover Image URL</label>
+            <input
+              type="text"
+              value={coverImage}
+              onChange={(e) => setCoverImage(e.target.value)}
+              placeholder="https://res.cloudinary.com/..."
+              className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-(--brand-purple) focus:outline-none"
+            />
+            {coverImage && (
+              <div className="mt-2 h-32 w-full relative rounded border overflow-hidden">
+                <NextImage src={coverImage} alt="Cover image preview" fill style={{ objectFit: 'cover' }} />
+              </div>
+            )}
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
           </div>
 
           <div className="pt-2 border-t border-gray-200 mt-2">
@@ -297,7 +398,11 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
               <div className="flex flex-wrap gap-2">
                 {gallery.map((img, idx) => (
                   <div key={idx} className="relative group w-16 h-16">
+<<<<<<< HEAD
                     <img src={img} className="w-full h-full object-cover rounded border" />
+=======
+                    <NextImage src={img} alt={`Gallery image ${idx + 1}`} fill style={{ objectFit: 'cover' }} className="rounded border" />
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
                     <button
                       type="button"
                       onClick={() => removeGalleryImage(idx)}
@@ -318,8 +423,13 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
         <div className="flex justify-between items-end">
           <label className="text-xl font-bold text-gray-800">Content</label>
         </div>
+<<<<<<< HEAD
         <div className="bg-gray-100 p-2 md:p-4 rounded-lg border border-gray-200 min-h-[50vh] md:min-h-[800px] flex justify-center relative">
           <div className="w-full max-w-[850px] bg-white shadow-lg min-h-[50vh] md:min-h-[800px] flex flex-col rounded-sm">
+=======
+        <div className="bg-gray-100 p-2 md:p-4 rounded-lg border border-gray-200 min-h-[50vh] md:min-h-200 flex justify-center relative">
+          <div className="w-full max-w-212.5 bg-white shadow-lg min-h-[50vh] md:min-h-200 flex flex-col rounded-sm">
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
             <div className="overflow-x-auto">
               <MenuBar editor={editor} />
             </div>
@@ -375,6 +485,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
       <div className="sticky bottom-4 z-20 flex justify-end gap-4">
         <div className="flex gap-4 bg-white/90 backdrop-blur p-2 rounded-lg shadow-xl border border-gray-200">
           <button type="button" onClick={() => window.history.back()} className="px-6 py-2 rounded font-semibold text-gray-700 hover:bg-gray-100">Cancel</button>
+<<<<<<< HEAD
           <button type="submit" disabled={isLoading} className="px-8 py-2 rounded bg-[var(--brand-purple)] text-white font-bold hover:bg-black transition">{isLoading ? 'Saving...' : initialData ? 'Update' : 'Publish'}</button>
         </div>
       </div>
@@ -387,6 +498,11 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
         </p>
         <ImageLinkGenerator isLoading={isLoading} />
       </div>
+=======
+          <button type="submit" disabled={isLoading} className="px-8 py-2 rounded bg-(--brand-purple) text-white font-bold hover:bg-black transition">{isLoading ? 'Saving...' : initialData ? 'Update' : 'Publish'}</button>
+        </div>
+      </div>
+>>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
       <style jsx global>{`
         .ProseMirror { min-height: 500px; outline: none; }
         .ProseMirror blockquote { border-left: 4px solid #e5e7eb; padding-left: 1rem; font-style: italic; color: #4b5563; }
