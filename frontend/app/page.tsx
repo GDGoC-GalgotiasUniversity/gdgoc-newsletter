@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import WeatherWidget from '@/components/WeatherWidget';
 
-import WeatherWidget  from '../components/WeatherWidget';
+import WeatherWidget from '../components/WeatherWidget';
 
 
 export const dynamic = 'force-dynamic';
@@ -192,17 +192,7 @@ export default async function HomePage() {
             </ul>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* 3. WEATHER WIDGET (Restored) */}
-          {/* <div className="border border-[var(--ink-black)] p-4 text-center">
-            <div className="font-gothic text-2xl text-[var(--ink-gray)] mb-1">Campus Weather</div>
-            <div className="font-serif text-4xl font-bold mb-1">24°C</div>
-            <div className="font-sans-accent text-xs text-[var(--brand-purple)]">SUNNY &bull; CODE COMPILING</div>
-          </div>           */}
-          <WeatherWidget />
 
->>>>>>> origin/develop
         </aside>
 
       </div>
