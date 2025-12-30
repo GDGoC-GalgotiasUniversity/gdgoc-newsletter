@@ -431,6 +431,42 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
             <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" />
 
           </div>
+
+          <div className="pt-2 border-t border-gray-200 mt-2">
+            <label className="block text-sm font-bold text-gray-700 mb-3">Gallery Images (Carousel)</label>
+            <GalleryImageUploader
+              onImageUpload={handleAddGalleryImage}
+              isLoading={isLoading}
+            />
+            {gallery.length > 0 && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={gallery}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-2 mt-4">
+                    <p className="text-xs text-gray-500 font-semibold">Drag or use arrows to reorder images:</p>
+                    {gallery.map((img, idx) => (
+                      <SortableGalleryItem
+                        key={img}
+                        id={img}
+                        img={img}
+                        idx={idx}
+                        totalImages={gallery.length}
+                        onMoveUp={moveGalleryImageUp}
+                        onMoveDown={moveGalleryImageDown}
+                        onRemove={removeGalleryImage}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+          </div>
         </div>
         <div className="space-y-4">
           <div>
@@ -472,42 +508,6 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
                   />
                 </div>
               </div>
-            )}
-          </div>
-
-          <div className="pt-2 border-t border-gray-200 mt-2">
-            <label className="block text-sm font-bold text-gray-700 mb-3">Gallery Images (Carousel)</label>
-            <GalleryImageUploader
-              onImageUpload={handleAddGalleryImage}
-              isLoading={isLoading}
-            />
-            {gallery.length > 0 && (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={gallery}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-2">
-                    <p className="text-xs text-gray-500 font-semibold">Drag or use arrows to reorder images:</p>
-                    {gallery.map((img, idx) => (
-                      <SortableGalleryItem
-                        key={img}
-                        id={img}
-                        img={img}
-                        idx={idx}
-                        totalImages={gallery.length}
-                        onMoveUp={moveGalleryImageUp}
-                        onMoveDown={moveGalleryImageDown}
-                        onRemove={removeGalleryImage}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
             )}
           </div>
         </div>
