@@ -347,7 +347,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
   };
 
   const handleAddGalleryImage = (url: string) => {
-    setGallery([...gallery, url]);
+    setGallery(prevGallery => [...prevGallery, url]);
   };
 
   const removeGalleryImage = (index: number) => {

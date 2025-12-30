@@ -10,75 +10,83 @@ interface GalleryImageUploaderProps {
 
 export default function GalleryImageUploader({ onImageUpload, isLoading }: GalleryImageUploaderProps) {
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
     const [dragActive, setDragActive] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleUpload = async (files: FileList) => {
-        const validFiles: File[] = [];
+    const uploadSingleFile = async (file: File): Promise<string | null> => {
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
 
-        // Validate all files first
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/cloudinary-upload`, {
+                method: 'POST',
+                body: formData,
+            });
 
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Upload failed');
+            }
+
+            return data.imageUrl;
+        } catch (error: any) {
+            console.error(`Upload error for ${file.name}:`, error);
+            toast.error(`Failed to upload ${file.name}`);
+            return null;
+        }
+    };
+
+    const handleUpload = async (files: FileList | File[]) => {
+        // Convert FileList to array
+        const fileArray = Array.from(files);
+
+        // Validate files
+        const validFiles = fileArray.filter(file => {
             if (!file.type.startsWith('image/')) {
                 toast.error(`${file.name} is not an image file`);
-                continue;
+                return false;
             }
-
             if (file.size > 10 * 1024 * 1024) {
                 toast.error(`${file.name} exceeds 10MB limit`);
-                continue;
+                return false;
             }
-
-            validFiles.push(file);
-        }
-
-        if (validFiles.length === 0) return;
-
-        setUploading(true);
-        const uploadPromises = validFiles.map(async (file) => {
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
-
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-                const response = await fetch(`${apiUrl}/api/cloudinary-upload`, {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'Upload failed');
-                }
-
-                return data.imageUrl;
-            } catch (error: any) {
-                console.error(`Upload error for ${file.name}:`, error);
-                toast.error(`Failed to upload ${file.name}`);
-                return null;
-            }
+            return true;
         });
 
-        try {
-            const results = await Promise.all(uploadPromises);
-            const successfulUploads = results.filter((url): url is string => url !== null);
+        if (validFiles.length === 0) {
+            return;
+        }
 
-            if (successfulUploads.length > 0) {
-                toast.success(`${successfulUploads.length} image${successfulUploads.length > 1 ? 's' : ''} uploaded!`);
-                successfulUploads.forEach(url => onImageUpload(url));
-            }
+        setUploading(true);
+        setUploadProgress({ current: 0, total: validFiles.length });
 
-            // Reset input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
+        let successCount = 0;
+
+        // Upload files one by one to avoid rate limiting
+        for (let i = 0; i < validFiles.length; i++) {
+            setUploadProgress({ current: i + 1, total: validFiles.length });
+
+            const url = await uploadSingleFile(validFiles[i]);
+
+            if (url) {
+                onImageUpload(url);
+                successCount++;
             }
-        } catch (error: any) {
-            console.error('Upload error:', error);
-            toast.error('Failed to upload images');
-        } finally {
-            setUploading(false);
+        }
+
+        setUploading(false);
+        setUploadProgress({ current: 0, total: 0 });
+
+        if (successCount > 0) {
+            toast.success(`Successfully uploaded ${successCount} image${successCount > 1 ? 's' : ''}!`);
+        }
+
+        // Reset file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
     };
 
@@ -140,7 +148,9 @@ export default function GalleryImageUploader({ onImageUpload, isLoading }: Galle
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                             </div>
-                            <p className="text-xs font-semibold text-[var(--brand-purple)]">Uploading...</p>
+                            <p className="text-xs font-semibold text-[var(--brand-purple)]">
+                                Uploading {uploadProgress.current} of {uploadProgress.total}...
+                            </p>
                         </>
                     ) : (
                         <>
