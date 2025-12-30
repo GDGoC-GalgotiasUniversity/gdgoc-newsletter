@@ -12,16 +12,17 @@ export default function NewNewsletterPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    // Check if key is verified
-    const keyVerified = localStorage.getItem('adminKeyVerified');
-    if (!keyVerified) {
-      router.push('/admin-key');
-      return;
-    }
+  // Check standard Auth Token & Role
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-    // Allow access with just key verification
-    setIsAuthorized(true);
-  }, [router]);
+  if (!token || user.role !== 'admin') {
+    router.push('/login');
+    return;
+  }
+
+  setIsAuthorized(true);
+}, [router]);
 
   const handleSubmit = async (formData: any) => {
     setIsLoading(true);
