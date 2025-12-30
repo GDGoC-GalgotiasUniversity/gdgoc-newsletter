@@ -1,21 +1,17 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
-// Import BubbleMenu from the specific menus path for v3
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-
 import TiptapImage from '@tiptap/extension-image';
-
-import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
-// REMOVED: import ExtensionBubbleMenu from '@tiptap/extension-bubble-menu'; <-- Causing the conflict
 import { useState, useEffect } from 'react';
-
 import NextImage from 'next/image';
 import type { Editor } from '@tiptap/react';
 import { toast } from 'sonner';
+import CloudinaryImageButton from './CloudinaryImageButton';
+import ImageLinkGenerator from './ImageLinkGenerator';
+import DragDropImageUploader from './DragDropImageUploader';
 
 interface NewsletterData {
   title?: string;
@@ -56,6 +52,22 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   const openImageInput = () => {
     setInputValue('');
     setInputMode('image');
+  };
+
+  const handleCloudinaryImageInsert = (imageUrl: string) => {
+    if (editor) {
+      editor.chain().focus().insertContent([
+        {
+          type: 'image',
+          attrs: {
+            src: imageUrl,
+            class: 'w-full block mb-4 rounded-lg'
+          }
+        },
+        { type: 'paragraph' }
+      ]).run();
+      toast.success('Image inserted from Cloudinary');
+    }
   };
 
   if (!editor) return null;
@@ -130,7 +142,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
             onChange={(e) => setInputValue(e.target.value)}
             placeholder={inputMode === 'image' ? "Paste image URL here..." : "Paste link URL here..."}
 
-            className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-(--brand-purple)]"
+            className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-[var(--brand-purple)]"
 
             onKeyDown={handleKeyDown}
           />
@@ -138,7 +150,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
             type="button"
             onClick={handleInputSubmit}
 
-            className="px-3 py-1 bg-(--brand-purple)] text-white text-xs font-bold rounded hover:bg-black transition-colors"
+            className="px-3 py-1 bg-[var(--brand-purple)] text-white text-xs font-bold rounded hover:bg-black transition-colors"
 
           >
             Apply
@@ -184,7 +196,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
       <button type="button" onClick={openLinkInput} className={btnClass(editor?.isActive?.('link') ?? false)} title="Add Link">🔗</button>
       <button type="button" onClick={openImageInput} className={btnClass(false)} title="Add Image">🖼️</button>
-
+      <CloudinaryImageButton onImageInsert={handleCloudinaryImageInsert} />
     </div>
   );
 };
@@ -201,11 +213,9 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Underline,
-      Link.configure({ openOnClick: false }),
-      // REMOVED: ExtensionBubbleMenu.configure(...) to prevent double initialization conflict
-
+      StarterKit.configure({
+        link: { openOnClick: false },
+      }),
       TiptapImage.extend({
         addAttributes() {
           return {
@@ -283,7 +293,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Headline</label>
 
-            <input type="text" value={title} onChange={handleTitleChange} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-(--brand-purple)] focus:outline-none" placeholder="Newsletter Headline" />
+            <input type="text" value={title} onChange={handleTitleChange} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" placeholder="Newsletter Headline" />
 
           </div>
           <div>
@@ -293,7 +303,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Summary</label>
 
-            <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-(--brand-purple)] focus:outline-none" />
+            <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" />
 
           </div>
         </div>
@@ -306,21 +316,25 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
             </select>
           </div>
           <div>
-
-            <label className="block text-sm font-bold text-gray-700 mb-1">Cover Image URL</label>
-            <input
-              type="text"
-              value={coverImage}
-              onChange={(e) => setCoverImage(e.target.value)}
-              placeholder="https://res.cloudinary.com/..."
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-(--brand-purple) focus:outline-none"
+            <label className="block text-sm font-bold text-gray-700 mb-3">Cover Image</label>
+            <DragDropImageUploader 
+              onImageUpload={(url) => setCoverImage(url)}
+              isLoading={isLoading}
             />
             {coverImage && (
-              <div className="mt-2 h-32 w-full relative rounded border overflow-hidden">
-                <NextImage src={coverImage} alt="Cover image preview" fill style={{ objectFit: 'cover' }} />
+              <div className="mt-4">
+                <p className="text-xs text-gray-600 mb-2 font-semibold">Current cover image:</p>
+                <div className="h-40 w-full relative rounded-lg border-2 border-[var(--brand-purple)] overflow-hidden">
+                  <NextImage 
+                    src={coverImage} 
+                    alt="Cover image preview" 
+                    fill 
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: 'cover' }} 
+                  />
+                </div>
               </div>
             )}
-
           </div>
 
           <div className="pt-2 border-t border-gray-200 mt-2">
