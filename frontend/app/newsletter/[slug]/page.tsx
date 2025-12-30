@@ -10,7 +10,6 @@ async function getNewsletter(slug: string) {
     // FIX: Add localhost fallback like you have in the main list page
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-    console.log(`📖 Fetching newsletter: ${slug} from ${apiUrl}`);
 
     const response = await fetch(`${apiUrl}/api/newsletters/${slug}`, {
       cache: 'no-store',
@@ -22,16 +21,16 @@ async function getNewsletter(slug: string) {
     }
 
     const data = await response.json();
-    console.log('✅ Newsletter fetched:', {
-      title: data.data?.title,
-      slug: data.data?.slug,
-      hasGallery: !!data.data?.gallery,
-      galleryCount: data.data?.gallery?.length || 0,
-      gallery: data.data?.gallery || [],
-    });
+    // console.log('✅ Newsletter fetched:', {
+    //   title: data.data?.title,
+    //   slug: data.data?.slug,
+    //   hasGallery: !!data.data?.gallery,
+    //   galleryCount: data.data?.gallery?.length || 0,
+    //   gallery: data.data?.gallery || [],
+    // });
     return data.data;
   } catch (error) {
-    console.error("❌ Error fetching newsletter:", error);
+    console.error(" Error fetching newsletter:", error);
     return null;
   }
 }

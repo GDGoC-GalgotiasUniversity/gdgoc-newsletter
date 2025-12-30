@@ -48,12 +48,12 @@ router.get('/api/newsletters/:slug', async (req, res) => {
   try {
     const newsletter = await Newsletter.findOne({ slug: req.params.slug });
 
-    console.log('📖 Fetching newsletter:', {
-      slug: req.params.slug,
-      found: !!newsletter,
-      hasGallery: newsletter ? !!newsletter.gallery : null,
-      galleryCount: newsletter?.gallery?.length || 0,
-    });
+    // console.log(' Fetching newsletter:', {
+    //   slug: req.params.slug,
+    //   found: !!newsletter,
+    //   hasGallery: newsletter ? !!newsletter.gallery : null,
+    //   galleryCount: newsletter?.gallery?.length || 0,
+    // });
 
     if (!newsletter) {
       return res.status(404).json({ success: false, message: 'Newsletter not found' });
@@ -82,7 +82,7 @@ router.get('/api/newsletters/:slug', async (req, res) => {
       }
     }
 
-    console.log('✅ Sending newsletter data:', {
+    console.log('Sending newsletter data:', {
       title: newsletter.title,
       slug: newsletter.slug,
       hasGallery: !!newsletter.gallery,

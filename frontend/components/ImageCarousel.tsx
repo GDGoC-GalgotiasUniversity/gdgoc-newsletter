@@ -12,11 +12,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Debug logging
-  console.log('ImageCarousel received images:', images);
-
   if (!images || images.length === 0) {
-    console.log('ImageCarousel: No images provided');
     return null;
   }
 

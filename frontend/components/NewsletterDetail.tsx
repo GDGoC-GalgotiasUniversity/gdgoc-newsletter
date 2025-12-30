@@ -23,10 +23,6 @@ export default function NewsletterDetail({ newsletter }: { newsletter: Newslette
   const content = newsletter.contentHtml || newsletter.contentMarkdown || '';
   const date = newsletter.publishedAt || newsletter.createdAt;
 
-  // Debug logging
-  console.log('NewsletterDetail received newsletter:', newsletter);
-  console.log('Gallery field:', newsletter.gallery);
-
   // Combine cover image and gallery images for carousel
   // Cover image appears first if it exists
   const carouselImages = useMemo(() => {
