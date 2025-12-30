@@ -107,11 +107,8 @@ export default function NewNewsletterPage() {
       <div className="container max-w-3xl mx-auto px-6">
         {/* Header */}
         <div className="mb-8 text-center">
-<<<<<<< HEAD
-          <p className="text-lg tracking-widest text-[var(--primary-purple)] mb-2 font-semibold">
-=======
           <p className="text-lg tracking-widest text-(--primary-purple) mb-2 font-semibold">
->>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
+
             CREATE NEWSLETTER
           </p>
           <h1 className="mb-3">Create Newsletter</h1>

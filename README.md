@@ -7,25 +7,17 @@ A public newsletter platform for GDG On Campus, Galgotias University.
 - Each newsletter has its own URL
 - Admins can publish newsletters
 - Built with Node.js + MongoDB
-<<<<<<< HEAD
 - Image hosting with Cloudinary
-=======
->>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
 
 ## Tech Stack
 Frontend: Next.js + Tailwind  
 Backend: Node.js + Express  
-<<<<<<< HEAD
 Database: MongoDB + Mongoose  
 Image Hosting: Cloudinary
-=======
-Database: MongoDB + Mongoose
->>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
 
 ## Project status
 Initial setup and architecture phase.
 Refer to the shared Notion Docs for more help regarding development
-<<<<<<< HEAD
 
 ## Setup Instructions
 
@@ -53,6 +45,4 @@ CLOUDINARY_API_SECRET=your_api_secret
 ```
 NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
-```
-=======
->>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
+``` 

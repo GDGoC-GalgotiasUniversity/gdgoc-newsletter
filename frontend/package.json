@@ -19,10 +19,6 @@
     "@tiptap/starter-kit": "^3.14.0",
     "date-fns": "^4.1.0",
     "next": "16.1.0",
-<<<<<<< HEAD
-=======
-    "ngrok": "5.0.0-beta.2",
->>>>>>> 3a9b743 (fixed cloudinary errors and env errors)
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
