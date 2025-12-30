@@ -87,8 +87,15 @@ export default function Footer() {
                 </div>
 
                 {/* Bottom Bar */}
+<<<<<<< HEAD
+                <div className="pt-8 border-t border-[var(--gray-200)] flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-sm text-[var(--gray-500)] text-center md:text-left">
+                        © {currentYear} GDGoC Galgotias University. <span className="hidden md:inline mx-2">•</span> <span className="block md:inline mt-1 md:mt-0">Greater Noida, Uttar Pradesh</span>
+                    </p>
+=======
                 <div className="pt-8 border-t border-[var(--paper-accent)]/20 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-sans-accent text-[var(--paper-accent)]/60">
                     <p>© {currentYear} GDGoC Galgotias University. <span className="mx-2">•</span> Greater Noida, Uttar Pradesh</p>
+>>>>>>> origin/develop
                     <div className="flex gap-6">
                         <Link href="/" className="hover:text-[var(--paper-bg)] transition">Privacy Policy</Link>
                         <Link href="/" className="hover:text-[var(--paper-bg)] transition">Terms of Service</Link>
