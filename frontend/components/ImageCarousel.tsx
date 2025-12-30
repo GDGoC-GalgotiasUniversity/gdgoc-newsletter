@@ -46,7 +46,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
     }, 4000); // Change image every 4 seconds
 
     return () => clearInterval(interval);
-  }, [currentIndex, isPaused, images.length]);
+  }, [isPaused, images.length]); // Removed currentIndex to prevent interval recreation
 
   // Handle keyboard navigation
   useEffect(() => {
