@@ -23,7 +23,7 @@ const verifyAdmin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next(); // Proceed
   } else {
-    res.status(403).json({ success: false, message: 'Access Denied: Admins Only' });
+    res.status(403).json({ success: false, message: 'Access Denied: Beta, tumse na ho payega' });
   }
 };
 

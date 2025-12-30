@@ -19,6 +19,7 @@ app.use(express.json());
 
 // Request Logging Middleware
 app.use((req, res, next) => {
+  res.setHeader('X-Developer-Note', 'Don ko pakadna mushkil hi nahi, namumkin hai');
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
 });
@@ -36,6 +37,10 @@ app.use('/', newsletterRoutes);
 const uploadRoutes = require('./routes/upload');
 app.use('/api/upload', uploadRoutes);
 
+// Cloudinary Upload Route
+const cloudinaryUploadRoutes = require('./routes/cloudinary-upload');
+app.use('/api/cloudinary-upload', cloudinaryUploadRoutes);
+
 // Serve Static Uploads
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -51,6 +56,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     message: 'Server Error',
+    devMessage: 'Khopdi tod saale ka! (Something went wrong internally)',
     error: err.message
   });
 });

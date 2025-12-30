@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@plugin "@tailwindcss/typography"; 
 /* -----------------------------
    Theme: Dark Academia / Newspaper
 ------------------------------ */
@@ -138,4 +138,39 @@ h1, h2, h3, h4, h5 {
     column-count: 2; /* Split into 2 columns on tablets/desktop */
     text-align: justify;
   }
+}
+
+/* -----------------------------
+   Animation Utilities
+------------------------------ */
+.effect-scrunch {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Ensure element can be transformed */
+  display: inline-block; 
+  cursor: pointer;
+}
+
+/* Hover: A subtle lift (optional, makes it feel lighter) */
+.effect-scrunch:hover {
+  transform: translateY(-2px);
+}
+
+/* Active: The Satisfying Scrunch */
+.effect-scrunch:active {
+  transform: scale(0.96) rotate(-1deg); /* Slightly less rotation than the big button */
+}
+
+/* -----------------------------
+   Hidden Quirk: The Highlighter
+------------------------------ */
+::selection {
+  background: var(--brand-purple); /* Purple Highlighter */
+  color: #FDF6E3; /* Paper Color text */
+  text-shadow: none;
+}
+
+/* Make images turn purple when selected instead of blue overlay */
+img::selection {
+  background: transparent;
+  filter: sepia(100%) hue-rotate(240deg) saturate(400%);
 }

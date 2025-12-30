@@ -96,10 +96,10 @@ export default function RegisterPage() {
                 </Link>
                 
                 <Link 
-                    href="/login" 
+                    href="/newsletter" 
                     className="flex-1 bg-white border border-[var(--ink-black)] text-[var(--ink-black)] font-sans-accent text-center text-sm py-3 hover:bg-[var(--paper-accent)] transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                 >
-                    View Account
+                    View Newsletters
                 </Link>
             </div>
             
@@ -134,7 +134,7 @@ export default function RegisterPage() {
               type="text"
               required
               className="w-full p-3 border border-[var(--ink-black)] bg-white focus:outline-none focus:border-[var(--brand-purple)] font-serif"
-              placeholder="Ada Lovelace"
+              placeholder="Your Name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
@@ -146,7 +146,7 @@ export default function RegisterPage() {
               type="email"
               required
               className="w-full p-3 border border-[var(--ink-black)] bg-white focus:outline-none focus:border-[var(--brand-purple)] font-serif"
-              placeholder="name@example.com"
+              placeholder="Email Address"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
