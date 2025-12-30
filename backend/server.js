@@ -37,6 +37,7 @@ app.use('/', newsletterRoutes);
 const uploadRoutes = require('./routes/upload');
 app.use('/api/upload', uploadRoutes);
 
+
 // Cloudinary Upload Route
 const cloudinaryUploadRoutes = require('./routes/cloudinary-upload');
 app.use('/api/cloudinary-upload', cloudinaryUploadRoutes);

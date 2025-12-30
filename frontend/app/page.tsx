@@ -1,6 +1,17 @@
 import Link from 'next/link';
 import WeatherWidget from '@/components/WeatherWidget';
 
+// Stable fallback timestamp computed at module load (avoids calling Date.now() during render)
+const NOW_ISO = new Date().toISOString();
+
+type Story = {
+  title: string;
+  excerpt?: string;
+  slug: string;
+  coverImage?: string;
+  createdAt?: string | Date;
+};
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -30,14 +41,14 @@ export default async function HomePage() {
     title: "Welcome to GDGoC",
     excerpt: "The latest updates from our campus community will appear here soon.",
     slug: "#",
-    createdAt: new Date()
+    createdAt: NOW_ISO
   };
 
   // Sidebar Stories (Take next 2 or use placeholders)
   const sideStories = hasNewsletters ? newsletters.slice(1, 3) : [
     { title: "Kickstart Session", excerpt: "The introductory session...", slug: "#" },
     { title: "Web Development", excerpt: "Beyond the basics...", slug: "#" }
-  ];
+  ] as Story[];
 
   return (
     <main className="container mx-auto px-4 max-w-6xl py-6 md:py-12">
@@ -58,7 +69,7 @@ export default async function HomePage() {
 
             <div className="flex flex-col md:flex-row gap-6 mb-6">
               <div className="font-sans-accent text-xs text-[var(--ink-gray)] border-t border-b border-[var(--ink-gray)] py-2 w-full md:w-auto self-start">
-                By <span className="text-[var(--brand-purple)] font-bold">GDGoC Team</span> &bull; {new Date(coverStory.createdAt || Date.now()).toLocaleDateString()}
+                By <span className="text-[var(--brand-purple)] font-bold">GDGoC Team</span> &bull; {new Date(coverStory.createdAt || NOW_ISO).toLocaleDateString()}
               </div>
             </div>
 
@@ -107,7 +118,7 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {sideStories.map((story: any, i: number) => (
+              {sideStories.map((story: Story, i: number) => (
                 <article key={i} className="flex flex-col gap-3 group relative top-0 hover:-top-1 transition-all duration-300">
                   {story.coverImage ? (
                     <div className="aspect-[4/3] border border-[var(--ink-black)] relative overflow-hidden rounded-sm shadow-sm group-hover:shadow-md transition-shadow">
@@ -189,7 +200,7 @@ export default async function HomePage() {
                   Reminder
                 </span>
                 <Link href="#" className="font-serif hover:text-[var(--brand-purple)] leading-snug block">
-                  Don't forget to claim your Cloud Study Jam badges before the 30th.
+                  Do not forget to claim your Cloud Study Jam badges before the 30th.
                 </Link>
               </li>
             </ul>
