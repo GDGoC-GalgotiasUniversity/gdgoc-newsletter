@@ -1,6 +1,7 @@
-'use client';
+ 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 interface User {
   id: string;
@@ -15,6 +16,7 @@ interface AdminUsersProps {
 }
 
 export default function AdminUsers({ token }: AdminUsersProps) {
+  const auth = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -88,6 +90,18 @@ export default function AdminUsers({ token }: AdminUsersProps) {
 
       // Update local state
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+
+      // If we changed the currently logged-in user's role, persist it in auth context + localStorage
+      try {
+        const currentUser = auth.user;
+        if (currentUser && currentUser.id === userId) {
+          const updatedUser = { ...currentUser, role: newRole } as User;
+          const currentToken = localStorage.getItem('token') || '';
+          auth.login(currentToken, updatedUser);
+        }
+      } catch (e) {
+        // noop
+      }
     } catch (err: any) {
       alert(err.message);
     }
