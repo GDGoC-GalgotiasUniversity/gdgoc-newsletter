@@ -66,12 +66,24 @@ export default function CloudinaryImageButton({ onImageInsert, isLoading }: Clou
     <>
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 space-y-4">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowModal(false);
+            }
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-bold text-gray-800">Upload Image</h3>
               <button
-                onClick={() => setShowModal(false)}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowModal(false);
+                }}
                 className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
               >
                 ×
@@ -116,7 +128,12 @@ export default function CloudinaryImageButton({ onImageInsert, isLoading }: Clou
             )}
 
             <button
-              onClick={() => fileInputRef.current?.click()}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
               disabled={uploading || isLoading}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
@@ -129,7 +146,11 @@ export default function CloudinaryImageButton({ onImageInsert, isLoading }: Clou
       {/* Button */}
       <button
         type="button"
-        onClick={() => setShowModal(true)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setShowModal(true);
+        }}
         disabled={isLoading}
         className="p-1.5 rounded min-w-[32px] flex items-center justify-center transition-colors text-gray-600 hover:bg-gray-200 hover:text-gray-800 title-'Upload Image'"
         title="Upload Image from Cloudinary"
