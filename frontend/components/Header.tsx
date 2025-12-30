@@ -28,7 +28,7 @@ export default function Header() {
                                 <button onClick={logout} className="hover:text-[var(--brand-purple)] underline">Sign Out</button>
                             </div>
                         ) : (
-                            <div className="flex gap-4">
+                            <div className="flex gap-4 whitespace-nowrap">
                                 <Link href="/login" className="hover:text-[var(--brand-purple)]">Log In</Link>
                                 <Link href="/register" className="hover:text-[var(--brand-purple)]">Subscribe</Link>
                             </div>

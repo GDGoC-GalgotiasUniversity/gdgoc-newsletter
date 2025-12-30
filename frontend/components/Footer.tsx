@@ -129,8 +129,8 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="pt-8 border-t border-[var(--gray-200)] flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-[var(--gray-500)]">
-                        © {currentYear} GDGoC Galgotias University.
+                    <p className="text-sm text-[var(--gray-500)] text-center md:text-left">
+                        © {currentYear} GDGoC Galgotias University. <span className="hidden md:inline mx-2">•</span> <span className="block md:inline mt-1 md:mt-0">Greater Noida, Uttar Pradesh</span>
                     </p>
                     <div className="flex gap-6">
                         <Link href="/" className="text-sm text-[var(--gray-500)] hover:text-[var(--google-blue)] transition">
