@@ -1,9 +1,6 @@
 import Link from 'next/link';
 import WeatherWidget from '@/components/WeatherWidget';
 
-import WeatherWidget  from '../components/WeatherWidget';
-
-
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -164,45 +161,41 @@ export default async function HomePage() {
           </div>
 
           {/* 3. IN BRIEF / ANNOUNCEMENTS */}
-          <div className="flex flex-col gap-0 bg-white p-6 border border-gray-200 rounded-lg shadow-sm">
-            <div className="border-b-2 border-gray-100 mb-4 pb-2">
-              <h3 className="font-sans-accent text-lg font-bold text-gray-800">In Brief</h3>
-            </div>
+          <div className="border border-[var(--ink-black)] p-6">
+            <h3 className="font-gothic text-2xl text-[var(--ink-gray)] mb-4 border-b border-[var(--ink-black)] pb-2">
+              In Brief
+            </h3>
 
             {/* List Items */}
-            <ul className="flex flex-col gap-5">
-              <li className="pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                <span className="text-[var(--brand-purple)] font-bold text-[10px] tracking-wider block mb-1 uppercase">Upcoming</span>
-                <Link href="#" className="font-serif hover:text-[var(--brand-purple)] font-medium leading-snug block text-gray-800 hover:underline">
+            <ul className="flex flex-col gap-4">
+              <li className="pb-4 border-b border-[var(--ink-gray)]/30 last:border-0 last:pb-0">
+                <span className="font-sans-accent text-[10px] tracking-widest block mb-1 uppercase text-[var(--brand-purple)]">
+                  Upcoming
+                </span>
+                <Link href="#" className="font-serif hover:text-[var(--brand-purple)] leading-snug block">
                   Hackathon 2025 registration opens this Friday. Teams of 4 required.
                 </Link>
               </li>
-              <li className="pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                <span className="text-blue-600 font-bold text-[10px] tracking-wider block mb-1 uppercase">Announcement</span>
-                <Link href="#" className="font-serif hover:text-[var(--brand-purple)] font-medium leading-snug block text-gray-800 hover:underline">
+              <li className="pb-4 border-b border-[var(--ink-gray)]/30 last:border-0 last:pb-0">
+                <span className="font-sans-accent text-[10px] tracking-widest block mb-1 uppercase text-[var(--ink-gray)]">
+                  Announcement
+                </span>
+                <Link href="#" className="font-serif hover:text-[var(--brand-purple)] leading-snug block">
                   New core team members announced for the Web Dev domain.
                 </Link>
               </li>
-              <li className="pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                <span className="text-orange-600 font-bold text-[10px] tracking-wider block mb-1 uppercase">Reminder</span>
-                <Link href="#" className="font-serif hover:text-[var(--brand-purple)] font-medium leading-snug block text-gray-800 hover:underline">
+              <li className="pb-4 border-b border-[var(--ink-gray)]/30 last:border-0 last:pb-0">
+                <span className="font-sans-accent text-[10px] tracking-widest block mb-1 uppercase text-[var(--ink-gray)]">
+                  Reminder
+                </span>
+                <Link href="#" className="font-serif hover:text-[var(--brand-purple)] leading-snug block">
                   Don't forget to claim your Cloud Study Jam badges before the 30th.
                 </Link>
               </li>
             </ul>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* 3. WEATHER WIDGET (Restored) */}
-          {/* <div className="border border-[var(--ink-black)] p-4 text-center">
-            <div className="font-gothic text-2xl text-[var(--ink-gray)] mb-1">Campus Weather</div>
-            <div className="font-serif text-4xl font-bold mb-1">24°C</div>
-            <div className="font-sans-accent text-xs text-[var(--brand-purple)]">SUNNY &bull; CODE COMPILING</div>
-          </div>           */}
-          <WeatherWidget />
 
->>>>>>> origin/develop
         </aside>
 
       </div>

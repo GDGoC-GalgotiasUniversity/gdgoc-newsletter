@@ -75,10 +75,7 @@ export default function Header() {
                         Front Page
                     </Link>
 
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/develop
                     <Link href="/newsletter" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
                         Archives
                     </Link>
@@ -87,11 +84,7 @@ export default function Header() {
                         About Us
                     </Link>
 
-<<<<<<< HEAD
                     <Link href="https://gdg-socials.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
-=======
-                    <Link href="https://gdg-socials.vercel.app/" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
->>>>>>> origin/develop
                         Socials
                     </Link>
 
