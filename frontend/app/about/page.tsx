@@ -21,7 +21,7 @@ export default function AboutPage() {
      
 
       <section className="mb-10">
-        <h2 className="font-gothic text-4xl text-[var(--ink-black)] mb-10 text-center">THE Team </h2>
+        <h2 className="font-gothic text-4xl text-[var(--ink-black)] mb-10 text-center">The Team</h2>
         </section>
 
         <section className="mb-16">
