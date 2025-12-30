@@ -37,6 +37,10 @@ app.use('/', newsletterRoutes);
 const uploadRoutes = require('./routes/upload');
 app.use('/api/upload', uploadRoutes);
 
+// Cloudinary Upload Route
+const cloudinaryUploadRoutes = require('./routes/cloudinary-upload');
+app.use('/api/cloudinary-upload', cloudinaryUploadRoutes);
+
 // Serve Static Uploads
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -134,7 +134,7 @@ export default function RegisterPage() {
               type="text"
               required
               className="w-full p-3 border border-[var(--ink-black)] bg-white focus:outline-none focus:border-[var(--brand-purple)] font-serif"
-              placeholder="Ada Lovelace"
+              placeholder="Your Name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
@@ -146,7 +146,7 @@ export default function RegisterPage() {
               type="email"
               required
               className="w-full p-3 border border-[var(--ink-black)] bg-white focus:outline-none focus:border-[var(--brand-purple)] font-serif"
-              placeholder="name@example.com"
+              placeholder="Email Address"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />

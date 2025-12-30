@@ -11,6 +11,8 @@ import TextAlign from '@tiptap/extension-text-align';
 // REMOVED: import ExtensionBubbleMenu from '@tiptap/extension-bubble-menu'; <-- Causing the conflict
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import ImageUploader from './ImageUploader';
+import ImageLinkGenerator from './ImageLinkGenerator';
 
 interface NewsletterEditorProps {
   onSubmit: (data: any) => void;
@@ -266,16 +268,16 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
             </select>
           </div>
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-1">Cover Image URL</label>
-             <input 
-               type="text" 
-               value={coverImage} 
-               onChange={(e) => setCoverImage(e.target.value)} 
-               placeholder="https://..."
-               className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" 
+             <label className="block text-sm font-bold text-gray-700 mb-3">Cover Image</label>
+             <ImageUploader 
+               onImageUpload={(url) => setCoverImage(url)}
+               isLoading={isLoading}
              />
              {coverImage && ( 
-               <img src={coverImage} alt="Cover" className="mt-2 h-32 object-cover rounded border" /> 
+               <div className="mt-4">
+                 <p className="text-xs text-gray-600 mb-2">Current cover image:</p>
+                 <img src={coverImage} alt="Cover" className="h-32 object-cover rounded border border-gray-300" /> 
+               </div>
              )}
           </div>
           
@@ -373,6 +375,15 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
             <button type="button" onClick={() => window.history.back()} className="px-6 py-2 rounded font-semibold text-gray-700 hover:bg-gray-100">Cancel</button>
             <button type="submit" disabled={isLoading} className="px-8 py-2 rounded bg-[var(--brand-purple)] text-white font-bold hover:bg-black transition">{isLoading ? 'Saving...' : initialData ? 'Update' : 'Publish'}</button>
          </div>
+      </div>
+
+      {/* Image Link Generator Section */}
+      <div className="mt-8 p-6 bg-gray-50 rounded-lg border-2 border-gray-300">
+        <h3 className="text-lg font-bold text-gray-800 mb-4">📸 Image Link Generator</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Need to add images to your newsletter content? Upload them here to get direct links you can paste into the editor.
+        </p>
+        <ImageLinkGenerator isLoading={isLoading} />
       </div>
       <style jsx global>{`
         .ProseMirror { min-height: 500px; outline: none; }
