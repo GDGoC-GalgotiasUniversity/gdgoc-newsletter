@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography"; 
+/* -----------------------------
+   Theme: Dark Academia / Newspaper
+------------------------------ */
+:root {
+  /* Paper & Ink */
+  --paper-bg: #FDF6E3;
+  --paper-accent: #F5E6D0; /* Slightly darker for cards */
+  --ink-black: #2c2c2c;    /* Soft Black for text */
+  --ink-gray: #595959;     /* Secondary text */
+  
+  /* Brand Accents */
+  --brand-purple: #4A148C; /* Deep Royal Purple */
+  --brand-purple-light: #7c43bd;
+  
+  /* Functional */
+  --border-color: #3E2723; /* Dark brown for dividing lines */
+}
+
+/* -----------------------------
+   Base Styles
+------------------------------ */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background-color: var(--paper-bg);
+  color: var(--ink-black);
+  /* The Paper Texture Effect */
+  background-image: radial-gradient(#d6d3c9 1px, transparent 1px);
+  background-size: 20px 20px;
+  
+  /* Typography - Default Body */
+  font-family: 'Lora', 'Times New Roman', serif;
+  line-height: 1.8;
+  font-size: 18px; /* Slightly larger for readability */
+}
+
+/* -----------------------------
+   Typography Utils
+------------------------------ */
+h1, h2, h3, h4, h5 {
+  font-family: 'Playfair Display', serif;
+  color: var(--brand-purple);
+  margin: 0;
+}
+
+/* The Blackletter Logo Font */
+.font-gothic {
+  font-family: 'UnifrakturCook', cursive;
+  font-weight: 400;
+}
+
+/* The "Date/Tag" Font */
+.font-sans-accent {
+  font-family: 'Google Sans', sans-serif; /* Keeping Google Sans for subtle branding */
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* The Drop Cap (Big First Letter) */
+.drop-cap::first-letter {
+  float: left;
+  font-size: 4.5rem;
+  line-height: 3.5rem;
+  font-weight: 700;
+  color: var(--brand-purple);
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  font-family: 'UnifrakturCook', cursive;
+}
+
+/* -----------------------------
+   Component Styles
+------------------------------ */
+/* Classic Newspaper Button */
+.btn-classic {
+  display: inline-block;
+  padding: 12px 32px;
+  background: transparent;
+  /* Double border looks more like a printed frame */
+  border: 3px double var(--brand-purple); 
+  color: var(--brand-purple);
+  font-family: 'Google Sans', sans-serif;
+  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 4px 4px 0px 0px rgba(74, 20, 140, 0.2); /* Ink shadow */
+}
+
+/* Hover: Lifts up slightly */
+.btn-classic:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px var(--brand-purple);
+  background: var(--paper-bg);
+}
+
+/* Active: The "Scrunch" / Stamp Effect */
+.btn-classic:active {
+  transform: translate(2px, 2px) scale(0.96) rotate(-2deg); /* Crunches and tilts */
+  box-shadow: 0px 0px 0px 0px var(--brand-purple); /* Shadow disappears */
+}
+
+/* Horizontal Rules */
+.separator-thick {
+  border: 0;
+  height: 3px;
+  background: var(--brand-purple);
+  margin: 2rem 0;
+}
+
+.separator-thin {
+  border: 0;
+  height: 1px;
+  background: var(--brand-purple);
+  margin: 1rem 0;
+  opacity: 0.3;
+}
+/* Newspaper Column Utility */
+.newspaper-columns {
+  column-count: 1; /* Mobile default */
+  column-gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .newspaper-columns {
+    column-count: 2; /* Split into 2 columns on tablets/desktop */
+    text-align: justify;
+  }
+}
