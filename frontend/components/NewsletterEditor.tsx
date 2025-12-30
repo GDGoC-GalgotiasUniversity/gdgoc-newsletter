@@ -2,7 +2,7 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 // Import BubbleMenu from the specific menus path for v3
-import { BubbleMenu } from '@tiptap/react/menus'; 
+import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Image from '@tiptap/extension-image';
@@ -36,7 +36,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
   const handleInputSubmit = (e?: React.FormEvent | React.KeyboardEvent | React.MouseEvent) => {
     if (e) e.preventDefault();
-    
+
     if (!inputValue.trim()) {
       closeInput();
       return;
@@ -44,17 +44,17 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
     if (inputMode === 'image') {
       editor.chain().focus().insertContent([
-        { 
-            type: 'image', 
-            attrs: { 
-                src: inputValue,
-                class: 'w-full block mb-4 rounded-lg'
-            } 
+        {
+          type: 'image',
+          attrs: {
+            src: inputValue,
+            class: 'w-full block mb-4 rounded-lg'
+          }
         },
         { type: 'paragraph' }
       ]).run();
       toast.success('Image inserted');
-    } 
+    }
     else if (inputMode === 'link') {
       editor.chain().focus().extendMarkRange('link').setLink({ href: inputValue }).run();
       toast.success('Link added');
@@ -83,7 +83,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
     closeInput();
   };
 
-  const btnClass = (isActive: boolean) => 
+  const btnClass = (isActive: boolean) =>
     `p-1.5 rounded min-w-[32px] flex items-center justify-center transition-colors ${isActive ? 'bg-gray-300 text-black shadow-inner font-bold' : 'text-gray-600 hover:bg-gray-200'}`;
 
   if (inputMode !== 'none') {
@@ -92,9 +92,9 @@ const MenuBar = ({ editor }: { editor: any }) => {
         <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
           {inputMode === 'image' ? 'Insert Image' : 'Edit Link'}
         </span>
-        
+
         <div className="flex-1 flex gap-2">
-          <input 
+          <input
             autoFocus
             type="text"
             value={inputValue}
@@ -103,23 +103,23 @@ const MenuBar = ({ editor }: { editor: any }) => {
             className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-[var(--brand-purple)]"
             onKeyDown={handleKeyDown}
           />
-          <button 
+          <button
             type="button"
             onClick={handleInputSubmit}
             className="px-3 py-1 bg-[var(--brand-purple)] text-white text-xs font-bold rounded hover:bg-black transition-colors"
           >
             Apply
           </button>
-          <button 
+          <button
             type="button"
             onClick={closeInput}
             className="px-3 py-1 bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded hover:bg-gray-100 transition-colors"
           >
             Cancel
           </button>
-          
+
           {inputMode === 'link' && editor.isActive('link') && (
-            <button 
+            <button
               type="button"
               onClick={removeLink}
               className="px-3 py-1 bg-red-50 border border-red-200 text-red-600 text-xs font-bold rounded hover:bg-red-100 transition-colors"
@@ -160,7 +160,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || '');
   const [status, setStatus] = useState(initialData?.status || 'draft');
   const [coverImage, setCoverImage] = useState(initialData?.coverImage || '');
-  
+
   const [galleryInput, setGalleryInput] = useState('');
   const [gallery, setGallery] = useState<string[]>(initialData?.gallery || []);
 
@@ -191,10 +191,10 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
     content: initialData?.contentHtml || initialData?.contentMarkdown || '',
     editorProps: {
       attributes: {
-        class: 'prose prose-lg max-w-none focus:outline-none min-h-[500px] p-8 prose-img:rounded-lg prose-img:shadow-sm prose-a:text-blue-600',
+        class: 'prose prose-lg max-w-none focus:outline-none min-h-[50vh] md:min-h-[500px] p-4 md:p-8 prose-img:rounded-lg prose-img:shadow-sm prose-a:text-blue-600',
       },
     },
-    immediatelyRender: false, 
+    immediatelyRender: false,
   });
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,7 +206,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
   };
 
   const handleAddGalleryImage = () => {
-    if(!galleryInput.trim()) return;
+    if (!galleryInput.trim()) return;
     setGallery([...gallery, galleryInput]);
     setGalleryInput('');
   };
@@ -266,46 +266,46 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
             </select>
           </div>
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-1">Cover Image URL</label>
-             <input 
-               type="text" 
-               value={coverImage} 
-               onChange={(e) => setCoverImage(e.target.value)} 
-               placeholder="https://..."
-               className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" 
-             />
-             {coverImage && ( 
-               <img src={coverImage} alt="Cover" className="mt-2 h-32 object-cover rounded border" /> 
-             )}
+            <label className="block text-sm font-bold text-gray-700 mb-1">Cover Image URL</label>
+            <input
+              type="text"
+              value={coverImage}
+              onChange={(e) => setCoverImage(e.target.value)}
+              placeholder="https://..."
+              className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none"
+            />
+            {coverImage && (
+              <img src={coverImage} alt="Cover" className="mt-2 h-32 object-cover rounded border" />
+            )}
           </div>
-          
+
           <div className="pt-2 border-t border-gray-200 mt-2">
             <label className="block text-sm font-bold text-gray-700 mb-1">Gallery Images (Optional)</label>
             <div className="flex gap-2 mb-2">
-                <input 
-                    type="text"
-                    value={galleryInput}
-                    onChange={(e) => setGalleryInput(e.target.value)}
-                    placeholder="Add image URL..."
-                    className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm"
-                />
-                <button type="button" onClick={handleAddGalleryImage} className="bg-gray-200 px-3 py-1 rounded text-xs font-bold hover:bg-gray-300">+</button>
+              <input
+                type="text"
+                value={galleryInput}
+                onChange={(e) => setGalleryInput(e.target.value)}
+                placeholder="Add image URL..."
+                className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm"
+              />
+              <button type="button" onClick={handleAddGalleryImage} className="bg-gray-200 px-3 py-1 rounded text-xs font-bold hover:bg-gray-300">+</button>
             </div>
             {gallery.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                    {gallery.map((img, idx) => (
-                        <div key={idx} className="relative group w-16 h-16">
-                            <img src={img} className="w-full h-full object-cover rounded border" />
-                            <button 
-                                type="button"
-                                onClick={() => removeGalleryImage(idx)}
-                                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ))}
-                </div>
+              <div className="flex flex-wrap gap-2">
+                {gallery.map((img, idx) => (
+                  <div key={idx} className="relative group w-16 h-16">
+                    <img src={img} className="w-full h-full object-cover rounded border" />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(idx)}
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -313,66 +313,68 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
 
       {/* Editor Section */}
       <div className="flex flex-col gap-2">
-         <div className="flex justify-between items-end">
-            <label className="text-xl font-bold text-gray-800">Content</label>
-         </div>
-         <div className="bg-gray-100 p-4 rounded-lg border border-gray-200 min-h-[800px] flex justify-center relative">
-            <div className="w-full max-w-[850px] bg-white shadow-lg min-h-[800px] flex flex-col rounded-sm">
-               <MenuBar editor={editor} />
-               
-               {/* --- BUBBLE MENU FOR IMAGES --- */}
-               {editor && (
-                   <BubbleMenu 
-                        editor={editor} 
-                        shouldShow={({ editor }) => editor.isActive('image')}
-                        className="flex gap-1 bg-white border border-gray-200 shadow-xl rounded-lg p-1"
-                   >
-                       <button
-                         type="button"
-                         onClick={setImgLeft}
-                         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'float-left mr-6 mb-4 max-w-[50%] rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
-                         title="Float Left"
-                       >
-                         ⬅️ Left
-                       </button>
-                       <button
-                         type="button"
-                         onClick={setImgCenter}
-                         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'block mx-auto mb-4 rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
-                         title="Center"
-                       >
-                         ⬇️ Center
-                       </button>
-                       <button
-                         type="button"
-                         onClick={setImgRight}
-                         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'float-right ml-6 mb-4 max-w-[50%] rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
-                         title="Float Right"
-                       >
-                         Right ➡️
-                       </button>
-                       <button
-                         type="button"
-                         onClick={setImgFull}
-                         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'w-full block mb-4 rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
-                         title="Full Width"
-                       >
-                         ↔️ Full
-                       </button>
-                   </BubbleMenu>
-               )}
-               
-               <EditorContent editor={editor} className="flex-1" />
+        <div className="flex justify-between items-end">
+          <label className="text-xl font-bold text-gray-800">Content</label>
+        </div>
+        <div className="bg-gray-100 p-2 md:p-4 rounded-lg border border-gray-200 min-h-[50vh] md:min-h-[800px] flex justify-center relative">
+          <div className="w-full max-w-[850px] bg-white shadow-lg min-h-[50vh] md:min-h-[800px] flex flex-col rounded-sm">
+            <div className="overflow-x-auto">
+              <MenuBar editor={editor} />
             </div>
-         </div>
+
+            {/* --- BUBBLE MENU FOR IMAGES --- */}
+            {editor && (
+              <BubbleMenu
+                editor={editor}
+                shouldShow={({ editor }) => editor.isActive('image')}
+                className="flex gap-1 bg-white border border-gray-200 shadow-xl rounded-lg p-1 overflow-x-auto max-w-[90vw]"
+              >
+                <button
+                  type="button"
+                  onClick={setImgLeft}
+                  className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'float-left mr-6 mb-4 max-w-[50%] rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
+                  title="Float Left"
+                >
+                  ⬅️ Left
+                </button>
+                <button
+                  type="button"
+                  onClick={setImgCenter}
+                  className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'block mx-auto mb-4 rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
+                  title="Center"
+                >
+                  ⬇️ Center
+                </button>
+                <button
+                  type="button"
+                  onClick={setImgRight}
+                  className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'float-right ml-6 mb-4 max-w-[50%] rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
+                  title="Float Right"
+                >
+                  Right ➡️
+                </button>
+                <button
+                  type="button"
+                  onClick={setImgFull}
+                  className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('image', { class: 'w-full block mb-4 rounded-lg' }) ? 'bg-purple-100 text-purple-700' : 'text-gray-600'}`}
+                  title="Full Width"
+                >
+                  ↔️ Full
+                </button>
+              </BubbleMenu>
+            )}
+
+            <EditorContent editor={editor} className="flex-1" />
+          </div>
+        </div>
       </div>
 
       {/* Actions */}
       <div className="sticky bottom-4 z-20 flex justify-end gap-4">
-         <div className="flex gap-4 bg-white/90 backdrop-blur p-2 rounded-lg shadow-xl border border-gray-200">
-            <button type="button" onClick={() => window.history.back()} className="px-6 py-2 rounded font-semibold text-gray-700 hover:bg-gray-100">Cancel</button>
-            <button type="submit" disabled={isLoading} className="px-8 py-2 rounded bg-[var(--brand-purple)] text-white font-bold hover:bg-black transition">{isLoading ? 'Saving...' : initialData ? 'Update' : 'Publish'}</button>
-         </div>
+        <div className="flex gap-4 bg-white/90 backdrop-blur p-2 rounded-lg shadow-xl border border-gray-200">
+          <button type="button" onClick={() => window.history.back()} className="px-6 py-2 rounded font-semibold text-gray-700 hover:bg-gray-100">Cancel</button>
+          <button type="submit" disabled={isLoading} className="px-8 py-2 rounded bg-[var(--brand-purple)] text-white font-bold hover:bg-black transition">{isLoading ? 'Saving...' : initialData ? 'Update' : 'Publish'}</button>
+        </div>
       </div>
       <style jsx global>{`
         .ProseMirror { min-height: 500px; outline: none; }

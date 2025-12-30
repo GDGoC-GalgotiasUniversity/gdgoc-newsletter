@@ -61,6 +61,9 @@ export default function WeatherWidget() {
       <div className="font-gothic text-2xl text-[var(--ink-gray)] mb-1">
         Campus Weather
       </div>
+      <div className="font-sans-accent text-xs text-[var(--ink-light)] mb-2 uppercase tracking-wider">
+        Greater Noida, UP
+      </div>
 
       <div className="font-serif text-4xl font-bold mb-1">
         {Math.round(weather.temperature)}°C

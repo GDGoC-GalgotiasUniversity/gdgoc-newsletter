@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 // @ts-ignore
-import AdminUsers from '@/components/AdminUsers'; 
+import AdminUsers from '@/components/AdminUsers';
 
 interface Newsletter {
     _id: string;
@@ -203,8 +203,8 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="border-2 border-[var(--ink-black)] bg-white shadow-sm overflow-hidden">
-                        <table className="w-full text-left border-collapse">
+                    <div className="border-2 border-[var(--ink-black)] bg-white shadow-sm overflow-hidden overflow-x-auto">
+                        <table className="w-full text-left border-collapse min-w-[600px]">
                             <thead className="bg-[var(--paper-accent)] border-b-2 border-[var(--ink-black)]">
                                 <tr>
                                     <th className="font-sans-accent text-xs p-4 border-r border-[var(--ink-black)] w-16">#</th>
@@ -280,7 +280,7 @@ export default function AdminDashboard() {
                             <div className="font-sans-accent text-xs text-[var(--ink-gray)]">
                                 Showing <span className="font-bold text-[var(--ink-black)]">{startIndex + 1}</span> to <span className="font-bold text-[var(--ink-black)]">{Math.min(startIndex + itemsPerPage, newsletters.length)}</span> of {newsletters.length} records
                             </div>
-                            
+
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={handlePrevPage}
@@ -289,7 +289,7 @@ export default function AdminDashboard() {
                                 >
                                     <span>←</span> Prev
                                 </button>
-                                
+
                                 <span className="font-serif italic px-2">
                                     Page {currentPage} of {totalPages}
                                 </span>

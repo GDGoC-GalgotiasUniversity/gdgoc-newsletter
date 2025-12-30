@@ -137,7 +137,7 @@ export default function NewNewsletterPage() {
         )}
 
         {/* Form */}
-        <div className="rounded-lg p-8 newsletter-page" style={{ backgroundColor: '#fff', border: '2px solid #000' }}>
+        <div className="rounded-lg p-4 md:p-8 newsletter-page" style={{ backgroundColor: '#fff', border: '2px solid #000' }}>
           <NewsletterEditor onSubmit={handleSubmit} isLoading={isLoading} />
         </div>
 
