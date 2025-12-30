@@ -14,6 +14,19 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Allow local backend images during development (e.g. http://localhost:5000/uploads/...)
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '5000',
+        pathname: '/uploads/**',
+      },
     ],
     // include common device widths and 800 so optimizer requests with w=800 are allowed
     deviceSizes: [320, 420, 640, 768, 800, 1024, 1200, 1920, 2048, 3840],
