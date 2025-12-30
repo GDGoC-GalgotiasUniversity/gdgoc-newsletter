@@ -9,6 +9,9 @@ import { useState, useEffect } from 'react';
 import NextImage from 'next/image';
 import type { Editor } from '@tiptap/react';
 import { toast } from 'sonner';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import CloudinaryImageButton from './CloudinaryImageButton';
 import ImageLinkGenerator from './ImageLinkGenerator';
 import DragDropImageUploader from './DragDropImageUploader';
@@ -22,6 +25,98 @@ interface NewsletterData {
   gallery?: string[];
   contentHtml?: string;
   contentMarkdown?: string;
+}
+
+interface SortableGalleryItemProps {
+  id: string;
+  img: string;
+  idx: number;
+  totalImages: number;
+  onMoveUp: (idx: number) => void;
+  onMoveDown: (idx: number) => void;
+  onRemove: (idx: number) => void;
+}
+
+function SortableGalleryItem({ id, img, idx, totalImages, onMoveUp, onMoveDown, onRemove }: SortableGalleryItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 p-2 bg-gray-50 rounded border ${isDragging ? 'border-[var(--brand-purple)] shadow-lg' : 'border-gray-200 hover:border-gray-300'
+        } transition-colors`}
+    >
+      {/* Drag handle */}
+      <button
+        type="button"
+        className="cursor-grab active:cursor-grabbing p-1 text-gray-400 hover:text-gray-600"
+        {...attributes}
+        {...listeners}
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+        </svg>
+      </button>
+
+      <div className="relative flex-shrink-0 w-12 h-12 rounded border border-gray-300 overflow-hidden">
+        <NextImage src={img} alt={`Gallery image ${idx + 1}`} fill style={{ objectFit: 'cover' }} />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-gray-600 truncate">{img}</p>
+        <p className="text-xs text-gray-400">Image {idx + 1}</p>
+      </div>
+
+      <div className="flex gap-1 flex-shrink-0">
+        <button
+          type="button"
+          onClick={() => onMoveUp(idx)}
+          disabled={idx === 0}
+          className="p-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Move up"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => onMoveDown(idx)}
+          disabled={idx === totalImages - 1}
+          className="p-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Move down"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => onRemove(idx)}
+          className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100"
+          title="Remove"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
 }
 
 interface NewsletterEditorProps {
@@ -277,6 +372,24 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
     setGallery(newGallery);
   };
 
+  // Drag and drop handler
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = gallery.indexOf(active.id as string);
+      const newIndex = gallery.indexOf(over.id as string);
+      setGallery(arrayMove(gallery, oldIndex, newIndex));
+    }
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return toast.error('Please enter a headline');
@@ -331,7 +444,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-3">Cover Image</label>
-            <DragDropImageUploader 
+            <DragDropImageUploader
               onImageUpload={(url) => setCoverImage(url)}
               isLoading={isLoading}
             />
@@ -339,12 +452,12 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
               <div className="mt-4">
                 <p className="text-xs text-gray-600 mb-2 font-semibold">Current cover image:</p>
                 <div className="h-40 w-full relative rounded-lg border-2 border-[var(--brand-purple)] overflow-hidden">
-                  <NextImage 
-                    src={coverImage} 
-                    alt="Cover image preview" 
-                    fill 
+                  <NextImage
+                    src={coverImage}
+                    alt="Cover image preview"
+                    fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    style={{ objectFit: 'cover' }} 
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
               </div>
@@ -364,54 +477,32 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
               <button type="button" onClick={handleAddGalleryImage} className="bg-gray-200 px-3 py-1 rounded text-xs font-bold hover:bg-gray-300">+</button>
             </div>
             {gallery.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs text-gray-500 font-semibold">Drag or use arrows to reorder images:</p>
-                {gallery.map((img, idx) => (
-                  <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded border border-gray-200 hover:border-gray-300 transition-colors">
-                    <div className="relative flex-shrink-0 w-12 h-12 rounded border border-gray-300 overflow-hidden">
-                      <NextImage src={img} alt={`Gallery image ${idx + 1}`} fill style={{ objectFit: 'cover' }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-600 truncate">{img}</p>
-                      <p className="text-xs text-gray-400">Image {idx + 1}</p>
-                    </div>
-                    <div className="flex gap-1 flex-shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => moveGalleryImageUp(idx)}
-                        disabled={idx === 0}
-                        className="p-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Move up"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveGalleryImageDown(idx)}
-                        disabled={idx === gallery.length - 1}
-                        className="p-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Move down"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeGalleryImage(idx)}
-                        className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100"
-                        title="Remove"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={gallery}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-500 font-semibold">Drag or use arrows to reorder images:</p>
+                    {gallery.map((img, idx) => (
+                      <SortableGalleryItem
+                        key={img}
+                        id={img}
+                        img={img}
+                        idx={idx}
+                        totalImages={gallery.length}
+                        onMoveUp={moveGalleryImageUp}
+                        onMoveDown={moveGalleryImageDown}
+                        onRemove={removeGalleryImage}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
             )}
           </div>
         </div>

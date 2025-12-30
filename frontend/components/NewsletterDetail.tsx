@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useMemo } from 'react';
 import ImageCarousel from './ImageCarousel';
 
 interface Newsletter {
@@ -26,6 +27,19 @@ export default function NewsletterDetail({ newsletter }: { newsletter: Newslette
   console.log('NewsletterDetail received newsletter:', newsletter);
   console.log('Gallery field:', newsletter.gallery);
 
+  // Combine cover image and gallery images for carousel
+  // Cover image appears first if it exists
+  const carouselImages = useMemo(() => {
+    const images: string[] = [];
+    if (newsletter.coverImage) {
+      images.push(newsletter.coverImage);
+    }
+    if (newsletter.gallery && newsletter.gallery.length > 0) {
+      images.push(...newsletter.gallery);
+    }
+    return images;
+  }, [newsletter.coverImage, newsletter.gallery]);
+
   // --- Feature 1: Calculate Reading Time ---
   const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
@@ -45,12 +59,12 @@ export default function NewsletterDetail({ newsletter }: { newsletter: Newslette
 
   return (
     <article className="min-h-screen bg-[var(--paper-bg)] text-[#1c1917] font-serif pb-24">
-      
+
       {/* Navbar */}
       <nav className="sticky top-0 z-10 bg-[var(--paper-bg)]/80 backdrop-blur-md border-b border-[#e7e5e4] px-6 py-4">
         <div className="max-w-3xl mx-auto flex justify-between items-center">
-          <Link 
-            href="/newsletter" 
+          <Link
+            href="/newsletter"
             className="text-sm font-sans font-bold tracking-widest text-[#57534e] hover:text-[#7e22ce] transition-colors uppercase"
           >
             ← Back to Archives
@@ -65,23 +79,13 @@ export default function NewsletterDetail({ newsletter }: { newsletter: Newslette
 
       <main className="max-w-3xl mx-auto px-6 mt-12">
         <header className="mb-12 text-center">
-          {/* Gallery carousel - display if gallery images exist */}
-          {newsletter.gallery && newsletter.gallery.length > 0 && (
+          {/* Unified carousel - displays cover image (first) + gallery images */}
+          {carouselImages.length > 0 && (
             <div className="mb-10">
-              <ImageCarousel images={newsletter.gallery} />
+              <ImageCarousel images={carouselImages} />
             </div>
           )}
 
-          {newsletter.coverImage && (
-            <div className="mb-10 rounded-xl overflow-hidden shadow-lg border border-[#e7e5e4]">
-              <img 
-                src={newsletter.coverImage} 
-                alt={newsletter.title} 
-                className="w-full h-auto object-cover max-h-[500px]"
-              />
-            </div>
-          )}
-          
           <h1 className="text-4xl md:text-6xl font-black text-[#1c1917] mb-6 leading-tight">
             {newsletter.title}
           </h1>
@@ -116,18 +120,18 @@ export default function NewsletterDetail({ newsletter }: { newsletter: Newslette
             Share this issue
           </p>
           <div className="flex gap-4">
-             <button 
-                onClick={handleCopyLink}
-                className="px-6 py-2 rounded-full border border-[#e7e5e4] hover:border-[#7e22ce] hover:text-[#7e22ce] transition-colors font-sans text-sm font-bold bg-white/50"
-             >
-                Copy Link
-             </button>
-             <button 
-                onClick={handleWhatsAppShare}
-                className="px-6 py-2 rounded-full border border-[#e7e5e4] hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-colors font-sans text-sm font-bold bg-white/50"
-             >
-                WhatsApp
-             </button>
+            <button
+              onClick={handleCopyLink}
+              className="px-6 py-2 rounded-full border border-[#e7e5e4] hover:border-[#7e22ce] hover:text-[#7e22ce] transition-colors font-sans text-sm font-bold bg-white/50"
+            >
+              Copy Link
+            </button>
+            <button
+              onClick={handleWhatsAppShare}
+              className="px-6 py-2 rounded-full border border-[#e7e5e4] hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-colors font-sans text-sm font-bold bg-white/50"
+            >
+              WhatsApp
+            </button>
           </div>
         </div>
 
