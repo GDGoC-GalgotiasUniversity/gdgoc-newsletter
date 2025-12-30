@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import ImageCarousel from './ImageCarousel';
 
 interface Newsletter {
   _id: string;
@@ -13,12 +14,17 @@ interface Newsletter {
   publishedAt?: string;
   createdAt: string;
   coverImage?: string;
+  gallery?: string[];
   excerpt?: string;
 }
 
 export default function NewsletterDetail({ newsletter }: { newsletter: Newsletter }) {
   const content = newsletter.contentHtml || newsletter.contentMarkdown || '';
   const date = newsletter.publishedAt || newsletter.createdAt;
+
+  // Debug logging
+  console.log('NewsletterDetail received newsletter:', newsletter);
+  console.log('Gallery field:', newsletter.gallery);
 
   // --- Feature 1: Calculate Reading Time ---
   const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
@@ -59,6 +65,13 @@ export default function NewsletterDetail({ newsletter }: { newsletter: Newslette
 
       <main className="max-w-3xl mx-auto px-6 mt-12">
         <header className="mb-12 text-center">
+          {/* Gallery carousel - display if gallery images exist */}
+          {newsletter.gallery && newsletter.gallery.length > 0 && (
+            <div className="mb-10">
+              <ImageCarousel images={newsletter.gallery} />
+            </div>
+          )}
+
           {newsletter.coverImage && (
             <div className="mb-10 rounded-xl overflow-hidden shadow-lg border border-[#e7e5e4]">
               <img 

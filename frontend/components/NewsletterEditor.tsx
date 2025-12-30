@@ -263,6 +263,20 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
     setGallery(newGallery);
   };
 
+  const moveGalleryImageUp = (index: number) => {
+    if (index === 0) return;
+    const newGallery = [...gallery];
+    [newGallery[index - 1], newGallery[index]] = [newGallery[index], newGallery[index - 1]];
+    setGallery(newGallery);
+  };
+
+  const moveGalleryImageDown = (index: number) => {
+    if (index === gallery.length - 1) return;
+    const newGallery = [...gallery];
+    [newGallery[index], newGallery[index + 1]] = [newGallery[index + 1], newGallery[index]];
+    setGallery(newGallery);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return toast.error('Please enter a headline');
@@ -339,7 +353,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
 
           <div className="pt-2 border-t border-gray-200 mt-2">
             <label className="block text-sm font-bold text-gray-700 mb-1">Gallery Images (Optional)</label>
-            <div className="flex gap-2 mb-2">
+            <div className="flex gap-2 mb-3">
               <input
                 type="text"
                 value={galleryInput}
@@ -350,19 +364,51 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: N
               <button type="button" onClick={handleAddGalleryImage} className="bg-gray-200 px-3 py-1 rounded text-xs font-bold hover:bg-gray-300">+</button>
             </div>
             {gallery.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="space-y-2">
+                <p className="text-xs text-gray-500 font-semibold">Drag or use arrows to reorder images:</p>
                 {gallery.map((img, idx) => (
-                  <div key={idx} className="relative group w-16 h-16">
-
-                    <NextImage src={img} alt={`Gallery image ${idx + 1}`} fill style={{ objectFit: 'cover' }} className="rounded border" />
-
-                    <button
-                      type="button"
-                      onClick={() => removeGalleryImage(idx)}
-                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      ×
-                    </button>
+                  <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded border border-gray-200 hover:border-gray-300 transition-colors">
+                    <div className="relative flex-shrink-0 w-12 h-12 rounded border border-gray-300 overflow-hidden">
+                      <NextImage src={img} alt={`Gallery image ${idx + 1}`} fill style={{ objectFit: 'cover' }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-gray-600 truncate">{img}</p>
+                      <p className="text-xs text-gray-400">Image {idx + 1}</p>
+                    </div>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => moveGalleryImageUp(idx)}
+                        disabled={idx === 0}
+                        className="p-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move up"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveGalleryImageDown(idx)}
+                        disabled={idx === gallery.length - 1}
+                        className="p-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move down"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(idx)}
+                        className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100"
+                        title="Remove"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

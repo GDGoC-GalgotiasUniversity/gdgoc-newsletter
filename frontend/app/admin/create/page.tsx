@@ -54,6 +54,7 @@ export default function NewNewsletterPage() {
         template: formData.template,
         status: formData.status,
         coverImage: formData.coverImage,
+        gallery: formData.gallery || [],
       };
 
       console.log('📝 Submitting newsletter:', {
