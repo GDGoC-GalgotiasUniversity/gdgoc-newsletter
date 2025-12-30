@@ -48,6 +48,13 @@ router.get('/api/newsletters/:slug', async (req, res) => {
   try {
     const newsletter = await Newsletter.findOne({ slug: req.params.slug });
 
+    // console.log(' Fetching newsletter:', {
+    //   slug: req.params.slug,
+    //   found: !!newsletter,
+    //   hasGallery: newsletter ? !!newsletter.gallery : null,
+    //   galleryCount: newsletter?.gallery?.length || 0,
+    // });
+
     if (!newsletter) {
       return res.status(404).json({ success: false, message: 'Newsletter not found' });
     }
@@ -74,6 +81,13 @@ router.get('/api/newsletters/:slug', async (req, res) => {
         return res.status(404).json({ success: false, message: 'Newsletter not found (Draft)' });
       }
     }
+
+    console.log('Sending newsletter data:', {
+      title: newsletter.title,
+      slug: newsletter.slug,
+      hasGallery: !!newsletter.gallery,
+      galleryCount: newsletter.gallery?.length || 0,
+    });
 
     res.json({ success: true, data: newsletter });
   } catch (error) {
@@ -107,7 +121,16 @@ router.get('/admin/newsletters/all', verifyToken, verifyAdmin, async (req, res) 
  */
 router.post('/admin/newsletters', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const { title, slug, excerpt, contentMarkdown, template, status, coverImage } = req.body;
+    const { title, slug, excerpt, contentMarkdown, template, status, coverImage, gallery } = req.body;
+
+    console.log('📝 Creating newsletter with data:', {
+      title,
+      slug,
+      status,
+      hasGallery: !!gallery,
+      galleryCount: gallery?.length || 0,
+      galleryContent: gallery || [],
+    });
 
     // Basic Validation
     if (!title || !slug || !contentMarkdown) {
@@ -122,7 +145,15 @@ router.post('/admin/newsletters', verifyToken, verifyAdmin, async (req, res) => 
       template: template || 'default',
       status: status || 'draft',
       coverImage: coverImage || null,
+      gallery: gallery || [],
       publishedAt: status === 'published' ? new Date() : null,
+    });
+
+    console.log('✅ Newsletter created:', {
+      id: newsletter._id,
+      title: newsletter.title,
+      hasGallery: !!newsletter.gallery,
+      galleryCount: newsletter.gallery?.length || 0,
     });
 
     res.status(201).json({
@@ -146,7 +177,7 @@ router.post('/admin/newsletters', verifyToken, verifyAdmin, async (req, res) => 
  */
 router.put('/admin/newsletters/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const { title, slug, excerpt, contentMarkdown, template, status, coverImage } = req.body;
+    const { title, slug, excerpt, contentMarkdown, template, status, coverImage, gallery } = req.body;
 
     // Check if it exists
     const currentNewsletter = await Newsletter.findById(req.params.id);
@@ -161,7 +192,8 @@ router.put('/admin/newsletters/:id', verifyToken, verifyAdmin, async (req, res) 
       contentMarkdown,
       template,
       status,
-      coverImage
+      coverImage,
+      gallery
     };
 
     // Update publishedAt only if flipping from draft -> published

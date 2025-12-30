@@ -55,6 +55,7 @@ export default function NewNewsletterPage() {
         template: formData.template,
         status: formData.status,
         coverImage: formData.coverImage,
+        gallery: formData.gallery || [], // Include gallery images
       };
 
       console.log('📝 Submitting newsletter:', {
@@ -110,7 +111,7 @@ export default function NewNewsletterPage() {
 
   return (
     <main className="newsletter-page min-h-screen py-16">
-      <div className="container max-w-3xl mx-auto px-6">
+      <div className="container max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="mb-8 text-center">
           <p className="text-lg tracking-widest text-(--primary-purple) mb-2 font-semibold">

@@ -71,6 +71,10 @@ const newsletterSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    gallery: {
+      type: [String],
+      default: [],
+    },
     publishedAt: {
       type: Date,
       default: null,

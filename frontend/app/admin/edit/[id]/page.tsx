@@ -84,6 +84,7 @@ export default function EditNewsletterPage() {
         template: formData.template,
         status: formData.status,
         coverImage: formData.coverImage,
+        gallery: formData.gallery || [],
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/admin/newsletters/${id}`, {
@@ -137,7 +138,7 @@ export default function EditNewsletterPage() {
 
   return (
     <main className="newsletter-page min-h-screen py-16">
-      <div className="container max-w-3xl mx-auto px-6">
+      <div className="container max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="mb-8 text-center">
           <p className="text-lg tracking-widest text-[var(--primary-purple)] mb-2 font-semibold">
