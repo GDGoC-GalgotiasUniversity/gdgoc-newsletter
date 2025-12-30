@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function LoadingScreen() {
   const [isVisible, setIsVisible] = useState(true);
@@ -20,15 +21,14 @@ export default function LoadingScreen() {
     <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
       <div className="flex flex-col items-center justify-center gap-8">
         {/* Animated Logo */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
+        <Image
+          src="/final-gdg-logo.svg"
+          alt="GDG OC Logo"
+          width={160}
+          height={160}
+          priority
           className="w-28 h-28 md:w-40 md:h-40 object-contain"
-        >
-          <source src="/logo.mp4" type="video/mp4" />
-        </video>
+        />
 
         {/* Loading Text - Single Line */}
         <div className="text-center">
