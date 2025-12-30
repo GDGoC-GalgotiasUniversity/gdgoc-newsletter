@@ -46,8 +46,8 @@ export default function Header() {
                     </span>
 
                     <Link href="/" className="group block">
-                        {/* 2. Title Changed back to "Google Developer Groups" */}
-                        <h1 className="font-gothic text-5xl md:text-7xl lg:text-8xl leading-none text-[var(--brand-purple)] group-hover:opacity-90 transition-opacity duration-300">
+                        {/* Added 'tracking-wide' and 'drop-shadow-md' */}
+                        <h1 className="font-gothic text-5xl md:text-7xl lg:text-8xl leading-none text-[var(--brand-purple)] tracking-wide drop-shadow-md group-hover:opacity-90 transition-opacity duration-300">
                             Google Developer Groups
                         </h1>
 
@@ -75,6 +75,10 @@ export default function Header() {
                         Front Page
                     </Link>
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/develop
                     <Link href="/newsletter" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
                         Archives
                     </Link>
@@ -83,7 +87,11 @@ export default function Header() {
                         About Us
                     </Link>
 
+<<<<<<< HEAD
                     <Link href="https://gdg-socials.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
+=======
+                    <Link href="https://gdg-socials.vercel.app/" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
+>>>>>>> origin/develop
                         Socials
                     </Link>
 

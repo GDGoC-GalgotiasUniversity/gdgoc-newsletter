@@ -96,10 +96,10 @@ export default function RegisterPage() {
                 </Link>
                 
                 <Link 
-                    href="/login" 
+                    href="/newsletter" 
                     className="flex-1 bg-white border border-[var(--ink-black)] text-[var(--ink-black)] font-sans-accent text-center text-sm py-3 hover:bg-[var(--paper-accent)] transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                 >
-                    View Account
+                    View Newsletters
                 </Link>
             </div>
             
