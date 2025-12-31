@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import WeatherWidget from '@/components/WeatherWidget';
+import SubscriptionBox from '@/components/SubscriptionBox';
 
 // Stable fallback timestamp computed at module load (avoids calling Date.now() during render)
 const NOW_ISO = new Date().toISOString();
@@ -155,21 +156,7 @@ export default async function HomePage() {
           <WeatherWidget />
 
           {/* 2. SUBSCRIPTION BOX */}
-          <div className="bg-[var(--paper-accent)] p-6 border-2 border-[var(--brand-purple)] border-dashed relative rounded-lg">
-            <div className="md:absolute md:-top-3 md:left-1/2 md:-translate-x-1/2 bg-white px-3 py-1 border border-gray-200 rounded-full font-sans-accent text-[var(--brand-purple)] text-[10px] font-bold tracking-widest shadow-sm mb-3 md:mb-0">
-              SUBSCRIBE
-            </div>
-            <h3 className="font-gothic text-3xl text-center mb-2 mt-2">Join the Club</h3>
-            <p className="text-center font-serif italic text-sm mb-4 text-gray-600">
-              Get the latest campus updates delivered via carrier pigeon (or email).
-            </p>
-            <div className="flex flex-col gap-2">
-              <input type="email" placeholder="Your email address" className="bg-white border border-gray-300 rounded px-4 py-2 font-serif text-sm focus:outline-none focus:border-[var(--brand-purple)] focus:ring-1 focus:ring-[var(--brand-purple)]" />
-              <button className="bg-[var(--brand-purple)] text-white font-sans-accent text-xs font-bold py-3 rounded hover:bg-black transition-colors shadow-md">
-                SIGN ME UP
-              </button>
-            </div>
-          </div>
+          <SubscriptionBox />
 
           {/* 3. IN BRIEF / ANNOUNCEMENTS */}
           <div className="border border-[var(--ink-black)] p-6">

@@ -31,7 +31,7 @@ const corsOptions = {
       'http://localhost:3002',
       process.env.FRONTEND_URL
     ].filter(Boolean);
-    
+
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -69,6 +69,10 @@ app.use('/api/upload', uploadRoutes);
 // Cloudinary Upload Route
 const cloudinaryUploadRoutes = require('./routes/cloudinary-upload');
 app.use('/api/cloudinary-upload', cloudinaryUploadRoutes);
+
+// Subscribers Route
+const subscriberRoutes = require('./routes/subscribers');
+app.use('/api/subscribers', subscriberRoutes);
 
 // Serve Static Uploads
 const path = require('path');
