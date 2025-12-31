@@ -71,26 +71,13 @@ export default function SubscriptionBox() {
                 <div className="absolute inset-0 bg-white/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center animate-fadeIn">
                     <div className="relative">
                         {/* Stamp Effect */}
-                        <div className="border-4 border-green-600 rounded-lg px-8 py-4 rotate-[-5deg] shadow-xl bg-white/50">
+                        <div className="border-4 border-red-600 rounded-lg px-8 py-4 rotate-[-5deg] shadow-xl bg-white/50">
                             <div className="flex items-center gap-3">
-                                <svg
-                                    className="w-12 h-12 text-green-600 animate-bounce"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={3}
-                                        d="M5 13l4 4L19 7"
-                                    />
-                                </svg>
                                 <div>
-                                    <div className="font-gothic text-3xl text-green-600 font-bold tracking-wider">
+                                    <div className="font-gothic text-3xl text-red-600 font-bold tracking-wider">
                                         SUBSCRIBED
                                     </div>
-                                    <div className="font-sans-accent text-xs text-green-700 tracking-widest">
+                                    <div className="font-sans-accent text-xs text-red-700 tracking-widest">
                                         WELCOME ABOARD!
                                     </div>
                                 </div>
