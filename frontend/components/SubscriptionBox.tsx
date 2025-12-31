@@ -140,9 +140,9 @@ export default function SubscriptionBox() {
             )}
 
             {/* Badge */}
-            <div className="md:absolute md:-top-3 md:left-1/2 md:-translate-x-1/2 bg-white px-3 py-1 border border-gray-200 rounded-full font-sans-accent text-[var(--brand-purple)] text-[10px] font-bold tracking-widest shadow-sm mb-3 md:mb-0">
-                SUBSCRIBE
-            </div>
+            {/* <div className="md:absolute md:-top-3 md:left-1/2 md:-translate-x-1/2 bg-white px-3 py-1 border border-gray-200 rounded-full font-sans-accent text-[var(--brand-purple)] text-[10px] font-bold tracking-widest shadow-sm mb-3 md:mb-0">
+                SUBSCRIBE  jhkjhk
+            </div> */}
 
             {/* Title */}
             <h3 className="font-gothic text-3xl text-center mb-2 mt-2">Join the Club</h3>

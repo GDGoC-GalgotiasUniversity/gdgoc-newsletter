@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 // @ts-ignore
 import AdminUsers from '@/components/AdminUsers';
+import AdminSubscribers from '@/components/AdminSubscribers';
 
 interface Newsletter {
     _id: string;
@@ -27,6 +28,7 @@ export default function AdminDashboard() {
     // State for UI/Auth
     const [userName, setUserName] = useState('Editor');
     const [showUsers, setShowUsers] = useState(false);
+    const [showSubscribers, setShowSubscribers] = useState(false);
     const [token, setToken] = useState<string | null>(null);
 
     // --- Pagination State ---
@@ -144,13 +146,29 @@ export default function AdminDashboard() {
 
                     <div className="flex gap-4">
                         <button
-                            onClick={() => setShowUsers(!showUsers)}
+                            onClick={() => {
+                                setShowUsers(!showUsers);
+                                if (!showUsers) setShowSubscribers(false);
+                            }}
                             className={`inline-flex items-center gap-2 border-2 border-[var(--ink-black)] font-sans-accent text-sm px-6 py-3 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${showUsers
                                 ? 'bg-[var(--brand-purple)] text-white'
                                 : 'bg-white text-[var(--ink-black)] hover:bg-[var(--paper-accent)]'
                                 }`}
                         >
                             {showUsers ? 'Hide Users' : 'Manage Users'}
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setShowSubscribers(!showSubscribers);
+                                if (!showSubscribers) setShowUsers(false);
+                            }}
+                            className={`inline-flex items-center gap-2 border-2 border-[var(--ink-black)] font-sans-accent text-sm px-6 py-3 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${showSubscribers
+                                ? 'bg-[var(--brand-purple)] text-white'
+                                : 'bg-white text-[var(--ink-black)] hover:bg-[var(--paper-accent)]'
+                                }`}
+                        >
+                            {showSubscribers ? 'Hide Subscribers' : 'View Subscribers'}
                         </button>
 
                         <Link
@@ -169,8 +187,15 @@ export default function AdminDashboard() {
                     </section>
                 )}
 
+                {/* --- SUBSCRIBERS SECTION (Inline) --- */}
+                {showSubscribers && (
+                    <section className="mb-12">
+                        <AdminSubscribers />
+                    </section>
+                )}
+
                 {/* --- STATS ROW --- */}
-                {!showUsers && (
+                {!showUsers && !showSubscribers && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                         {/* Stat Card 1 */}
                         <div className="border border-[var(--ink-black)] p-6 bg-[var(--paper-accent)] relative overflow-hidden group">
@@ -194,7 +219,7 @@ export default function AdminDashboard() {
                 )}
 
                 {/* --- THE LEDGER (Table) --- */}
-                {!showUsers && (
+                {!showUsers && !showSubscribers && (
                     <section>
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                             <div className="flex items-center gap-4 w-full md:w-auto">
