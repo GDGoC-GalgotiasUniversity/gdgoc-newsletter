@@ -11,7 +11,7 @@ export default function Footer() {
 
             <div className="container mx-auto px-6 max-w-7xl relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
-                    
+
                     {/* --- Branding Section (Left) --- */}
                     <div className="md:col-span-6 space-y-4">
                         <div className="flex items-center gap-3">
@@ -47,12 +47,17 @@ export default function Footer() {
                                     href={social.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-2 border border-white/20 rounded-md text-gray-400 hover:text-amber-500 hover:border-amber-500 hover:-translate-y-1 transition duration-300 transform"
+                                    className="group relative p-2 border border-white/20 rounded-md text-gray-400 hover:text-amber-500 hover:border-amber-500 hover:-translate-y-1 transition duration-300 transform"
                                     aria-label={social.label}
                                 >
                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                         {social.icon}
                                     </svg>
+
+                                    {/* Tooltip */}
+                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900/90 backdrop-blur-sm border border-white/10 rounded shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 pointer-events-none whitespace-nowrap z-20">
+                                        {social.label}
+                                    </span>
                                 </a>
                             ))}
                         </div>
@@ -71,8 +76,8 @@ export default function Footer() {
                                 { name: "Linktree", href: "https://gdg-socials.vercel.app/" }
                             ].map((link, i) => (
                                 <li key={i}>
-                                    <Link 
-                                        href={link.href} 
+                                    <Link
+                                        href={link.href}
                                         className="font-serif text-base text-gray-300 hover:text-white hover:underline decoration-amber-500 underline-offset-4 transition"
                                     >
                                         {link.name}
@@ -92,7 +97,6 @@ export default function Footer() {
                             {[
                                 { name: "Google Developers", href: "https://developers.google.com" },
                                 { name: "GDG Community", href: "https://gdg.community.dev" },
-                                { name: "Galgotias University", href: "https://galgotiasuniversity.edu.in" }
                             ].map((link, i) => (
                                 <li key={i}>
                                     <a
