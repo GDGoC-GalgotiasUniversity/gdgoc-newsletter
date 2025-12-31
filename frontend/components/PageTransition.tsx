@@ -1,9 +1,32 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
-export default function PageTransition({ children }: { children: React.ReactNode }) {
+export default function PageTransition({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
+  const isFirstRender = useRef(true);
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      // Skip animation on initial page load
+      isFirstRender.current = false;
+      return;
+    }
+
+    setAnimate(true);
+
+    const timer = setTimeout(() => {
+      setAnimate(false);
+    }, 500); // match animation duration
+
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   return (
     <>
@@ -19,12 +42,12 @@ export default function PageTransition({ children }: { children: React.ReactNode
           }
         }
 
-        .page-transition-enter {
+        .page-transition {
           animation: fadeInUp 0.5s ease-out forwards;
         }
       `}</style>
 
-      <div key={pathname} className="page-transition-enter">
+      <div className={animate ? 'page-transition' : ''}>
         {children}
       </div>
     </>
