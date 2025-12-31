@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { toast } from 'sonner';
 
 interface DragDropImageUploaderProps {
-  onImageUpload: (imageUrl: string) => void;
+  onImageUpload: (imageUrl: string, filename?: string) => void;
   isLoading?: boolean;
 }
 
@@ -44,7 +44,7 @@ export default function DragDropImageUploader({ onImageUpload, isLoading }: Drag
       }
 
       toast.success('Image uploaded to Cloudinary!');
-      onImageUpload(data.imageUrl);
+      onImageUpload(data.imageUrl, file.name);
     } catch (error: any) {
       console.error('Upload error:', error);
       toast.error(error.message || 'Failed to upload image');
@@ -87,11 +87,10 @@ export default function DragDropImageUploader({ onImageUpload, isLoading }: Drag
       onDragLeave={handleDrag}
       onDragOver={handleDrag}
       onDrop={handleDrop}
-      className={`relative border-3 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${
-        dragActive
-          ? 'border-[var(--brand-purple)] bg-[var(--paper-accent)] scale-105'
-          : 'border-gray-300 bg-gray-50 hover:border-[var(--brand-purple)] hover:bg-[var(--paper-accent)]'
-      } ${uploading || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`relative border-3 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${dragActive
+        ? 'border-[var(--brand-purple)] bg-[var(--paper-accent)] scale-105'
+        : 'border-gray-300 bg-gray-50 hover:border-[var(--brand-purple)] hover:bg-[var(--paper-accent)]'
+        } ${uploading || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       <input
         ref={fileInputRef}
