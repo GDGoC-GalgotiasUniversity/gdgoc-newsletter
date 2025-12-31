@@ -5,10 +5,12 @@
  * throughout the application
  */
 
-const User = require('./User');
 const Newsletter = require('./Newsletter');
+const User = require('./User');
+const Subscriber = require('./Subscriber');
 
 module.exports = {
-  User,
   Newsletter,
+  User,
+  Subscriber,
 };
