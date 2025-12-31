@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { toast } from 'sonner';
 
 interface GalleryImageUploaderProps {
-    onImageUpload: (imageUrl: string) => void;
+    onImageUpload: (imageUrl: string, filename: string) => void;
     isLoading?: boolean;
 }
 
@@ -72,7 +72,7 @@ export default function GalleryImageUploader({ onImageUpload, isLoading }: Galle
             const url = await uploadSingleFile(validFiles[i]);
 
             if (url) {
-                onImageUpload(url);
+                onImageUpload(url, validFiles[i].name);
                 successCount++;
             }
         }
@@ -125,8 +125,8 @@ export default function GalleryImageUploader({ onImageUpload, isLoading }: Galle
             onDragOver={handleDrag}
             onDrop={handleDrop}
             className={`relative border-2 border-dashed rounded-lg p-4 text-center transition-all cursor-pointer ${dragActive
-                    ? 'border-[var(--brand-purple)] bg-purple-50 scale-105'
-                    : 'border-gray-300 bg-gray-50 hover:border-[var(--brand-purple)] hover:bg-purple-50'
+                ? 'border-[var(--brand-purple)] bg-purple-50 scale-105'
+                : 'border-gray-300 bg-gray-50 hover:border-[var(--brand-purple)] hover:bg-purple-50'
                 } ${uploading || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
             <input

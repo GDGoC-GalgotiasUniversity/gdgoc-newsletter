@@ -12,15 +12,16 @@ import { useState, useEffect } from 'react';
 import NextImage from 'next/image';
 import { toast } from 'sonner';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { 
+import {
   Bold, Italic, Underline, Strikethrough, Highlighter,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   List, ListOrdered, Quote,
   Link as LinkIcon, Image as ImageIcon, Minus,
-  Heading1, Heading2, Heading3, Undo, Redo, 
-  Subscript as SubIcon, Superscript as SuperIcon 
+  Heading1, Heading2, Heading3, Undo, Redo,
+  Subscript as SubIcon, Superscript as SuperIcon,
+  ArrowLeft, ArrowRight, Trash2, Copy, Check
 } from 'lucide-react';
 
 import CloudinaryImageButton from './CloudinaryImageButton';
@@ -42,16 +43,19 @@ interface NewsletterData {
 interface SortableGalleryItemProps {
   id: string;
   img: string;
+  filename?: string;
   idx: number;
   totalImages: number;
+  isSelected: boolean;
+  onSelect: () => void;
   onMoveUp: (idx: number) => void;
   onMoveDown: (idx: number) => void;
   onRemove: (idx: number) => void;
 }
 
-function SortableGalleryItem({ id, img, idx, totalImages, onMoveUp, onMoveDown, onRemove }: SortableGalleryItemProps) {
+function SortableGalleryItem({ id, img, filename, idx, totalImages, isSelected, onSelect, onMoveUp, onMoveDown, onRemove }: SortableGalleryItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -59,20 +63,43 @@ function SortableGalleryItem({ id, img, idx, totalImages, onMoveUp, onMoveDown, 
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={`flex items-center gap-2 p-2 bg-gray-50 rounded border ${isDragging ? 'border-[var(--brand-purple)] shadow-lg' : 'border-gray-200 hover:border-gray-300'} transition-colors`}>
-      <button type="button" className="cursor-grab active:cursor-grabbing p-1 text-gray-400 hover:text-gray-600" {...attributes} {...listeners}>
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
-      </button>
-      <div className="relative flex-shrink-0 w-12 h-12 rounded border border-gray-300 overflow-hidden">
+    <div ref={setNodeRef} style={style} className={`relative group w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${isSelected ? 'border-[var(--brand-purple)] ring-2 ring-[var(--brand-purple)]/20' : 'border-gray-200 hover:border-gray-300'}`}>
+      <div className="absolute inset-0 cursor-pointer" onClick={onSelect}>
         <NextImage src={img} alt={`Gallery image ${idx + 1}`} fill style={{ objectFit: 'cover' }} />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-700 font-semibold">Image {idx + 1}</p>
-      </div>
-      <div className="flex gap-1 flex-shrink-0">
-        <button type="button" onClick={() => onRemove(idx)} className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100" title="Remove">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+
+      {/* Controls Overlay */}
+      <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onMoveUp(idx); }}
+          disabled={idx === 0}
+          className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === 0 ? 'invisible' : ''}`}
+        >
+          <ArrowLeft size={14} />
         </button>
+
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onRemove(idx); }}
+          className="p-1 rounded text-red-400 hover:bg-white/20 hover:text-red-300"
+        >
+          <Trash2 size={14} />
+        </button>
+
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onMoveDown(idx); }}
+          disabled={idx === totalImages - 1}
+          className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === totalImages - 1 ? 'invisible' : ''}`}
+        >
+          <ArrowRight size={14} />
+        </button>
+      </div>
+
+      {/* Drag Handle (Top Right) */}
+      <div className="absolute top-1 right-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 p-1 rounded bg-black/40 text-white" {...attributes} {...listeners}>
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
       </div>
     </div>
   );
@@ -128,9 +155,9 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   const btnClass = (isActive: boolean, disabled: boolean = false) =>
     `p-1.5 md:p-2 rounded-md transition-all duration-200 flex items-center justify-center min-w-[32px] md:min-w-[36px]
     ${disabled ? 'opacity-30 cursor-not-allowed text-gray-400' : ''}
-    ${!disabled && isActive 
-      ? 'bg-[var(--brand-purple)] text-white shadow-md transform scale-105' 
-      : !disabled && 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200' 
+    ${!disabled && isActive
+      ? 'bg-[var(--brand-purple)] text-white shadow-md transform scale-105'
+      : !disabled && 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200'
     }`;
 
   const Divider = () => <div className="w-px h-6 md:h-8 bg-gray-200 mx-1 self-center"></div>;
@@ -164,7 +191,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
   return (
     <div className="border-b border-gray-200 bg-white p-2 md:p-3 sticky top-0 z-10 flex flex-wrap gap-1 md:gap-2 items-center shadow-sm">
-      
+
       {/* History */}
       <div className="flex gap-0.5">
         <button type="button" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} className={btnClass(false, !editor.can().undo())} title="Undo">
@@ -174,7 +201,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <Redo size={18} />
         </button>
       </div>
-      
+
       <Divider />
 
       {/* Headings */}
@@ -281,7 +308,18 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || '');
   const [status, setStatus] = useState(initialData?.status || 'draft');
   const [coverImage, setCoverImage] = useState(initialData?.coverImage || '');
+  const [coverFileName, setCoverFileName] = useState<string>('');
   const [gallery, setGallery] = useState<string[]>(initialData?.gallery || []);
+  const [imageMetadata, setImageMetadata] = useState<Record<string, { filename: string }>>({});
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+
+  // Set initial preview when gallery loads
+  useEffect(() => {
+    if (gallery.length > 0 && !previewImage) {
+      setPreviewImage(gallery[0]);
+    }
+  }, [gallery, previewImage]);
 
   const editor = useEditor({
     extensions: [
@@ -324,9 +362,23 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
     }
   };
 
-  const handleAddGalleryImage = (url: string) => setGallery(prev => [...prev, url]);
-  const removeGalleryImage = (index: number) => setGallery(prev => prev.filter((_, i) => i !== index));
-  
+  const handleAddGalleryImage = (url: string, filename: string) => {
+    setGallery(prev => [...prev, url]);
+    setImageMetadata(prev => ({ ...prev, [url]: { filename } }));
+    if (!previewImage) setPreviewImage(url);
+  };
+
+  const removeGalleryImage = (index: number) => {
+    const urlToRemove = gallery[index];
+    const newGallery = gallery.filter((_, i) => i !== index);
+    setGallery(newGallery);
+
+    // If we removed the preview image, set a new one
+    if (previewImage === urlToRemove) {
+      setPreviewImage(newGallery[0] || null);
+    }
+  };
+
   const moveGalleryImageUp = (index: number) => {
     if (index === 0) return;
     const newGallery = [...gallery];
@@ -369,33 +421,51 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
       {/* Top Meta Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-white rounded-xl border border-gray-200 shadow-sm">
         <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Headline</label>
-              <input type="text" value={title} onChange={handleTitleChange} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" placeholder="Newsletter Headline" />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Slug</label>
-              <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded font-mono text-sm bg-gray-50" />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Summary</label>
-              <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" />
-            </div>
-            <div className="pt-2 border-t border-gray-200 mt-2">
-              <label className="block text-sm font-bold text-gray-700 mb-3">Gallery Images (Carousel)</label>
-              <GalleryImageUploader onImageUpload={handleAddGalleryImage} isLoading={isLoading} />
-              {gallery.length > 0 && (
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Headline</label>
+            <input type="text" value={title} onChange={handleTitleChange} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" placeholder="Newsletter Headline" />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Slug</label>
+            <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded font-mono text-sm bg-gray-50" />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Summary</label>
+            <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[var(--brand-purple)] focus:outline-none" />
+          </div>
+          <div className="pt-2 border-t border-gray-200 mt-2">
+            <label className="block text-sm font-bold text-gray-700 mb-3">Carousel Images</label>
+
+            <GalleryImageUploader onImageUpload={handleAddGalleryImage} isLoading={isLoading} />
+
+            {/* Reorder Images */}
+            {gallery.length > 0 && (
+              <div className="mt-4">
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Reorder Images</label>
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <SortableContext items={gallery} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-2 mt-4">
+                  <SortableContext items={gallery} strategy={horizontalListSortingStrategy}>
+                    <div className="flex flex-wrap gap-2">
                       {gallery.map((img, idx) => (
-                        <SortableGalleryItem key={img} id={img} img={img} idx={idx} totalImages={gallery.length} onMoveUp={moveGalleryImageUp} onMoveDown={moveGalleryImageDown} onRemove={removeGalleryImage} />
+                        <SortableGalleryItem
+                          key={img}
+                          id={img}
+                          img={img}
+                          filename={imageMetadata[img]?.filename}
+                          idx={idx}
+                          totalImages={gallery.length}
+                          isSelected={previewImage === img}
+                          onSelect={() => setPreviewImage(img)}
+                          onMoveUp={moveGalleryImageUp}
+                          onMoveDown={moveGalleryImageDown}
+                          onRemove={removeGalleryImage}
+                        />
                       ))}
                     </div>
                   </SortableContext>
                 </DndContext>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
         </div>
         <div className="space-y-4">
           <div>
@@ -407,16 +477,72 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-3">Cover Image</label>
-            <DragDropImageUploader onImageUpload={(url) => setCoverImage(url)} isLoading={isLoading} />
+            <DragDropImageUploader
+              onImageUpload={(url, filename) => {
+                setCoverImage(url);
+                if (filename) setCoverFileName(filename);
+              }}
+              isLoading={isLoading}
+            />
             {coverImage && (
-              <div className="mt-4">
-                 <div className="h-40 w-full relative rounded-lg border-2 border-[var(--brand-purple)] overflow-hidden">
-                    <NextImage src={coverImage} alt="Cover" fill style={{ objectFit: 'cover' }} />
-                 </div>
-                 <button type="button" onClick={() => setCoverImage('')} className="mt-2 text-xs text-red-600 font-bold hover:underline">Remove Cover Image</button>
+              <div className="mt-4 space-y-2">
+                <div
+                  className="h-40 w-full relative rounded-lg border-2 border-[var(--brand-purple)] overflow-hidden cursor-pointer hover:opacity-95 transition-opacity"
+                  onClick={() => window.open(coverImage, '_blank')}
+                  title="Click to open full image"
+                >
+                  <NextImage src={coverImage} alt="Cover" fill style={{ objectFit: 'cover' }} />
+                </div>
+                <div className="flex justify-between items-center px-1">
+                  <button type="button" onClick={() => { setCoverImage(''); setCoverFileName(''); }} className="text-xs text-red-600 font-bold hover:underline">Remove Cover Image</button>
+                  {coverFileName && (
+                    <p className="text-xs font-medium text-gray-500 truncate max-w-[60%]" title={coverFileName}>
+                      {coverFileName}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </div>
+
+          {/* Gallery Preview */}
+          {gallery.length > 0 && previewImage && (
+            <div className="pt-4 border-t border-gray-200 mt-4">
+              <label className="block text-sm font-bold text-gray-700 mb-2">Image Preview</label>
+
+              <div className="p-3 bg-gray-50 rounded-lg border flex gap-3">
+                <div
+                  className="relative w-24 h-24 flex-shrink-0 bg-white rounded border border-gray-200 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => setEnlargedImage(previewImage)}
+                  title="Click to enlarge"
+                >
+                  <NextImage src={previewImage} alt="Preview" fill style={{ objectFit: 'cover' }} />
+                </div>
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div>
+                    <span className="text-xs font-bold text-gray-500 uppercase">Original File Name</span>
+                    <p className="text-sm font-medium text-gray-900 truncate" title={imageMetadata[previewImage]?.filename || 'Existing Image'}>
+                      {imageMetadata[previewImage]?.filename || 'Existing Image'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-gray-500 uppercase">Cloudinary URL</span>
+                    <div className="flex gap-2">
+                      <input type="text" readOnly value={previewImage} className="flex-1 text-xs px-2 py-1 bg-white border border-gray-300 rounded text-gray-500" />
+                      <button
+                        type="button"
+                        onClick={() => { navigator.clipboard.writeText(previewImage); toast.success('URL copied!'); }}
+                        className="p-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 text-gray-600"
+                        title="Copy URL"
+                      >
+                        <Copy size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -428,8 +554,8 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
           <div className="w-full max-w-4xl bg-white shadow-xl rounded-sm min-h-[800px] flex flex-col">
             <MenuBar editor={editor} />
             {editor && (
-              <BubbleMenu 
-                editor={editor} 
+              <BubbleMenu
+                editor={editor}
                 shouldShow={({ editor }) => {
                   if (!editor || editor.isDestroyed || !editor.view) return false;
                   return editor.isActive('image');
@@ -456,6 +582,36 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
           </button>
         </div>
       </div>
+
+      {/* Enlarged Image Modal */}
+      {enlargedImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setEnlargedImage(null)}
+        >
+          <div className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => setEnlargedImage(null)}
+              className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-sm transition-all z-10"
+              title="Close"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="relative w-full h-full">
+              <NextImage
+                src={enlargedImage}
+                alt="Enlarged preview"
+                fill
+                style={{ objectFit: 'contain' }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx global>{`
         /* Highlight Color */
