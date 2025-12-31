@@ -9,29 +9,36 @@ export default function AboutPage() {
           <AnimatedLogo className="w-12 h-12" />
         </div>
 
-        <h1 className="font-gothic text-2xl sm:text-4xl md:text-6xl text-[var(--brand-purple)] leading-tight mb-4">
-          GDG — On Campus, Galgotias University
+        <h1 className="font-gothic text-4xl sm:text-5xl md:text-6xl text-[var(--brand-purple)] leading-tight mb-4">
+          GDG — On Campus
         </h1>
+        <h2 className="font-gothic text-xl sm:text-2xl md:text-3xl text-[var(--brand-purple)] leading-tight mb-4">
+          Galgotias University
+        </h2>
 
-        <p className="max-w-2xl mx-auto text-[var(--ink-gray)] font-serif text-base sm:text-lg">
-          GDGOC Galgotias University is where curious minds meet cool tech. Our newsletter brings you the inside scoop on everything we're up to—events, projects, learning resources, and the occasional meme that's too good not to share.
+        <p className="max-w-4xl mx-auto text-[var(--ink-gray)] font-serif text-base sm:text-lg md:text-xl leading-relaxed">
+          We are a student-led tech community operating under Google’s GDG On Campus initiative. At GDGoC, we strive to promote innovation, explore emerging technologies, and solve real-world problems through workshops, study jams, hackathons, and hands-on projects.
+
+          Open to everyone, GDGoC welcomes students from all backgrounds to join the community, discover upcoming events, and take part in initiatives that align with your interests.
+
+          This newsletter aims to serve as the digital front page of our community, featuring event highlights, project spotlights, and key updates.
         </p>
       </section>
 
-     
+
 
       <section className="mb-10">
         <h2 className="font-gothic text-4xl text-[var(--ink-black)] mb-10 text-center">The Team</h2>
-        </section>
+      </section>
 
-        <section className="mb-16">
-          <div className="text-center">
-            <a href="https://res.cloudinary.com/dnxydyvwg/image/upload/v1767109943/20251230193808532_admchc.jpg" target="_blank" rel="noopener noreferrer" className="inline-block">
-              {/* group photo from Cloudinary */}
-              <img src="https://res.cloudinary.com/dnxydyvwg/image/upload/v1767109943/20251230193808532_admchc.jpg" alt="GDGOC Core Members" className="mx-auto w-full max-w-4xl rounded-lg object-cover" />
-            </a>
-          </div>
-        </section>
+      <section className="mb-16">
+        <div className="text-center">
+          <a href="https://res.cloudinary.com/dnxydyvwg/image/upload/v1767109943/20251230193808532_admchc.jpg" target="_blank" rel="noopener noreferrer" className="inline-block">
+            {/* group photo from Cloudinary */}
+            <img src="https://res.cloudinary.com/dnxydyvwg/image/upload/v1767109943/20251230193808532_admchc.jpg" alt="GDGOC Core Members" className="mx-auto w-full max-w-4xl rounded-lg object-cover" />
+          </a>
+        </div>
+      </section>
 
       <section className="text-center py-6">
         <p className="font-serif text-[var(--ink-gray)] text-sm">That's all folks! Keep building cool stuff ✌️</p>
