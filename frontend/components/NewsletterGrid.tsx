@@ -36,20 +36,20 @@ export default function NewsletterGrid({ newsletters }: NewsletterGridProps) {
   };
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
+    <div className="grid  sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {newsletters.length > 0 ? (
         newsletters.map((newsletter, index) => (
           <Link
             key={newsletter._id}
             href={`/newsletter/${newsletter.slug}`}
-            className="card group block overflow-hidden effect-scrunch h-full"
+            className="card group block overflow-hidden effect-scrunch h-full border-2 border-transparent hover:border-[#6F4E37] rounded-xl transition-all duration-300 hover:shadow-lg p-2 hover:bg-[#F5E6D3]"
           >
-            <div className="relative h-48 w-full overflow-hidden bg-[var(--gray-200)]">
+            <div className="relative h-48 w-full overflow-hidden bg-[var(--gray-200)] rounded-lg">
               {newsletter.coverImage ? (
                 <img
                   src={newsletter.coverImage}
                   alt={newsletter.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="w-full h-full object-cover md:grayscale group-hover:grayscale-0 group-hover:scale-105 transition duration-500"
                   onError={() => handleImageError(newsletter._id)}
                 />
               ) : !imageErrors.has(newsletter._id) ? (
@@ -57,7 +57,7 @@ export default function NewsletterGrid({ newsletters }: NewsletterGridProps) {
                   src={`https://images.unsplash.com/photo-${1540575467063 + (index % 10)}?auto=format&fit=crop&w=800&q=80`}
                   alt={newsletter.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition duration-500"
+                  className="object-cover md:grayscale group-hover:grayscale-0 group-hover:scale-105 transition duration-500"
                   onError={() => handleImageError(newsletter._id)}
                 />
               ) : (
@@ -76,6 +76,7 @@ export default function NewsletterGrid({ newsletters }: NewsletterGridProps) {
               <p className="text-sm text-[var(--gray-500)] mb-2">
                 {new Date(newsletter.publishedAt || newsletter.createdAt).toISOString().split('T')[0]}
               </p>
+              <hr className="border-t border-[#6F4E37] mb-3" />
               <h3 className="group-hover:text-[var(--google-blue)] transition mb-3">
                 {newsletter.title}
               </h3>

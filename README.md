@@ -45,4 +45,4 @@ CLOUDINARY_API_SECRET=your_api_secret
 ```
 NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
-```
+``` 

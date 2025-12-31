@@ -12,14 +12,15 @@ export default function NewNewsletterPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    // Check if key is verified
-    const keyVerified = localStorage.getItem('adminKeyVerified');
-    if (!keyVerified) {
-      router.push('/admin-key');
+    // Check standard Auth Token & Role
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    if (!token || user.role !== 'admin') {
+      router.push('/login');
       return;
     }
 
-    // Allow access with just key verification
     setIsAuthorized(true);
   }, [router]);
 
@@ -39,7 +40,10 @@ export default function NewNewsletterPage() {
         throw new Error('Content is required');
       }
 
-      const token = localStorage.getItem('adminToken') || 'key-verified';
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
 
       // Transform contentHtml to contentMarkdown for backend compatibility
       const payload = {
@@ -50,13 +54,13 @@ export default function NewNewsletterPage() {
         template: formData.template,
         status: formData.status,
         coverImage: formData.coverImage,
+        gallery: formData.gallery || [],
       };
 
       console.log('📝 Submitting newsletter:', {
         title: payload.title,
         slug: payload.slug,
         status: payload.status,
-        token: token === 'key-verified' ? 'key-verified' : 'jwt-token',
       });
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/newsletters`, {
@@ -104,10 +108,11 @@ export default function NewNewsletterPage() {
 
   return (
     <main className="newsletter-page min-h-screen py-16">
-      <div className="container max-w-3xl mx-auto px-6">
+      <div className="container max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="mb-8 text-center">
-          <p className="text-lg tracking-widest text-[var(--primary-purple)] mb-2 font-semibold">
+          <p className="text-lg tracking-widest text-(--primary-purple) mb-2 font-semibold">
+
             CREATE NEWSLETTER
           </p>
           <h1 className="mb-3">Create Newsletter</h1>

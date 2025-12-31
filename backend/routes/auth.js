@@ -16,7 +16,7 @@ const generateToken = (user) => {
 // 🟢 NEW: REGISTER ROUTE (Add this part)
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role: requestedRole } = req.body;
 
     // 1. Validation
     if (!name || !email || !password) {
@@ -33,18 +33,34 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4. Create User (Default role: 'user')
+    // 4. Determine role: default to 'user'. If a role is provided, only allow it when the request is authenticated as admin.
+    let roleToSet = 'user';
+    if (requestedRole && ['user', 'admin'].includes(requestedRole)) {
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+          if (decoded.role === 'admin') {
+            roleToSet = requestedRole;
+          }
+        } catch (e) {
+          // ignore - not authenticated as admin
+        }
+      }
+    }
+
+    // 5. Create User
     user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role: 'user'
+      role: roleToSet
     });
 
-    // 5. Create Token
+    // 6. Create Token
     const token = generateToken(user);
 
-    // 6. Return Data
+    // 7. Return Data
     res.status(201).json({
       success: true,
       token,
