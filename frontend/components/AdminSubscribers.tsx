@@ -60,12 +60,13 @@ export default function AdminSubscribers() {
             return;
         }
 
-        // Create mailto link with BCC (more private than CC)
+        // Create Gmail compose URL with BCC recipients
         const bccEmails = selectedEmails.join(',');
-        const mailtoLink = `mailto:?bcc=${encodeURIComponent(bccEmails)}&subject=${encodeURIComponent('GDGoC Newsletter Update')}`;
+        const subject = encodeURIComponent('GDGoC Newsletter Update');
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&bcc=${encodeURIComponent(bccEmails)}&su=${subject}`;
 
-        // Open default email client
-        window.location.href = mailtoLink;
+        // Open Gmail in a new tab
+        window.open(gmailUrl, '_blank');
     };
 
     const isAllSelected = subscribers.length > 0 && selectedEmails.length === subscribers.length;
