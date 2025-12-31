@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Prevent Next.js from looking in parent directory for dependencies
+  experimental: {
+    outputFileTracingRoot: undefined,
+  },
   images: {
     // Allowed remote image patterns and allowed widths for the Next image optimizer
     remotePatterns: [
