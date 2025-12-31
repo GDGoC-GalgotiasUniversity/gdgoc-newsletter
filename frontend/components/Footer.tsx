@@ -116,7 +116,7 @@ export default function Footer() {
                 {/* --- Bottom Bar --- */}
                 <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500 font-serif">
                     <p>
-                        © {currentYear} GDGoC Galgotias University. • Greater Noida, Uttar Pradesh
+                        © {currentYear} GDGoC Galgotias University • Greater Noida, Uttar Pradesh
                     </p>
                     <div className="flex gap-6">
                         <Link href="/" className="hover:text-white transition">

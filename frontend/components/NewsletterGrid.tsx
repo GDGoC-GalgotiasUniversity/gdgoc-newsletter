@@ -49,7 +49,7 @@ export default function NewsletterGrid({ newsletters }: NewsletterGridProps) {
                 <img
                   src={newsletter.coverImage}
                   alt={newsletter.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="w-full h-full object-cover md:grayscale group-hover:grayscale-0 group-hover:scale-105 transition duration-500"
                   onError={() => handleImageError(newsletter._id)}
                 />
               ) : !imageErrors.has(newsletter._id) ? (
@@ -57,7 +57,7 @@ export default function NewsletterGrid({ newsletters }: NewsletterGridProps) {
                   src={`https://images.unsplash.com/photo-${1540575467063 + (index % 10)}?auto=format&fit=crop&w=800&q=80`}
                   alt={newsletter.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition duration-500"
+                  className="object-cover md:grayscale group-hover:grayscale-0 group-hover:scale-105 transition duration-500"
                   onError={() => handleImageError(newsletter._id)}
                 />
               ) : (
