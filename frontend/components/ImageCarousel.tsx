@@ -89,32 +89,42 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
           {/* Navigation arrows - only show if more than 1 image */}
           {images.length > 1 && (
             <>
-              {/* Left arrow */}
-              <button
+              {/* Left arrow area */}
+              <div
+                className="absolute left-0 top-0 bottom-0 w-[15%] z-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-all duration-300 cursor-pointer group bg-gradient-to-r from-black/20 to-transparent hover:backdrop-blur-[2px]"
                 onClick={goToPrevious}
-                disabled={isTransitioning}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white text-black rounded-full p-2 transition-all disabled:opacity-50 hover:scale-110"
+                role="button"
                 aria-label="Previous image"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
+                <button
+                  disabled={isTransitioning}
+                  className="text-white/70 group-hover:text-white transition-colors transform group-hover:-translate-x-1"
+                >
+                  <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              </div>
 
-              {/* Right arrow */}
-              <button
+              {/* Right arrow area */}
+              <div
+                className="absolute right-0 top-0 bottom-0 w-[15%] z-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-all duration-300 cursor-pointer group bg-gradient-to-l from-black/20 to-transparent hover:backdrop-blur-[2px]"
                 onClick={goToNext}
-                disabled={isTransitioning}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white text-black rounded-full p-2 transition-all disabled:opacity-50 hover:scale-110"
+                role="button"
                 aria-label="Next image"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+                <button
+                  disabled={isTransitioning}
+                  className="text-white/70 group-hover:text-white transition-colors transform group-hover:translate-x-1"
+                >
+                  <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
 
               {/* Image counter */}
-              <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              <div className="absolute bottom-2 right-2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold">
                 {currentIndex + 1} / {images.length}
               </div>
             </>
@@ -130,9 +140,9 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
               key={index}
               onClick={() => goToSlide(index)}
               disabled={isTransitioning}
-              className={`transition-all rounded-lg overflow-hidden ${index === currentIndex
-                ? 'ring-2 ring-[#7e22ce] ring-offset-2 w-16 h-12'
-                : 'w-12 h-12 opacity-60 hover:opacity-100'
+              className={`transition-all rounded-lg cursor-pointer overflow-hidden ${index === currentIndex
+                ? 'ring-2 ring-[#6F4E37] ring-offset-2 w-16 h-12'
+                : 'w-12 h-12 grayscale opacity-60 hover:opacity-100'
                 }`}
               aria-label={`Go to image ${index + 1}`}
             >
