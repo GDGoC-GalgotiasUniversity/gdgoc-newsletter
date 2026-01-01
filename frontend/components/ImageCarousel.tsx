@@ -91,16 +91,16 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
             <>
               {/* Left arrow area */}
               <div
-                className="absolute left-0 top-0 bottom-0 w-[15%] z-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-all duration-300 cursor-pointer group bg-gradient-to-r from-black/20 to-transparent hover:backdrop-blur-[2px]"
+                className="absolute left-0 top-1/2 -translate-y-1/2 h-32 w-12 z-20 flex items-center justify-center opacity-70 hover:opacity-100 transition-all duration-300 cursor-pointer group bg-black/20 hover:bg-black/40 hover:backdrop-blur-sm rounded-r-lg"
                 onClick={goToPrevious}
                 role="button"
                 aria-label="Previous image"
               >
                 <button
                   disabled={isTransitioning}
-                  className="text-white/70 group-hover:text-white transition-colors transform group-hover:-translate-x-1"
+                  className="text-white/80 group-hover:text-white transition-colors transform group-hover:-translate-x-0.5"
                 >
-                  <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
@@ -108,16 +108,16 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
 
               {/* Right arrow area */}
               <div
-                className="absolute right-0 top-0 bottom-0 w-[15%] z-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-all duration-300 cursor-pointer group bg-gradient-to-l from-black/20 to-transparent hover:backdrop-blur-[2px]"
+                className="absolute right-0 top-1/2 -translate-y-1/2 h-32 w-12 z-20 flex items-center justify-center opacity-70 hover:opacity-100 transition-all duration-300 cursor-pointer group bg-black/20 hover:bg-black/40 hover:backdrop-blur-sm rounded-l-lg"
                 onClick={goToNext}
                 role="button"
                 aria-label="Next image"
               >
                 <button
                   disabled={isTransitioning}
-                  className="text-white/70 group-hover:text-white transition-colors transform group-hover:translate-x-1"
+                  className="text-white/80 group-hover:text-white transition-colors transform group-hover:translate-x-0.5"
                 >
-                  <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
