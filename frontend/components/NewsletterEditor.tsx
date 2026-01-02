@@ -47,13 +47,14 @@ interface SortableGalleryItemProps {
   idx: number;
   totalImages: number;
   isSelected: boolean;
+  isDeleting: boolean;
   onSelect: () => void;
   onMoveUp: (idx: number) => void;
   onMoveDown: (idx: number) => void;
   onRemove: (idx: number) => void;
 }
 
-function SortableGalleryItem({ id, img, filename, idx, totalImages, isSelected, onSelect, onMoveUp, onMoveDown, onRemove }: SortableGalleryItemProps) {
+function SortableGalleryItem({ id, img, filename, idx, totalImages, isSelected, isDeleting, onSelect, onMoveUp, onMoveDown, onRemove }: SortableGalleryItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   const style = {
@@ -68,39 +69,50 @@ function SortableGalleryItem({ id, img, filename, idx, totalImages, isSelected, 
         <NextImage src={img} alt={`Gallery image ${idx + 1}`} fill style={{ objectFit: 'cover' }} />
       </div>
 
+      {/* Deleting Overlay */}
+      {isDeleting && (
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-20 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-5 w-5 border-2 border-[var(--brand-purple)] border-t-transparent"></div>
+        </div>
+      )}
+
       {/* Controls Overlay */}
-      <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onMoveUp(idx); }}
-          disabled={idx === 0}
-          className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === 0 ? 'invisible' : ''}`}
-        >
-          <ArrowLeft size={14} />
-        </button>
+      {!isDeleting && (
+        <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onMoveUp(idx); }}
+            disabled={idx === 0}
+            className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === 0 ? 'invisible' : ''}`}
+          >
+            <ArrowLeft size={14} />
+          </button>
 
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onRemove(idx); }}
-          className="p-1 rounded text-red-400 hover:bg-white/20 hover:text-red-300"
-        >
-          <Trash2 size={14} />
-        </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onRemove(idx); }}
+            className="p-1 rounded text-red-400 hover:bg-white/20 hover:text-red-300"
+          >
+            <Trash2 size={14} />
+          </button>
 
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onMoveDown(idx); }}
-          disabled={idx === totalImages - 1}
-          className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === totalImages - 1 ? 'invisible' : ''}`}
-        >
-          <ArrowRight size={14} />
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onMoveDown(idx); }}
+            disabled={idx === totalImages - 1}
+            className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === totalImages - 1 ? 'invisible' : ''}`}
+          >
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Drag Handle (Top Right) */}
-      <div className="absolute top-1 right-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 p-1 rounded bg-black/40 text-white" {...attributes} {...listeners}>
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
-      </div>
+      {!isDeleting && (
+        <div className="absolute top-1 right-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 p-1 rounded bg-black/40 text-white" {...attributes} {...listeners}>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
+        </div>
+      )}
     </div>
   );
 }
@@ -313,6 +325,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
   const [imageMetadata, setImageMetadata] = useState<Record<string, { filename: string }>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+  const [deletingImage, setDeletingImage] = useState<string | null>(null);
 
   // Set initial preview when gallery loads
   useEffect(() => {
@@ -369,6 +382,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
   };
 
   const deleteImageFromCloud = async (url: string) => {
+    setDeletingImage(url);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       await fetch(`${apiUrl}/api/cloudinary-upload`, {
@@ -382,11 +396,17 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
     } catch (error) {
       console.error('Failed to delete image from cloud:', error);
       toast.error('Failed to delete image from cloud');
+    } finally {
+      setDeletingImage(null);
     }
   };
 
   const removeGalleryImage = async (index: number) => {
     const urlToRemove = gallery[index];
+
+    // Delete from Cloudinary first (shows loader)
+    await deleteImageFromCloud(urlToRemove);
+
     const newGallery = gallery.filter((_, i) => i !== index);
     setGallery(newGallery);
 
@@ -394,9 +414,6 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
     if (previewImage === urlToRemove) {
       setPreviewImage(newGallery[0] || null);
     }
-
-    // Delete from Cloudinary
-    await deleteImageFromCloud(urlToRemove);
   };
 
   const moveGalleryImageUp = (index: number) => {
@@ -474,6 +491,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                           idx={idx}
                           totalImages={gallery.length}
                           isSelected={previewImage === img}
+                          isDeleting={deletingImage === img}
                           onSelect={() => setPreviewImage(img)}
                           onMoveUp={moveGalleryImageUp}
                           onMoveDown={moveGalleryImageDown}
@@ -512,6 +530,11 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                   title="Click to open full image"
                 >
                   <NextImage src={coverImage} alt="Cover" fill style={{ objectFit: 'cover' }} />
+                  {deletingImage === coverImage && (
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-20 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-3 border-[var(--brand-purple)] border-t-transparent"></div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Cover Image Actions & URL */}
