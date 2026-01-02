@@ -66,7 +66,13 @@ function SortableGalleryItem({ id, img, filename, idx, totalImages, isSelected, 
   return (
     <div ref={setNodeRef} style={style} className={`relative group w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${isSelected ? 'border-[var(--brand-purple)] ring-2 ring-[var(--brand-purple)]/20' : 'border-gray-200 hover:border-gray-300'}`}>
       <div className="absolute inset-0 cursor-pointer" onClick={onSelect}>
-        <NextImage src={img} alt={`Gallery image ${idx + 1}`} fill style={{ objectFit: 'cover' }} />
+        <NextImage
+          src={img}
+          alt={`Gallery image ${idx + 1}`}
+          fill
+          sizes="(max-width: 768px) 33vw, 100px"
+          style={{ objectFit: 'cover' }}
+        />
       </div>
 
       {/* Deleting Overlay */}
@@ -537,7 +543,13 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                   onClick={() => window.open(coverImage, '_blank')}
                   title="Click to open full image"
                 >
-                  <NextImage src={coverImage} alt="Cover" fill style={{ objectFit: 'cover' }} />
+                  <NextImage
+                    src={coverImage}
+                    alt="Cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    style={{ objectFit: 'cover' }}
+                  />
                   {deletingImage === coverImage && (
                     <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-20 flex items-center justify-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-3 border-[var(--brand-purple)] border-t-transparent"></div>
@@ -603,7 +615,13 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                   onClick={() => setEnlargedImage(previewImage)}
                   title="Click to enlarge"
                 >
-                  <NextImage src={previewImage} alt="Preview" fill style={{ objectFit: 'cover' }} />
+                  <NextImage
+                    src={previewImage}
+                    alt="Preview"
+                    fill
+                    sizes="150px"
+                    style={{ objectFit: 'cover' }}
+                  />
                 </div>
                 <div className="flex-1 min-w-0 space-y-1.5">
                   <div>
@@ -692,6 +710,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                 src={enlargedImage}
                 alt="Enlarged preview"
                 fill
+                sizes="100vw"
                 style={{ objectFit: 'contain' }}
                 onClick={(e) => e.stopPropagation()}
               />
