@@ -368,7 +368,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
     if (!previewImage) setPreviewImage(url);
   };
 
-  const removeGalleryImage = (index: number) => {
+  const removeGalleryImage = async (index: number) => {
     const urlToRemove = gallery[index];
     const newGallery = gallery.filter((_, i) => i !== index);
     setGallery(newGallery);
@@ -376,6 +376,22 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
     // If we removed the preview image, set a new one
     if (previewImage === urlToRemove) {
       setPreviewImage(newGallery[0] || null);
+    }
+
+    // Delete from Cloudinary
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      await fetch(`${apiUrl}/api/cloudinary-upload`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ imageUrl: urlToRemove }),
+      });
+      toast.success('Image deleted from cloud');
+    } catch (error) {
+      console.error('Failed to delete image from cloud:', error);
+      toast.error('Failed to delete image from cloud');
     }
   };
 
