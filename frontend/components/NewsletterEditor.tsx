@@ -368,6 +368,23 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
     if (!previewImage) setPreviewImage(url);
   };
 
+  const deleteImageFromCloud = async (url: string) => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      await fetch(`${apiUrl}/api/cloudinary-upload`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ imageUrl: url }),
+      });
+      toast.success('Image deleted from cloud');
+    } catch (error) {
+      console.error('Failed to delete image from cloud:', error);
+      toast.error('Failed to delete image from cloud');
+    }
+  };
+
   const removeGalleryImage = async (index: number) => {
     const urlToRemove = gallery[index];
     const newGallery = gallery.filter((_, i) => i !== index);
@@ -379,20 +396,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
     }
 
     // Delete from Cloudinary
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      await fetch(`${apiUrl}/api/cloudinary-upload`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ imageUrl: urlToRemove }),
-      });
-      toast.success('Image deleted from cloud');
-    } catch (error) {
-      console.error('Failed to delete image from cloud:', error);
-      toast.error('Failed to delete image from cloud');
-    }
+    await deleteImageFromCloud(urlToRemove);
   };
 
   const moveGalleryImageUp = (index: number) => {
@@ -509,13 +513,49 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                 >
                   <NextImage src={coverImage} alt="Cover" fill style={{ objectFit: 'cover' }} />
                 </div>
-                <div className="flex justify-between items-center px-1">
-                  <button type="button" onClick={() => { setCoverImage(''); setCoverFileName(''); }} className="text-xs text-red-600 font-bold hover:underline">Remove Cover Image</button>
-                  {coverFileName && (
-                    <p className="text-xs font-medium text-gray-500 truncate max-w-[60%]" title={coverFileName}>
-                      {coverFileName}
-                    </p>
-                  )}
+
+                {/* Cover Image Actions & URL */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex justify-between items-center px-1">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const urlToDelete = coverImage;
+                        setCoverImage('');
+                        setCoverFileName('');
+                        await deleteImageFromCloud(urlToDelete);
+                      }}
+                      className="text-xs text-red-600 font-bold hover:underline"
+                    >
+                      Remove Cover Image
+                    </button>
+                    {coverFileName && (
+                      <p className="text-xs font-medium text-gray-500 truncate max-w-[60%]" title={coverFileName}>
+                        {coverFileName}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Cloudinary URL Box */}
+                  <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                    <span className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cloudinary URL</span>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={coverImage}
+                        className="flex-1 text-xs px-2 py-1 bg-white border border-gray-300 rounded text-gray-500 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => { navigator.clipboard.writeText(coverImage); toast.success('URL copied!'); }}
+                        className="p-1 px-2 bg-white border border-gray-300 rounded hover:bg-gray-100 text-gray-600 text-xs font-bold"
+                        title="Copy URL"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
