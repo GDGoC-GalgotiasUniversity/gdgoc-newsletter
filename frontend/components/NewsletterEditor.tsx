@@ -47,13 +47,14 @@ interface SortableGalleryItemProps {
   idx: number;
   totalImages: number;
   isSelected: boolean;
+  isDeleting: boolean;
   onSelect: () => void;
   onMoveUp: (idx: number) => void;
   onMoveDown: (idx: number) => void;
   onRemove: (idx: number) => void;
 }
 
-function SortableGalleryItem({ id, img, filename, idx, totalImages, isSelected, onSelect, onMoveUp, onMoveDown, onRemove }: SortableGalleryItemProps) {
+function SortableGalleryItem({ id, img, filename, idx, totalImages, isSelected, isDeleting, onSelect, onMoveUp, onMoveDown, onRemove }: SortableGalleryItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   const style = {
@@ -65,42 +66,59 @@ function SortableGalleryItem({ id, img, filename, idx, totalImages, isSelected, 
   return (
     <div ref={setNodeRef} style={style} className={`relative group w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${isSelected ? 'border-[var(--brand-purple)] ring-2 ring-[var(--brand-purple)]/20' : 'border-gray-200 hover:border-gray-300'}`}>
       <div className="absolute inset-0 cursor-pointer" onClick={onSelect}>
-        <NextImage src={img} alt={`Gallery image ${idx + 1}`} fill style={{ objectFit: 'cover' }} />
+        <NextImage
+          src={img}
+          alt={`Gallery image ${idx + 1}`}
+          fill
+          sizes="(max-width: 768px) 33vw, 100px"
+          style={{ objectFit: 'cover' }}
+        />
       </div>
+
+      {/* Deleting Overlay */}
+      {isDeleting && (
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-20 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-5 w-5 border-2 border-[var(--brand-purple)] border-t-transparent"></div>
+        </div>
+      )}
 
       {/* Controls Overlay */}
-      <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onMoveUp(idx); }}
-          disabled={idx === 0}
-          className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === 0 ? 'invisible' : ''}`}
-        >
-          <ArrowLeft size={14} />
-        </button>
+      {!isDeleting && (
+        <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onMoveUp(idx); }}
+            disabled={idx === 0}
+            className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === 0 ? 'invisible' : ''}`}
+          >
+            <ArrowLeft size={14} />
+          </button>
 
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onRemove(idx); }}
-          className="p-1 rounded text-red-400 hover:bg-white/20 hover:text-red-300"
-        >
-          <Trash2 size={14} />
-        </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onRemove(idx); }}
+            className="p-1 rounded text-red-400 hover:bg-white/20 hover:text-red-300"
+          >
+            <Trash2 size={14} />
+          </button>
 
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onMoveDown(idx); }}
-          disabled={idx === totalImages - 1}
-          className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === totalImages - 1 ? 'invisible' : ''}`}
-        >
-          <ArrowRight size={14} />
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onMoveDown(idx); }}
+            disabled={idx === totalImages - 1}
+            className={`p-1 rounded text-white hover:bg-white/20 disabled:opacity-30 ${idx === totalImages - 1 ? 'invisible' : ''}`}
+          >
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Drag Handle (Top Right) */}
-      <div className="absolute top-1 right-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 p-1 rounded bg-black/40 text-white" {...attributes} {...listeners}>
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
-      </div>
+      {!isDeleting && (
+        <div className="absolute top-1 right-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 p-1 rounded bg-black/40 text-white" {...attributes} {...listeners}>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
+        </div>
+      )}
     </div>
   );
 }
@@ -313,6 +331,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
   const [imageMetadata, setImageMetadata] = useState<Record<string, { filename: string }>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+  const [deletingImage, setDeletingImage] = useState<string | null>(null);
 
   // Set initial preview when gallery loads
   useEffect(() => {
@@ -368,8 +387,40 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
     if (!previewImage) setPreviewImage(url);
   };
 
-  const removeGalleryImage = (index: number) => {
+  const deleteImageFromCloud = async (url: string) => {
+    console.log('[NewsletterEditor] Deletion started');
+    setDeletingImage(url);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+      const response = await fetch(`${apiUrl}/api/cloudinary-delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ imageUrl: url }),
+      });
+
+      const data = await response.json();
+      console.log('[NewsletterEditor] Deletion completed');
+
+      if (!response.ok) throw new Error(data.message || 'Deletion failed');
+      toast.success('Image deleted from cloud');
+    } catch (error) {
+      console.error('Failed to delete image from cloud:', error);
+      toast.error('Failed to delete image from cloud');
+    } finally {
+      setDeletingImage(null);
+    }
+  };
+
+  const removeGalleryImage = async (index: number) => {
     const urlToRemove = gallery[index];
+    console.log('[NewsletterEditor] Removing image locally');
+
+    // Delete from Cloudinary first (shows loader)
+    await deleteImageFromCloud(urlToRemove);
+
     const newGallery = gallery.filter((_, i) => i !== index);
     setGallery(newGallery);
 
@@ -454,6 +505,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                           idx={idx}
                           totalImages={gallery.length}
                           isSelected={previewImage === img}
+                          isDeleting={deletingImage === img}
                           onSelect={() => setPreviewImage(img)}
                           onMoveUp={moveGalleryImageUp}
                           onMoveDown={moveGalleryImageDown}
@@ -491,15 +543,62 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                   onClick={() => window.open(coverImage, '_blank')}
                   title="Click to open full image"
                 >
-                  <NextImage src={coverImage} alt="Cover" fill style={{ objectFit: 'cover' }} />
-                </div>
-                <div className="flex justify-between items-center px-1">
-                  <button type="button" onClick={() => { setCoverImage(''); setCoverFileName(''); }} className="text-xs text-red-600 font-bold hover:underline">Remove Cover Image</button>
-                  {coverFileName && (
-                    <p className="text-xs font-medium text-gray-500 truncate max-w-[60%]" title={coverFileName}>
-                      {coverFileName}
-                    </p>
+                  <NextImage
+                    src={coverImage}
+                    alt="Cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    style={{ objectFit: 'cover' }}
+                  />
+                  {deletingImage === coverImage && (
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-20 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-3 border-[var(--brand-purple)] border-t-transparent"></div>
+                    </div>
                   )}
+                </div>
+
+                {/* Cover Image Actions & URL */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex justify-between items-center px-1">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const urlToDelete = coverImage;
+                        setCoverImage('');
+                        setCoverFileName('');
+                        await deleteImageFromCloud(urlToDelete);
+                      }}
+                      className="text-xs text-red-600 font-bold hover:underline"
+                    >
+                      Remove Cover Image
+                    </button>
+                    {coverFileName && (
+                      <p className="text-xs font-medium text-gray-500 truncate max-w-[60%]" title={coverFileName}>
+                        {coverFileName}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Cloudinary URL Box */}
+                  <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                    <span className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cloudinary URL</span>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={coverImage}
+                        className="flex-1 text-xs px-2 py-1 bg-white border border-gray-300 rounded text-gray-500 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => { navigator.clipboard.writeText(coverImage); toast.success('URL copied!'); }}
+                        className="p-1 px-2 bg-white border border-gray-300 rounded hover:bg-gray-100 text-gray-600 text-xs font-bold"
+                        title="Copy URL"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -516,7 +615,13 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                   onClick={() => setEnlargedImage(previewImage)}
                   title="Click to enlarge"
                 >
-                  <NextImage src={previewImage} alt="Preview" fill style={{ objectFit: 'cover' }} />
+                  <NextImage
+                    src={previewImage}
+                    alt="Preview"
+                    fill
+                    sizes="150px"
+                    style={{ objectFit: 'cover' }}
+                  />
                 </div>
                 <div className="flex-1 min-w-0 space-y-1.5">
                   <div>
@@ -605,6 +710,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
                 src={enlargedImage}
                 alt="Enlarged preview"
                 fill
+                sizes="100vw"
                 style={{ objectFit: 'contain' }}
                 onClick={(e) => e.stopPropagation()}
               />

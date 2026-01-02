@@ -26,20 +26,33 @@ const upload = multer({
   }
 });
 
+// Helper function for retrying operations
+const retryOperation = async (operation, maxRetries = 3, delay = 1000) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      console.log(`Operation failed, retrying (${i + 1}/${maxRetries})... Error: ${error.message}`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
+
 // @route   POST /api/cloudinary-upload
 // @desc    Upload an image to Cloudinary
 // @access  Public
 router.post('/', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'No file uploaded' 
+        message: 'No file uploaded'
       });
     }
 
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
+    // Upload to Cloudinary with retry
+    const result = await retryOperation(() => new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'gdgoc-newsletter',
@@ -54,7 +67,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       );
 
       uploadStream.end(req.file.buffer);
-    });
+    }));
 
     res.status(200).json({
       success: true,
@@ -64,11 +77,13 @@ router.post('/', upload.single('image'), async (req, res) => {
     });
   } catch (error) {
     console.error('Cloudinary upload error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Upload failed' 
+      message: error.message || 'Upload failed'
     });
   }
 });
+
+// DELETE route moved to routes/cloudinary-delete.js
 
 module.exports = router;
