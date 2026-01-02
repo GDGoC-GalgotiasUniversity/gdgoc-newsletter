@@ -27,17 +27,20 @@ export default function DragDropImageUploader({ onImageUpload, isLoading }: Drag
     }
 
     setUploading(true);
+    console.log('[DragDropImageUploader] Upload started');
     try {
       const formData = new FormData();
       formData.append('image', file);
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
       const response = await fetch(`${apiUrl}/api/cloudinary-upload`, {
         method: 'POST',
         body: formData,
       });
 
       const data = await response.json();
+      console.log('[DragDropImageUploader] Upload completed');
 
       if (!response.ok || !data.success) {
         throw new Error(data.message || 'Upload failed');
@@ -46,7 +49,7 @@ export default function DragDropImageUploader({ onImageUpload, isLoading }: Drag
       toast.success('Image uploaded to Cloudinary!');
       onImageUpload(data.imageUrl, file.name);
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error('[DragDropImageUploader] Upload error:', error);
       toast.error(error.message || 'Failed to upload image');
     } finally {
       setUploading(false);

@@ -70,6 +70,10 @@ app.use('/api/upload', uploadRoutes);
 const cloudinaryUploadRoutes = require('./routes/cloudinary-upload');
 app.use('/api/cloudinary-upload', cloudinaryUploadRoutes);
 
+// Cloudinary Delete Route
+const cloudinaryDeleteRoutes = require('./routes/cloudinary-delete');
+app.use('/api/cloudinary-delete', cloudinaryDeleteRoutes);
+
 // Subscribers Route
 const subscriberRoutes = require('./routes/subscribers');
 app.use('/api/subscribers', subscriberRoutes);

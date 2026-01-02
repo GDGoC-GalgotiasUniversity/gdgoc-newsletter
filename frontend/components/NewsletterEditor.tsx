@@ -382,16 +382,23 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
   };
 
   const deleteImageFromCloud = async (url: string) => {
+    console.log('[NewsletterEditor] Deletion started');
     setDeletingImage(url);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      await fetch(`${apiUrl}/api/cloudinary-upload`, {
+
+      const response = await fetch(`${apiUrl}/api/cloudinary-delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ imageUrl: url }),
       });
+
+      const data = await response.json();
+      console.log('[NewsletterEditor] Deletion completed');
+
+      if (!response.ok) throw new Error(data.message || 'Deletion failed');
       toast.success('Image deleted from cloud');
     } catch (error) {
       console.error('Failed to delete image from cloud:', error);
@@ -403,6 +410,7 @@ export default function NewsletterEditor({ onSubmit, initialData, isLoading }: {
 
   const removeGalleryImage = async (index: number) => {
     const urlToRemove = gallery[index];
+    console.log('[NewsletterEditor] Removing image locally');
 
     // Delete from Cloudinary first (shows loader)
     await deleteImageFromCloud(urlToRemove);
