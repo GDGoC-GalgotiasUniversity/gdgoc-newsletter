@@ -15,6 +15,28 @@ export default function AdminSubscribers() {
     const [error, setError] = useState('');
     const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
 
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to remove this subscriber?')) return;
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/subscribers/${id}`, {
+                method: 'DELETE',
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to remove subscriber');
+            }
+
+            setSubscribers(subscribers.filter(sub => sub._id !== id));
+        } catch (err: any) {
+            console.error('Error removing subscriber:', err);
+            alert(err.message);
+        }
+    };
+
     useEffect(() => {
         fetchSubscribers();
     }, []);
@@ -91,18 +113,20 @@ export default function AdminSubscribers() {
                     </p>
                 </div>
 
-                {selectedEmails.length > 0 && (
-                    <button
-                        onClick={handleEmailSelected}
-                        className="px-4 py-2 bg-[var(--brand-purple)] text-white text-sm font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all border border-black flex items-center gap-2"
-                        style={{ backgroundColor: '#6b4c9a' }}
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Email Selected ({selectedEmails.length})
-                    </button>
-                )}
+                <button
+                    onClick={handleEmailSelected}
+                    disabled={selectedEmails.length === 0}
+                    className={`px-4 py-2 text-sm font-bold border border-black flex items-center gap-2 transition-all ${selectedEmails.length > 0
+                        ? 'text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none'
+                        : 'text-gray-400 cursor-not-allowed opacity-50'
+                        }`}
+                    style={{ backgroundColor: selectedEmails.length > 0 ? '#6b4c9a' : '#e5e7eb' }}
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Email Selected {selectedEmails.length > 0 ? `(${selectedEmails.length})` : ''}
+                </button>
             </div>
 
             {error && (
@@ -130,7 +154,7 @@ export default function AdminSubscribers() {
                                 <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: '#6b4c9a' }}>#</th>
                                 <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: '#6b4c9a' }}>Email</th>
                                 <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: '#6b4c9a' }}>Subscribed Date</th>
-                                <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: '#6b4c9a' }}>Status</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: '#6b4c9a' }}>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -167,9 +191,12 @@ export default function AdminSubscribers() {
                                         })}
                                     </td>
                                     <td className="px-4 py-2">
-                                        <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                            {subscriber.isActive ? 'Active' : 'Inactive'}
-                                        </span>
+                                        <button
+                                            onClick={() => handleDelete(subscriber._id)}
+                                            className="px-3 py-1 text-xs font-bold text-white bg-red-600 rounded hover:bg-red-700 transition"
+                                        >
+                                            Remove
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

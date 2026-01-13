@@ -105,4 +105,29 @@ router.get('/', async (req, res) => {
     }
 });
 
+// DELETE /api/subscribers/:id - Delete a subscriber
+router.delete('/:id', async (req, res) => {
+    try {
+        const subscriber = await Subscriber.findByIdAndDelete(req.params.id);
+
+        if (!subscriber) {
+            return res.status(404).json({
+                success: false,
+                message: 'Subscriber not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Subscriber removed successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting subscriber:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete subscriber'
+        });
+    }
+});
+
 module.exports = router;
