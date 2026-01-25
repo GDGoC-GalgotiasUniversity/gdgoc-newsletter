@@ -97,22 +97,32 @@ export default function Header() {
 
             {/* === TIER 3: NAVIGATION === */}
             <div className="border-t border-b border-[var(--ink-black)] py-2 bg-[var(--paper-bg)] sticky top-0 z-50 shadow-sm">
-                <nav className="max-w-6xl mx-auto flex justify-center flex-wrap gap-6 md:gap-12 text-xs md:text-sm font-sans-accent font-bold tracking-widest uppercase">
-                    <Link href="/" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
-                        Front Page
-                    </Link>
-                    <Link href="/newsletter" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
-                        Archives
-                    </Link>
-                    <Link href="/about" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
-                        About Us
-                    </Link>
-                    <Link href="https://gdg-socials.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--brand-purple)] hover:underline decoration-2 underline-offset-4">
-                        Socials
-                    </Link>
+                <nav className="max-w-6xl mx-auto flex justify-center flex-wrap gap-4 md:gap-8 text-xs md:text-sm font-sans-accent font-bold tracking-widest uppercase">
+                    {[
+                        { name: "Front Page", href: "/" },
+                        { name: "Archives", href: "/newsletter" },
+                        { name: "About Us", href: "/about" },
+                        { name: "Socials", href: "https://gdg-socials.vercel.app/", external: true },
+                    ].map((item) => (
+                        <Link 
+                            key={item.name}
+                            href={item.href} 
+                            target={item.external ? "_blank" : undefined}
+                            rel={item.external ? "noopener noreferrer" : undefined}
+                            className="relative group px-3 py-1 overflow-hidden transition-all duration-300 hover:text-[var(--brand-purple)]"
+                        >
+                            <span className="relative z-10">{item.name}</span>
+                            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[var(--brand-purple)] transition-all duration-300 group-hover:w-full"></span>
+                            <span className="absolute top-0 left-0 w-full h-full bg-[var(--brand-purple)]/5 -translate-y-full transition-transform duration-300 group-hover:translate-y-0"></span>
+                        </Link>
+                    ))}
                     {user?.role === 'admin' && (
-                        <Link href="/admin" className="text-red-700 hover:text-red-900 bg-red-50 px-2 rounded-sm border border-red-100">
-                            Editor's Desk
+                        <Link 
+                            href="/admin" 
+                            className="relative overflow-hidden px-4 py-1 text-red-700 font-black border-2 border-red-700 transition-all duration-300 hover:text-white group"
+                        >
+                            <span className="relative z-10">Editor's Desk</span>
+                            <span className="absolute inset-0 bg-red-700 translate-x-[-101%] transition-transform duration-300 ease-out group-hover:translate-x-0"></span>
                         </Link>
                     )}
                 </nav>
